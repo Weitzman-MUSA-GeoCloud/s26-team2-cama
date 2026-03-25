@@ -1,0 +1,46 @@
+main:
+  steps:
+    - extract:
+        call: http.post
+        args:
+          url: https://us-central1-musa5090s26-team2.cloudfunctions.net/extract-opa-properties
+          auth:
+            type: OIDC
+        result: extract_result
+    - check_extract:
+        switch:
+          - condition: ${extract_result.body.success}
+            next: prepare
+        next: extract_failed
+    - prepare:
+        call: http.post
+        args:
+          url: https://us-central1-musa5090s26-team2.cloudfunctions.net/prepare-opa-properties
+          auth:
+            type: OIDC
+        result: prepare_result
+    - check_prepare:
+        switch:
+          - condition: ${prepare_result.body.success}
+            next: load
+        next: prepare_failed
+    - load:
+        call: http.post
+        args:
+          url: https://us-central1-musa5090s26-team2.cloudfunctions.net/load-opa-properties
+          auth:
+            type: OIDC
+        result: load_result
+    - check_load:
+        switch:
+          - condition: ${load_result.body.success}
+            next: success
+        next: load_failed
+    - success:
+        return: "Pipeline completed successfully"
+    - extract_failed:
+        return: "Extract step failed"
+    - prepare_failed:
+        return: "Prepare step failed"
+    - load_failed:
+        return: "Load step failed"
