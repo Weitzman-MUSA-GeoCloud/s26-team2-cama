@@ -12,11 +12,6 @@ main:
                         auth:
                           type: OIDC
                       result: extract_props_result
-                  - check_extract_properties:
-                      switch:
-                        - condition: ${extract_props_result.body.success}
-                          next: prepare_properties
-                      next: extract_properties_failed
                   - prepare_properties:
                       call: http.post
                       args:
@@ -24,11 +19,6 @@ main:
                         auth:
                           type: OIDC
                       result: prepare_props_result
-                  - check_prepare_properties:
-                      switch:
-                        - condition: ${prepare_props_result.body.success}
-                          next: load_properties
-                      next: prepare_properties_failed
                   - load_properties:
                       call: http.post
                       args:
@@ -36,19 +26,6 @@ main:
                         auth:
                           type: OIDC
                       result: load_props_result
-                  - check_load_properties:
-                      switch:
-                        - condition: ${load_props_result.body.success}
-                          next: properties_done
-                      next: load_properties_failed
-                  - properties_done:
-                      return: "OPA Properties pipeline completed"
-                  - extract_properties_failed:
-                      raise: "Extract OPA Properties failed"
-                  - prepare_properties_failed:
-                      raise: "Prepare OPA Properties failed"
-                  - load_properties_failed:
-                      raise: "Load OPA Properties failed"
 
             - opa_assessments:
                 steps:
@@ -59,11 +36,6 @@ main:
                         auth:
                           type: OIDC
                       result: extract_assess_result
-                  - check_extract_assessments:
-                      switch:
-                        - condition: ${extract_assess_result.body.success}
-                          next: prepare_assessments
-                      next: extract_assessments_failed
                   - prepare_assessments:
                       call: http.post
                       args:
@@ -71,11 +43,6 @@ main:
                         auth:
                           type: OIDC
                       result: prepare_assess_result
-                  - check_prepare_assessments:
-                      switch:
-                        - condition: ${prepare_assess_result.body.success}
-                          next: load_assessments
-                      next: prepare_assessments_failed
                   - load_assessments:
                       call: http.post
                       args:
@@ -83,19 +50,6 @@ main:
                         auth:
                           type: OIDC
                       result: load_assess_result
-                  - check_load_assessments:
-                      switch:
-                        - condition: ${load_assess_result.body.success}
-                          next: assessments_done
-                      next: load_assessments_failed
-                  - assessments_done:
-                      return: "OPA Assessments pipeline completed"
-                  - extract_assessments_failed:
-                      raise: "Extract OPA Assessments failed"
-                  - prepare_assessments_failed:
-                      raise: "Prepare OPA Assessments failed"
-                  - load_assessments_failed:
-                      raise: "Load OPA Assessments failed"
 
     - success:
         return: "All pipelines completed successfully"
