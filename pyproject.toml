@@ -1,6 +1,12 @@
 [project]
 name = "cama"
 version = "1.0.0"
+requires-python = ">=3.9"
+dependencies = [
+    "google-cloud-storage==2.14.0",
+    "requests==2.31.0",
+    "functions-framework==3.5.0",
+]
 
 [tool.poetry]
 package-mode = false

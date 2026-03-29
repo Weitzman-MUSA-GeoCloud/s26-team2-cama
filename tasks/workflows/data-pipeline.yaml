@@ -1,0 +1,79 @@
+main:
+  steps:
+    - run_pipelines:
+        parallel:
+          branches:
+            - opa_properties:
+                steps:
+                  - extract_properties:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/extract-opa-properties
+                        auth:
+                          type: OIDC
+                      result: extract_props_result
+                  - prepare_properties:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/prepare-opa-properties
+                        auth:
+                          type: OIDC
+                      result: prepare_props_result
+                  - load_properties:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/load-opa-properties
+                        auth:
+                          type: OIDC
+                      result: load_props_result
+
+            - opa_assessments:
+                steps:
+                  - extract_assessments:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/extract-opa-assessments
+                        auth:
+                          type: OIDC
+                      result: extract_assess_result
+                  - prepare_assessments:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/prepare-opa-assessments
+                        auth:
+                          type: OIDC
+                      result: prepare_assess_result
+                  - load_assessments:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/load-opa-assessments
+                        auth:
+                          type: OIDC
+                      result: load_assess_result
+
+            - pwd_parcels:
+                steps:
+                  - extract_parcels:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/extract-pwd-parcels
+                        auth:
+                          type: OIDC
+                      result: extract_parcels_result
+                  - prepare_parcels:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/prepare-pwd-parcels
+                        auth:
+                          type: OIDC
+                      result: prepare_parcels_result
+                  - load_parcels:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/load-pwd-parcels
+                        auth:
+                          type: OIDC
+                      result: load_parcels_result
+
+    - success:
+        return: "All pipelines completed successfully"
