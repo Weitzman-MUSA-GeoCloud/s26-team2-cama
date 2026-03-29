@@ -1,7 +1,8 @@
-import requests
 import json
-import time
 from typing import Dict
+
+import requests
+
 
 def fetch_opa_batch(offset: int = 0, limit: int = 10000) -> Dict:
     url = "https://data.phila.gov/api/3/action/datastore_search"
@@ -28,6 +29,7 @@ def fetch_opa_batch(offset: int = 0, limit: int = 10000) -> Dict:
         print(f"API call failed: {e}")
         raise
 
+
 def test():
     print("Testing OPA Properties API...")
 
@@ -45,6 +47,7 @@ def test():
     total_batches = (result["total"] + batch_size - 1) // batch_size
     print(f"\nEstimated batches: {total_batches}")
     print(f"Estimated time (1 req/sec): ~{total_batches}s")
+
 
 if __name__ == "__main__":
     test()

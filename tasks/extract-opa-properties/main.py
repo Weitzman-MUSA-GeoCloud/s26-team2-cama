@@ -1,5 +1,6 @@
 import functions_framework
 
+
 @functions_framework.http
 def extract_opa_properties(request):
     """Verify OPA Properties data exists in GCS raw_data bucket."""
