@@ -140,6 +140,48 @@ main:
                         auth:
                           type: OIDC
                       result: load_transit_result
+                  - extract_hospitals:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/extract-hospitals
+                        auth:
+                          type: OIDC
+                      result: extract_hospitals_result
+                  - prepare_hospitals:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/prepare-hospitals
+                        auth:
+                          type: OIDC
+                      result: prepare_hospitals_result
+                  - load_hospitals:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/load-hospitals
+                        auth:
+                          type: OIDC
+                      result: load_hospitals_result
+                  - extract_schools:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/extract-schools
+                        auth:
+                          type: OIDC
+                      result: extract_schools_result
+                  - prepare_schools:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/prepare-schools
+                        auth:
+                          type: OIDC
+                      result: prepare_schools_result
+                  - load_schools:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/load-schools
+                        auth:
+                          type: OIDC
+                      result: load_schools_result
 
     - success:
         return: "All pipelines completed successfully"
