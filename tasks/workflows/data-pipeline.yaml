@@ -75,5 +75,71 @@ main:
                           type: OIDC
                       result: load_parcels_result
 
+            - external_data:
+                steps:
+                  - extract_crime:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/extract-crime
+                        auth:
+                          type: OIDC
+                      result: extract_crime_result
+                  - prepare_crime:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/prepare-crime
+                        auth:
+                          type: OIDC
+                      result: prepare_crime_result
+                  - load_crime:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/load-crime
+                        auth:
+                          type: OIDC
+                      result: load_crime_result
+                  - extract_recreation:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/extract-recreation
+                        auth:
+                          type: OIDC
+                      result: extract_rec_result
+                  - prepare_recreation:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/prepare-recreation
+                        auth:
+                          type: OIDC
+                      result: prepare_rec_result
+                  - load_recreation:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/load-recreation
+                        auth:
+                          type: OIDC
+                      result: load_rec_result
+                  - extract_transit:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/extract-transit
+                        auth:
+                          type: OIDC
+                      result: extract_transit_result
+                  - prepare_transit:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/prepare-transit
+                        auth:
+                          type: OIDC
+                      result: prepare_transit_result
+                  - load_transit:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/load-transit
+                        auth:
+                          type: OIDC
+                      result: load_transit_result
+
     - success:
         return: "All pipelines completed successfully"
