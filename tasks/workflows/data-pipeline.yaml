@@ -182,6 +182,27 @@ main:
                         auth:
                           type: OIDC
                       result: load_schools_result
+                  - extract_census_tracts:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/extract-census-tracts
+                        auth:
+                          type: OIDC
+                      result: extract_census_result
+                  - prepare_census_tracts:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/prepare-census-tracts
+                        auth:
+                          type: OIDC
+                      result: prepare_census_result
+                  - load_census_tracts:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/load-census-tracts
+                        auth:
+                          type: OIDC
+                      result: load_census_result
 
     - success:
         return: "All pipelines completed successfully"
