@@ -5,10 +5,10 @@ from xgboost import XGBRegressor
 from sklearn.model_selection import train_test_split
 from datetime import datetime, timezone
 
-PROJECT        = "musa5090s26-team2"
+PROJECT = "musa5090s26-team2"
 TRAINING_TABLE = "musa5090s26-team2.derived.current_assessments_model_training_data"
-PREDICT_TABLE  = "musa5090s26-team2.core.opa_with_spatial"
-OUTPUT_TABLE   = "musa5090s26-team2.derived.current_assessments"
+PREDICT_TABLE = "musa5090s26-team2.core.opa_with_spatial"
+OUTPUT_TABLE = "musa5090s26-team2.derived.current_assessments"
 
 FEATURE_COLS = [
     "total_livable_area", "number_of_bathrooms", "number_of_bedrooms",
