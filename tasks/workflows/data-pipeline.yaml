@@ -75,5 +75,15 @@ main:
                           type: OIDC
                       result: load_parcels_result
 
+    - create_derived_tables:
+        steps:
+          - create_tax_year_assessment_bins:
+              call: http.post
+              args:
+                url: https://us-central1-musa5090s26-team2.cloudfunctions.net/create-derived-tax-year-assessment-bins
+                auth:
+                  type: OIDC
+              result: create_bins_result
+
     - success:
         return: "All pipelines completed successfully"
