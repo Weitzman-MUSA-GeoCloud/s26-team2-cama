@@ -1,0 +1,7 @@
+google-cloud-bigquery
+google-cloud-bigquery-storage
+pandas
+numpy
+xgboost
+pyarrow
+db-dtypes
