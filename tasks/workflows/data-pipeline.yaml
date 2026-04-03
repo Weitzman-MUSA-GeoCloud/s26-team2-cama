@@ -85,5 +85,13 @@ main:
                   type: OIDC
               result: create_bins_result
 
+    - run_training_pipeline:
+        call: http.post
+        args:
+          url: https://us-east4-musa5090s26-team2.cloudfunctions.net/run_pipeline
+          auth:
+            type: OIDC
+        result: training_pipeline_result
+
     - success:
         return: "All pipelines completed successfully"

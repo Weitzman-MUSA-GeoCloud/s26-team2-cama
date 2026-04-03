@@ -56,11 +56,11 @@ step3_no_bundles AS (
     WHERE b.sale_price = s.sale_price
       AND b.sale_date  = s.sale_date
   )
+  AND SAFE_CAST(s.sale_price AS FLOAT64) >= 1000
 ),
 
 price_bounds AS (
   SELECT
-    APPROX_QUANTILES(SAFE_CAST(sale_price AS FLOAT64), 100)[OFFSET(1)]  AS p01,
     APPROX_QUANTILES(SAFE_CAST(sale_price AS FLOAT64), 100)[OFFSET(99)] AS p99
   FROM step3_no_bundles
 ),
@@ -69,7 +69,7 @@ step4_trimmed AS (
   SELECT s.*
   FROM step3_no_bundles s
   CROSS JOIN price_bounds p
-  WHERE SAFE_CAST(s.sale_price AS FLOAT64) BETWEEN p.p01 AND p.p99
+  WHERE SAFE_CAST(s.sale_price AS FLOAT64) <= p.p99
 ),
 
 step5_features AS (
@@ -232,7 +232,7 @@ def run_pipeline(request):
     for name, query in queries:
         print(f"Starting {name}...")
         job = client.query(query)
-        job.result()  # Wait for completion
+        job.result()
         print(f"Finished {name}!")
 
     return "Pipeline complete!", 200
