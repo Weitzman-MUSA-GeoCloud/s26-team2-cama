@@ -93,5 +93,13 @@ main:
             type: OIDC
         result: training_pipeline_result
 
+    - create_current_assessment_bins:
+        call: http.post
+        args:
+          url: https://us-central1-musa5090s26-team2.cloudfunctions.net/create-derived-current-assessment-bins
+          auth:
+            type: OIDC
+        result: create_current_bins_result
+
     - success:
         return: "All pipelines completed successfully"
