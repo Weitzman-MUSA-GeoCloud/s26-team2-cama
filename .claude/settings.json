@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gcloud logging:*)",
+      "Bash(python -c \"import sys,json; logs=json.load\\(sys.stdin\\); [print\\(l.get\\('textPayload',''\\) or str\\(l.get\\('jsonPayload',''\\)\\)\\) for l in logs]\")",
+      "Bash(gcloud auth:*)",
+      "Bash(curl -X POST -H \"Authorization: Bearer $\\(gcloud auth print-identity-token\\)\" https://us-central1-musa5090s26-team2.cloudfunctions.net/create-derived-current-assessment-bins)",
+      "Bash(curl -X POST -H \"Authorization: Bearer $\\(gcloud auth print-identity-token\\)\" -H \"Content-Length: 0\" https://us-central1-musa5090s26-team2.cloudfunctions.net/create-derived-current-assessment-bins)",
+      "Bash(gcloud bigquery:*)",
+      "Bash(python -c \"import sys,json; schema=json.load\\(sys.stdin\\).get\\('schema',{}\\).get\\('fields',[]\\); [print\\(f['name'], f['type']\\) for f in schema]\")",
+      "Bash(bq show:*)",
+      "Bash(curl -X POST -H \"Authorization: Bearer $\\(gcloud auth print-identity-token\\)\" -H \"Content-Length: 0\" -H \"Content-Type: application/json\" \"https://us-east4-musa5090s26-team2.cloudfunctions.net/predict_current_assessments\")",
+      "Bash(python -c \"import sys; print\\(sys.stdin.read\\(\\)[:500]\\)\")"
+    ]
+  }
+}

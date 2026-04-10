@@ -1,18 +1,18 @@
 CREATE OR REPLACE TABLE derived.current_assessment_bins AS
 WITH cleaned AS (
     SELECT
-        market_value
+        predicted_value
     FROM derived.current_assessments
     WHERE
-        market_value IS NOT NULL
-        AND market_value >= 0
+        predicted_value IS NOT NULL
+        AND predicted_value >= 0
 ),
 
 capped AS (
     SELECT
         CASE
-            WHEN market_value > 1000000 THEN 1000000
-            ELSE market_value
+            WHEN predicted_value > 1000000 THEN 1000000
+            ELSE predicted_value
         END AS capped_value
     FROM cleaned
 ),
