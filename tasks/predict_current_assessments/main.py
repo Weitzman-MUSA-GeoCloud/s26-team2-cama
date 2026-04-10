@@ -1,6 +1,5 @@
 # Import packages
 import pandas as pd
-import tqdm
 from datetime import datetime
 
 from dotenv import load_dotenv
@@ -23,7 +22,7 @@ def run_model(project_id):
     """
     data_raw = pandas_gbq.read_gbq(sql, project_id=project_id)
 
-    print(f'✅ Loaded input BigQuery table')
+    print('✅ Loaded input BigQuery table')
 
     # Shape data for modeling
     data_modeling = data_raw.query('can_train == True')
@@ -64,7 +63,7 @@ def run_model(project_id):
     # Model fit
     model_production.fit(train_predictors, train_target)
 
-    print(f'✅ Model fitting complete')
+    print('✅ Model fitting complete')
 
     # Model prediction
     prediction = model_production.predict(production_predictors)
@@ -81,10 +80,11 @@ def run_model(project_id):
         ready, 'derived.current_assessments', project_id=project_id, if_exists='replace',
     )
 
-    print(f'✅ Output table created or replaced')
+    print('✅ Output table created or replaced')
+
 
 @functions_framework.http
 def predict_current_assessments(request):
     print('Running modeling code...')
     run_model("musa5090s26-team2")
-    return f'✅ Training and output update complete'
+    return '✅ Training and output update complete'
