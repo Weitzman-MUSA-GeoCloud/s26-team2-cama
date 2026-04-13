@@ -2,7 +2,16 @@
   "permissions": {
     "allow": [
       "Bash(gcloud functions:*)",
-      "Bash(gcloud workflows:*)"
+      "Bash(gcloud workflows:*)",
+      "Read(//c/Users/yanyang/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/7cd28ea4-af51-4097-9b02-fc2350a8cb75/873bb2cd-4a79-4eb5-88aa-a1917d6d43a1/skills/docx/**)",
+      "Bash(python scripts/office/unpack.py \"C:\\\\Users\\\\yanyang\\\\Desktop\\\\4,5,13.docx\" unpacked_task/)",
+      "Bash(pandoc --track-changes=all \"C:\\\\Users\\\\yanyang\\\\Desktop\\\\4,5,13.docx\" -o task_content.md)",
+      "Bash(python3 -c ':*)",
+      "Bash(where python:*)",
+      "Bash(py --version)",
+      "Bash(py -3 --version)",
+      "Bash(/c/Users/yanyang/AppData/Local/Programs/Python/Python313/python.exe -c ':*)",
+      "Bash(xargs grep:*)"
     ]
   }
 }
