@@ -75,31 +75,134 @@ main:
                           type: OIDC
                       result: load_parcels_result
 
-    - create_derived_tables:
-        steps:
-          - create_tax_year_assessment_bins:
-              call: http.post
-              args:
-                url: https://us-central1-musa5090s26-team2.cloudfunctions.net/create-derived-tax-year-assessment-bins
-                auth:
-                  type: OIDC
-              result: create_bins_result
-
-    - run_training_pipeline:
-        call: http.post
-        args:
-          url: https://us-east4-musa5090s26-team2.cloudfunctions.net/run_pipeline
-          auth:
-            type: OIDC
-        result: training_pipeline_result
-
-    - create_current_assessment_bins:
-        call: http.post
-        args:
-          url: https://us-central1-musa5090s26-team2.cloudfunctions.net/create-derived-current-assessment-bins
-          auth:
-            type: OIDC
-        result: create_current_bins_result
+            - external_data:
+                steps:
+                  - extract_crime:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/extract-crime
+                        auth:
+                          type: OIDC
+                      result: extract_crime_result
+                  - prepare_crime:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/prepare-crime
+                        auth:
+                          type: OIDC
+                      result: prepare_crime_result
+                  - load_crime:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/load-crime
+                        auth:
+                          type: OIDC
+                      result: load_crime_result
+                  - extract_recreation:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/extract-recreation
+                        auth:
+                          type: OIDC
+                      result: extract_rec_result
+                  - prepare_recreation:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/prepare-recreation
+                        auth:
+                          type: OIDC
+                      result: prepare_rec_result
+                  - load_recreation:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/load-recreation
+                        auth:
+                          type: OIDC
+                      result: load_rec_result
+                  - extract_transit:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/extract-transit
+                        auth:
+                          type: OIDC
+                      result: extract_transit_result
+                  - prepare_transit:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/prepare-transit
+                        auth:
+                          type: OIDC
+                      result: prepare_transit_result
+                  - load_transit:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/load-transit
+                        auth:
+                          type: OIDC
+                      result: load_transit_result
+                  - extract_hospitals:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/extract-hospitals
+                        auth:
+                          type: OIDC
+                      result: extract_hospitals_result
+                  - prepare_hospitals:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/prepare-hospitals
+                        auth:
+                          type: OIDC
+                      result: prepare_hospitals_result
+                  - load_hospitals:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/load-hospitals
+                        auth:
+                          type: OIDC
+                      result: load_hospitals_result
+                  - extract_schools:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/extract-schools
+                        auth:
+                          type: OIDC
+                      result: extract_schools_result
+                  - prepare_schools:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/prepare-schools
+                        auth:
+                          type: OIDC
+                      result: prepare_schools_result
+                  - load_schools:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/load-schools
+                        auth:
+                          type: OIDC
+                      result: load_schools_result
+                  - extract_census_tracts:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/extract-census-tracts
+                        auth:
+                          type: OIDC
+                      result: extract_census_result
+                  - prepare_census_tracts:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/prepare-census-tracts
+                        auth:
+                          type: OIDC
+                      result: prepare_census_result
+                  - load_census_tracts:
+                      call: http.post
+                      args:
+                        url: https://us-central1-musa5090s26-team2.cloudfunctions.net/load-census-tracts
+                        auth:
+                          type: OIDC
+                      result: load_census_result
 
     - success:
         return: "All pipelines completed successfully"

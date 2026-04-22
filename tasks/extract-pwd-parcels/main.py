@@ -1,39 +1,76 @@
 import functions_framework
+import json
+import requests
+from google.cloud import storage
+from datetime import datetime
+
+
+FEATURE_SERVICE_URL = (
+    "https://services.arcgis.com/fLeGjb7u4uXqeF9q/arcgis/rest/services/"
+    "PWD_PARCELS/FeatureServer/0/query"
+)
+PAGE_SIZE = 2000
+PROJECT_ID = "musa5090s26-team2"
+BUCKET_RAW = "musa5090s26-team2-raw_data"
+DEST_BLOB = "pwd_parcels/pwd_parcels.geojson"
 
 
 @functions_framework.http
 def extract_pwd_parcels(request):
-    """Verify PWD Parcels GeoJSON exists in GCS raw_data bucket."""
+    """Stream PWD Parcels from ArcGIS FeatureServer directly into GCS as GeoJSON."""
     try:
-        from google.cloud import storage
-        from datetime import datetime
-
-        PROJECT_ID = "musa5090s26-team2"
-        BUCKET_RAW = "musa5090s26-team2-raw_data"
-        FOLDER = "pwd_parcels"
-
         client = storage.Client(project=PROJECT_ID)
-        bucket = client.bucket(BUCKET_RAW)
+        blob = client.bucket(BUCKET_RAW).blob(DEST_BLOB)
 
-        blobs = list(bucket.list_blobs(prefix=FOLDER + "/"))
-        data_blobs = [b for b in blobs if b.size and b.size > 0]
+        offset = 0
+        total = 0
+        first = True
 
-        if not data_blobs:
-            return {
-                "success": False,
-                "error": "No PWD Parcels data found in GCS",
-                "location": f"gs://{BUCKET_RAW}/{FOLDER}/"
-            }, 404
+        with blob.open("wb") as f:
+            f.write(b'{"type":"FeatureCollection","features":[')
 
-        total_size_mb = sum(b.size for b in data_blobs) / (1024 * 1024)
+            while True:
+                resp = requests.get(
+                    FEATURE_SERVICE_URL,
+                    params={
+                        "where": "1=1",
+                        "outFields": "*",
+                        "f": "geojson",
+                        "resultOffset": offset,
+                        "resultRecordCount": PAGE_SIZE,
+                        "outSR": "4326",
+                    },
+                    timeout=120,
+                )
+                resp.raise_for_status()
+                page = resp.json()
+                features = page.get("features", [])
 
+                if not features:
+                    break
+
+                for feat in features:
+                    if not first:
+                        f.write(b",")
+                    f.write(json.dumps(feat).encode())
+                    first = False
+
+                total += len(features)
+                offset += PAGE_SIZE
+
+                if len(features) < PAGE_SIZE:
+                    break
+
+            f.write(b"]}")
+
+        blob.reload()
         return {
             "success": True,
-            "message": "PWD Parcels data verified in GCS",
-            "location": f"gs://{BUCKET_RAW}/{FOLDER}/",
-            "files_found": len(data_blobs),
-            "total_size_mb": round(total_size_mb, 2),
-            "timestamp": datetime.now().isoformat()
+            "message": f"PWD Parcels downloaded and uploaded to GCS ({total} features)",
+            "destination": f"gs://{BUCKET_RAW}/{DEST_BLOB}",
+            "total_features": total,
+            "size_mb": round(blob.size / 1024 / 1024, 2),
+            "timestamp": datetime.now().isoformat(),
         }, 200
 
     except Exception as e:
