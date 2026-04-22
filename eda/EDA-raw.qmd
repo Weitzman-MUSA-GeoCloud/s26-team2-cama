@@ -1,0 +1,666 @@
+---
+title: "EDA"
+format: html
+---
+
+# Prepare
+
+```{r}
+#library
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(stringr)
+library(tidyverse)
+library(sf)
+library(tidycensus)
+```
+
+```{r}
+#read CSV
+df <- read_csv(
+  "D:/MUSA5090/eda/data/opa_properties_public.csv",
+  n_max = 100000
+)
+
+dim(df)
+head(df)
+```
+
+```{r}
+#Dataset Preview
+ggplot(df, aes(x = sale_price)) +
+  geom_histogram(bins = 50) +
+  labs(
+    title = "Sale Price Distribution",
+    x = "Sale Price",
+    y = "Count"
+  )
+```
+
+# Data Cleaning and Trimming
+
+```{r}
+#Remove non-market & bundle sales
+
+df_clean <- df %>%
+  filter(!is.na(sale_price)) %>%
+  filter(sale_price > 1)
+
+df_clean <- df_clean %>%
+  group_by(sale_date, sale_price) %>%
+  filter(n() == 1) %>%
+  ungroup()
+
+head(df_clean)
+summary(df_clean$sale_price)
+```
+
+```{r}
+df_clean <- df_clean %>%
+  mutate(log_price = log(sale_price))
+
+ggplot(df_clean, aes(x = log_price)) +
+  geom_histogram(bins = 50) +
+  labs(title = "Log Sale Price Distribution")
+```
+
+```{r}
+df_residential <- df_clean %>%
+  filter(
+    str_detect(building_code_description, 
+               "ROW|DET|SEMI|S/D|APT|CONDO") &
+    !str_detect(building_code_description, 
+                "VACANT|COMMERCIAL|IND|STORE|OFF|GAR|HOTEL|AUTO|SCHOOL")
+  )
+
+ggplot(df_residential, aes(x = log_price)) +
+  geom_histogram(bins = 50) +
+  labs(title = "Log Sale Price Distribution")
+```
+
+```{r}
+#Trim Data
+lower <- quantile(df_residential$sale_price, 0.01, na.rm = TRUE)
+upper <- quantile(df_residential$sale_price, 0.99, na.rm = TRUE)
+
+lower
+upper
+```
+
+```{r}
+df_final <- df_residential %>%
+  filter(sale_price >= lower, sale_price <= upper)
+
+df_final <- df_final %>%
+  mutate(log_price = log(sale_price))
+
+summary(df_final$sale_price)
+```
+
+To ensure that the analysis reflects actual market behavior, several data cleaning steps were applied to the original dataset.
+
+First, non-market transactions were removed. Observations with extremely low sale prices (e.g., \$1) were excluded, as these likely represent transfers between related parties rather than arms-length transactions. In addition, bundled sales were identified by grouping properties with identical sale_date and sale_price, and observations appearing multiple times within these groups were removed. These transactions likely represent multiple properties sold together and do not reflect individual property values.
+
+Next, the dataset was restricted to residential properties. Given the highly granular building classification system, residential units were identified using keyword-based filtering (e.g., “ROW”, “DET”, “SEMI”, “S/D”, “APT”, “CONDO”), while non-residential categories such as commercial, industrial, and vacant land were excluded. This step ensures that the analysis focuses on comparable property types with similar pricing mechanisms.
+
+Finally, to reduce the influence of extreme values, a two-sided trimming approach was applied using the 1st and 99th percentiles of sale_price. The resulting thresholds were approximately \$3,000 and \$1.7 million. This approach removes anomalous observations while preserving the vast majority of typical market transactions. Although the lower bound remains relatively small, it represents a negligible portion of the data and does not significantly affect the analysis.
+
+# Feature Exploration
+
+## Structural Feartures
+
+```{r}
+# Test data missing rate
+df <- df %>%
+  mutate(log_price = log(sale_price))
+
+structural_vars <- c(
+  "total_livable_area",
+  "total_area", 
+  "number_of_bedrooms",
+  "number_of_bathrooms",
+  "number_stories",
+  "year_built",
+  "exterior_condition",
+  "interior_condition",
+  "quality_grade",
+  "type_heater",
+  "building_code_description"
+)
+
+df %>%
+  select(all_of(structural_vars)) %>%
+  summarise(across(everything(), ~mean(is.na(.)))) %>%
+  pivot_longer(everything(), names_to = "variable", values_to = "missing_rate") %>%
+  arrange(desc(missing_rate))
+```
+
+```{r}
+#Continuous vs log_price
+continuous_vars <- c(
+  "total_livable_area",
+  "total_area",
+  "number_of_bedrooms",
+  "number_of_bathrooms",
+  "number_stories"
+)
+
+df %>%
+  select(log_price, all_of(continuous_vars)) %>%
+  pivot_longer(-log_price, names_to = "variable", values_to = "value") %>%
+  ggplot(aes(x = value, y = log_price)) +
+  geom_point(alpha = 0.1, size = 0.5) +
+  geom_smooth(method = "lm", color = "steelblue", se = FALSE) +
+  facet_wrap(~variable, scales = "free_x") +
+  labs(title = "Structural continuous features vs log_price")
+```
+
+```{r}
+#Spearman
+df %>%
+  select(log_price, all_of(continuous_vars)) %>%
+  cor(method = "spearman", use = "complete.obs") %>%
+  .[,"log_price"] %>%
+  sort(decreasing = TRUE)
+```
+
+```{r}
+#categorical box plot
+categorical_vars <- c(
+  "exterior_condition",
+  "interior_condition", 
+  "quality_grade",
+  "building_code_description"
+)
+
+df %>%
+  select(log_price, all_of(categorical_vars)) %>%
+  mutate(across(all_of(categorical_vars), as.character)) %>%  
+  pivot_longer(-log_price, names_to = "variable", values_to = "value") %>%
+  ggplot(aes(x = as.factor(value), y = log_price)) +
+  geom_boxplot(outlier.alpha = 0.1) +
+  facet_wrap(~variable, scales = "free_x") +
+  labs(title = "Structural categorical features vs log_price") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+```{r}
+#Total livable area
+df <- df %>%
+  filter(is.na(total_livable_area) | total_livable_area < 10000)
+
+df <- df %>%
+  mutate(quality_grade_simplified = str_extract(quality_grade, "^[A-Z]"))
+
+```
+
+```{r}
+#correlation
+cor(df$total_livable_area, df$log_price, 
+    method = "spearman", use = "complete.obs")
+```
+
+```{r}
+#Quality grade
+df %>%
+  filter(!is.na(quality_grade_simplified)) %>%
+  ggplot(aes(x = quality_grade_simplified, y = log_price)) +
+  geom_boxplot(outlier.alpha = 0.1) +
+  labs(title = "quality_grade_simplified vs log_price")
+```
+
+```{r}
+#Age
+df <- df %>%
+  mutate(age = 2025 - year_built,
+         age = ifelse(age < 0 | age > 200, NA, age))
+
+cor(df$age, df$log_price, 
+    method = "spearman", use = "complete.obs")
+```
+
+| feature                     | 保留？               |
+|-----------------------------|----------------------|
+| number_of_bathrooms         | 保留，cap 异常值     |
+| total_livable_area          | 保留                 |
+| exterior_condition          | 保留                 |
+| interior_condition          | 保留，之后查共线性   |
+| quality_grade_simplified    | 保留，C/D 噪音大     |
+| age                         | 保留，信号弱但方向对 |
+| number_of_bedrooms          | 可选，信号弱         |
+| number_stories / total_area | 丢掉                 |
+| type_heater                 | 丢掉                 |
+
+## Location Features
+
+```{r}
+# missing rate
+df %>%
+  select(zip_code, census_tract, geographic_ward, zoning) %>%
+  summarise(across(everything(), ~mean(is.na(.)))) %>%
+  pivot_longer(everything(), names_to = "variable", values_to = "missing_rate")
+
+# zip_code
+df %>%
+  group_by(zip_code) %>%
+  summarise(
+    median_log_price = median(log_price, na.rm = TRUE),
+    n = n()
+  ) %>%
+  filter(n > 50) %>%
+  arrange(desc(median_log_price))
+```
+
+```{r}
+# geographic_ward
+df %>%
+  group_by(geographic_ward) %>%
+  summarise(
+    median_log_price = median(log_price, na.rm = TRUE),
+    n = n()
+  ) %>%
+  filter(n > 50) %>%
+  arrange(desc(median_log_price)) %>%
+  head(10)
+
+# census_tract
+df %>%
+  summarise(
+    n_zip = n_distinct(zip_code),
+    n_ward = n_distinct(geographic_ward),
+    n_tract = n_distinct(census_tract)
+  )
+```
+
+```{r}
+df %>%
+  group_by(census_tract) %>%
+  summarise(
+    median_log_price = median(log_price, na.rm = TRUE),
+    n = n()
+  ) %>%
+  filter(n > 30) %>%
+  summarise(
+    tract_price_sd = sd(median_log_price),
+    zip_reference = "compare with zip"
+  )
+
+df %>%
+  group_by(zip_code) %>%
+  summarise(median_log_price = median(log_price, na.rm = TRUE)) %>%
+  summarise(zip_price_sd = sd(median_log_price))
+```
+
+```{r}
+df %>%
+  select(log_price, topography, view_type, site_type) %>%
+  mutate(across(-log_price, as.character)) %>%
+  pivot_longer(-log_price, names_to = "variable", values_to = "value") %>%
+  ggplot(aes(x = as.factor(value), y = log_price)) +
+  geom_boxplot(outlier.alpha = 0.1) +
+  facet_wrap(~variable, scales = "free_x") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+# missing rate
+df %>%
+  summarise(
+    missing_rate = mean(is.na(zoning)),
+    n_distinct = n_distinct(zoning, na.rm = TRUE)
+  )
+
+# signal
+df %>%
+  group_by(zoning) %>%
+  summarise(
+    median_log_price = median(log_price, na.rm = TRUE),
+    n = n()
+  ) %>%
+  filter(n > 50) %>%
+  arrange(desc(median_log_price))
+```
+
+```{r}
+df %>%
+  summarise(
+    missing_rate = mean(is.na(zoning)),
+    n_distinct = n_distinct(zoning, na.rm = TRUE)
+  )
+
+df %>%
+  count(zoning, sort = TRUE) %>%
+  summarise(n_categories = n())
+```
+
+```{r}
+df <- df %>%
+  mutate(zoning_prefix = str_extract(zoning, "^[A-Z]+"))
+
+df %>%
+  count(zoning_prefix, sort = TRUE)
+
+df <- df %>%
+  mutate(zoning_prefix = case_when(
+    zoning_prefix %in% c("RSA", "RM", "CMX", "RSD", 
+                          "RMX", "RTA", "ICMX") ~ zoning_prefix,
+    is.na(zoning_prefix) ~ NA_character_,
+    TRUE ~ "other"
+  ))
+```
+
+| eature                                   | 保留？                |
+|------------------------------------------|-----------------------|
+| `zip_code`                               | 保留                  |
+| `zoning_prefix`                          | 保留，简化自 `zoning` |
+| `census_tract`                           | 丢掉                  |
+| `geographic_ward`                        | 丢掉                  |
+| `topography` / `view_type` / `site_type` | 全部丢掉              |
+
+## Temproal Features
+
+```{r}
+df <- df %>%
+  mutate(
+    sale_year = year(sale_date),
+    sale_month = month(sale_date),
+    sale_quarter = quarter(sale_date),
+    sale_age = 2025 - sale_year
+  )
+
+# seasonal
+df %>%
+  group_by(sale_month) %>%
+  summarise(
+    median_log_price = median(log_price, na.rm = TRUE),
+    n = n()
+  ) %>%
+  ggplot(aes(x = sale_month, y = median_log_price)) +
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(breaks = 1:12) +
+  labs(title = "Median log_price by sale month")
+```
+
+```{r}
+# sale volume
+df %>%
+  count(sale_year) %>%
+  filter(!is.na(sale_year)) %>%
+  ggplot(aes(x = sale_year, y = n)) +
+  geom_col() +
+  labs(title = "Sale volume by year")
+
+# sale year
+df %>%
+  group_by(sale_year) %>%
+  summarise(median_log_price = median(log_price, na.rm = TRUE)) %>%
+  filter(!is.na(sale_year)) %>%
+  ggplot(aes(x = sale_year, y = median_log_price)) +
+  geom_line() + geom_point() +
+  labs(title = "Median log_price by sale year")
+```
+
+```{r}
+df <- df %>%
+  filter(sale_year >= 2021)
+
+df %>% count(sale_year)
+```
+
+| feature                              | 保留？                    |
+|--------------------------------------|---------------------------|
+| `sale_year`                          | 保留                      |
+| `sale_month`                         | 保留，季节性信号强        |
+| `sale_age`                           | 丢掉，数据只有3-4年没意义 |
+| `age`（year_built算的）              | 保留，信号弱但方向对      |
+| `recording_date` / `assessment_date` | 丢掉，和sale_date重复     |
+
+## External Features
+
+```{r}
+crime <- read_csv("data/crime.csv")
+ppr <- read_csv("data/Recreation.csv")
+transit <- read_csv("data/transit.csv")
+
+glimpse(crime)
+glimpse(ppr)
+glimpse(transit)
+```
+
+```{r}
+df_sf <- df %>%
+  filter(!is.na(shape)) %>%
+  st_as_sf(wkt = "shape", crs = 2272) %>%  
+  st_transform(crs = 4326)                 
+
+df <- df_sf %>%
+  mutate(
+    lng = st_coordinates(.)[,1],
+    lat = st_coordinates(.)[,2]
+  ) %>%
+  st_drop_geometry()                      
+
+df %>% select(lat, lng) %>% head()
+```
+
+**Spatial join**
+
+```{r}
+crime_sf <- crime %>%
+  filter(!is.na(lat), !is.na(lng)) %>%
+  st_as_sf(coords = c("lng", "lat"), crs = 4326)
+
+opa_sf <- df %>%
+  filter(!is.na(lat), !is.na(lng)) %>%
+  st_as_sf(coords = c("lng", "lat"), crs = 4326) %>%
+  st_transform(crs = 4326)
+
+opa_buffer <- opa_sf %>%
+  st_transform(crs = 3857) %>%   
+  st_buffer(500)                 # 500m buffer
+
+crime_sf_meter <- crime_sf %>%
+  st_transform(crs = 3857)
+
+# spatial join + count
+crime_count <- st_join(opa_buffer, crime_sf_meter) %>%
+  st_drop_geometry() %>%
+  group_by(parcel_number) %>%
+  summarise(crime_count_500m = n())
+
+# join df
+df <- df %>%
+  left_join(crime_count, by = "parcel_number")
+```
+
+```{r}
+summary(df$crime_count_500m)
+```
+
+```{r}
+cor(df$crime_count_500m, df$log_price, 
+    method = "spearman", use = "complete.obs")
+```
+
+```{r}
+ppr_sf <- ppr %>%
+  filter(!is.na(X), !is.na(Y)) %>%
+  st_as_sf(coords = c("X", "Y"), crs = 4326) %>%
+  st_transform(crs = 3857)
+
+opa_meter <- opa_sf %>%
+  st_transform(crs = 3857)
+
+# parcel to park dist
+nearest_park <- st_nearest_feature(opa_meter, ppr_sf)
+df$dist_to_park <- st_distance(
+  opa_meter, 
+  ppr_sf[nearest_park,], 
+  by_element = TRUE
+) %>% as.numeric()
+
+summary(df$dist_to_park)
+```
+
+```{r}
+cor(df$dist_to_park, df$log_price,
+    method = "spearman", use = "complete.obs")
+```
+
+```{r}
+transit_sf <- transit %>%
+  filter(!is.na(Lat), !is.na(Lon)) %>%
+  st_as_sf(coords = c("Lon", "Lat"), crs = 4326) %>%
+  st_transform(crs = 3857)
+
+nearest_stop <- st_nearest_feature(opa_meter, transit_sf)
+df$dist_to_transit <- st_distance(
+  opa_meter,
+  transit_sf[nearest_stop,],
+  by_element = TRUE
+) %>% as.numeric()
+
+summary(df$dist_to_transit)
+```
+
+```{r}
+cor(df$dist_to_transit, df$log_price,
+    method = "spearman", use = "complete.obs")
+```
+
+```{r}
+library(sf)
+library(tidyverse)
+
+hospital <- st_read("data/Hospitals.geojson")
+school <- st_read("data/Schools_Parcels.geojson")
+
+glimpse(hospital)
+glimpse(school)
+```
+```{r}
+# only active school data
+school_active <- school %>%
+  filter(ACTIVE == "O" | is.na(ACTIVE) == FALSE)
+
+# TYPE_SPECIFIC 
+school %>% count(TYPE_SPECIFIC)
+
+# GRADE_LEVEL  
+school %>% count(GRADE_LEVEL)
+```
+```{r}
+opa_sf <- df %>%
+  filter(!is.na(lat), !is.na(lng)) %>%
+  st_as_sf(coords = c("lng", "lat"), crs = 4326)
+
+opa_meter <- opa_sf %>%
+  st_transform(crs = 3857)
+
+#only public
+school_public <- school %>%
+  filter(TYPE_SPECIFIC %in% c("DISTRICT", "CHARTER"))
+
+school_meter <- school_public %>%
+  st_transform(crs = 3857) %>%
+  st_centroid()  
+
+opa_meter <- opa_sf %>%
+  st_transform(crs = 3857)
+
+nearest_school <- st_nearest_feature(opa_meter, school_meter)
+df$dist_to_school <- st_distance(
+  opa_meter,
+  school_meter[nearest_school,],
+  by_element = TRUE
+) %>% as.numeric()
+
+#Hospital
+hospital_meter <- hospital %>%
+  st_transform(crs = 3857)
+
+nearest_hospital <- st_nearest_feature(opa_meter, hospital_meter)
+df$dist_to_hospital <- st_distance(
+  opa_meter,
+  hospital_meter[nearest_hospital,],
+  by_element = TRUE
+) %>% as.numeric()
+```
+
+```{r}
+cor(df %>% select(log_price, dist_to_school, dist_to_hospital),
+    method = "spearman", use = "complete.obs")
+```
+
+
+| feature            | 相关系数 | 保留？ |
+|--------------------|----------|--------|
+| `crime_count_500m` | -0.17    | 保留   |
+| `dist_to_park`     | 0.04     | 丢掉   |
+| `dist_to_transit`  | -0.03    | 丢掉   |
+
+### **Census**
+
+```{r}
+census_data <- get_acs(
+  geography = "tract",
+  state = "PA",
+  county = "Philadelphia",
+  variables = c(
+    median_income    = "B19013_001",
+    poverty_rate     = "B17001_002",
+    bach_degree_rate = "B15003_022"
+  ),
+  year = 2022,
+  geometry = TRUE  
+)
+```
+
+```{r}
+census_sf <- census_data %>%
+  st_transform(crs = 3857)
+
+opa_meter <- opa_sf %>%
+  st_transform(crs = 3857)
+
+df_census <- st_join(opa_meter, census_sf) %>%
+  st_drop_geometry() %>%
+  select(parcel_number, variable, estimate) %>%
+  pivot_wider(names_from = variable, values_from = estimate)
+
+df <- df %>%
+  left_join(df_census, by = "parcel_number")
+```
+
+```{r}
+cor(df %>% select(log_price, median_income, poverty_rate, bach_degree_rate),
+    method = "spearman", use = "complete.obs")
+```
+
+| feature            | 相关系数 | 方向                       |
+|--------------------|----------|----------------------------|
+| `median_income`    | 0.41     | 正确，收入越高房价越高     |
+| `bach_degree_rate` | 0.36     | 正确，教育水平越高房价越高 |
+| `poverty_rate`     | -0.35    | 正确，贫困率越高房价越低   |
+
+**Interaction**
+
+```{r}
+# zip_code x total_livable_area
+df %>%
+  filter(!is.na(zip_code), !is.na(total_livable_area)) %>%
+  group_by(zip_code) %>%
+  mutate(area_quintile = ntile(total_livable_area, 5)) %>%
+  group_by(zip_code, area_quintile) %>%
+  summarise(median_log_price = median(log_price, na.rm = TRUE), .groups = "drop") %>%
+  ggplot(aes(x = area_quintile, y = median_log_price, 
+             group = zip_code, color = zip_code)) +
+  geom_line(alpha = 0.5) +
+  labs(title = "log_price vs area quintile by zip_code",
+       x = "area quintile (1=smallest, 5=largest)",
+       y = "median log_price") +
+  theme(legend.position = "none")
+```

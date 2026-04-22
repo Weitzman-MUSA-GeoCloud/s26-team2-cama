@@ -13,3 +13,6 @@ data/
 
 # Sensitive files
 keys/
+
+# Local Claude Code settings
+.claude/
