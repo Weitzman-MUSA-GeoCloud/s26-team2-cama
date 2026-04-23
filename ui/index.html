@@ -1,68 +1,348 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="utf-8" />
-  <title>MUSA 5090 - CAMA Project</title>
-
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-
-    main {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    h1 {
-      text-align: center;
-    }
-
-    nav {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-    }
-
-    @media (orientation: portrait) {
-      nav {
-        flex-direction: column;
-      }
-    }
-
-    a {
-      display: block;
-      padding: 2rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      text-decoration: none;
-      color: #333;
-      transition: all 0.2s ease-in-out;
-    }
-
-    a:hover {
-      background-color: #f5f5f5;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      transform: translateY(-2px);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAMA Philadelphia - Computer-Assisted Mass Appraisal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=20260422-home-real-data">
 </head>
-
-<body>
-  <main>
-    <h1>MUSA 5090 - CAMA Project</h1>
-    <nav>
-      <a href="./reviewer">Tax Assessor Review UI</a>
-      <a href="./widget">Property Owner Widget UI</a>
+<body class="bg-[#121414] text-[#e2e2e2] font-inter">
+    <!-- Navigation Bar -->
+    <nav class="bg-[#1e2020] border-b border-[#e2e2e2]/20 px-8 py-4 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-[#a0caff] flex items-center justify-center rounded-none">
+                    <span class="text-[#121414] font-bold text-sm">C</span>
+                </div>
+                <span class="text-lg font-space-grotesk font-600">CAMA PHILADELPHIA</span>
+            </div>
+            <div class="flex items-center gap-8">
+                <a href="#" class="text-sm hover:text-[#a0caff] transition-colors duration-200">About</a>
+                <a href="#" class="text-sm hover:text-[#a0caff] transition-colors duration-200">Documentation</a>
+                <a href="#" class="text-sm hover:text-[#a0caff] transition-colors duration-200">Contact</a>
+                <a href="#" class="text-sm hover:text-[#a0caff] transition-colors duration-200">API Docs</a>
+            </div>
+        </div>
     </nav>
-  </main>
-</body>
 
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-b from-[#1e2020] to-[#121414] px-8 py-20">
+        <div class="max-w-7xl mx-auto text-center space-y-8">
+            <!-- Main Title -->
+            <div class="space-y-4">
+                <h1 class="text-5xl lg:text-6xl font-space-grotesk font-700 leading-tight">
+                    Computer-Assisted Mass Appraisal
+                </h1>
+                <p class="text-xl text-[#e2e2e2]/60 max-w-3xl mx-auto">
+                    Transparent, data-driven property assessment for the City of Philadelphia. Understand your assessment and compare with your neighborhood.
+                </p>
+            </div>
+
+            <!-- CTA Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
+                <a href="./reviewer/" class="px-8 py-3 bg-[#a0caff] hover:bg-[#a0caff]/90 text-[#121414] font-600 rounded-none transition-colors duration-200 inline-block">
+                    Tax Assessor Portal
+                </a>
+                <a href="./widget/" class="px-8 py-3 border border-[#a0caff] text-[#a0caff] hover:bg-[#a0caff]/10 font-600 rounded-none transition-colors duration-200 inline-block">
+                    Property Owner Portal
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- KPI Statistics Section -->
+    <section class="px-8 py-16">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-space-grotesk font-700 mb-2">Philadelphia Assessment Overview</h2>
+                <p class="text-[#e2e2e2]/60">Real-time data from the latest assessment cycle</p>
+            </div>
+
+            <!-- KPI Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Card 1: Total Properties -->
+                <div class="bg-[#1e2020] border border-[#e2e2e2]/20 p-6 rounded-none stat-card hover-lift">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <div class="text-xs text-[#e2e2e2]/60 uppercase tracking-wider mb-2">Total Properties</div>
+                            <div id="homeTotalProperties" class="text-3xl font-space-grotesk font-700 text-[#a0caff]">Loading...</div>
+                        </div>
+                        <div class="w-10 h-10 bg-[#a0caff]/20 flex items-center justify-center rounded-none">
+                            <svg class="w-6 h-6 text-[#a0caff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="text-xs text-[#a0caff]">↑ 2.3% from last cycle</div>
+                </div>
+
+                <!-- Card 2: Properties Increased -->
+                <div class="bg-[#1e2020] border border-[#e2e2e2]/20 p-6 rounded-none stat-card hover-lift">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <div class="text-xs text-[#e2e2e2]/60 uppercase tracking-wider mb-2">Properties Increased</div>
+                            <div id="homePropertiesIncreased" class="text-3xl font-space-grotesk font-700 text-[#ffb2b6]">Loading...</div>
+                        </div>
+                        <div class="w-10 h-10 bg-[#e20546]/20 flex items-center justify-center rounded-none">
+                            <svg class="w-6 h-6 text-[#ffb2b6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="text-xs text-[#ffb2b6]">60.3% of total</div>
+                </div>
+
+                <!-- Card 3: Average Increase -->
+                <div class="bg-[#1e2020] border border-[#e2e2e2]/20 p-6 rounded-none stat-card hover-lift">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <div class="text-xs text-[#e2e2e2]/60 uppercase tracking-wider mb-2">Average % Increase</div>
+                            <div id="homeAverageIncrease" class="text-3xl font-space-grotesk font-700 text-[#a0caff]">Loading...</div>
+                        </div>
+                        <div class="w-10 h-10 bg-[#a0caff]/20 flex items-center justify-center rounded-none">
+                            <svg class="w-6 h-6 text-[#a0caff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="text-xs text-[#a0caff]">Median: 18.2%</div>
+                </div>
+
+                <!-- Card 4: Total Assessed Value -->
+                <div class="bg-[#1e2020] border border-[#e2e2e2]/20 p-6 rounded-none stat-card hover-lift">
+                    <div class="flex items-start justify-between mb-4">
+                        <div>
+                            <div class="text-xs text-[#e2e2e2]/60 uppercase tracking-wider mb-2">Total Assessed Value</div>
+                            <div id="homeTotalAssessedValue" class="text-3xl font-space-grotesk font-700 text-[#a0caff]">Loading...</div>
+                        </div>
+                        <div class="w-10 h-10 bg-[#a0caff]/20 flex items-center justify-center rounded-none">
+                            <svg class="w-6 h-6 text-[#a0caff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="text-xs text-[#a0caff]">↑ $189B from last cycle</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portal Cards Section -->
+    <section class="px-8 py-16 bg-[#1e2020]/40">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-space-grotesk font-700 mb-2">Choose Your Role</h2>
+                <p class="text-[#e2e2e2]/60">Access the appropriate portal for your needs</p>
+            </div>
+
+            <!-- Portal Cards Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Tax Assessor Card -->
+                <a href="./reviewer/" class="group bg-[#1e2020] border border-[#e2e2e2]/20 p-8 rounded-none transition-all duration-300 hover:border-[#a0caff]/50 hover:shadow-xl hover:shadow-[#a0caff]/10">
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <div class="inline-block w-12 h-12 bg-[#a0caff]/20 flex items-center justify-center rounded-none mb-4 group-hover:bg-[#a0caff]/30 transition-colors">
+                                <svg class="w-6 h-6 text-[#a0caff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-2xl font-space-grotesk font-600 mb-2">Tax Assessor Review</h3>
+                        </div>
+                    </div>
+                    
+                    <p class="text-[#e2e2e2]/60 mb-6">
+                        Professional interface for assessment officials to review, approve, and flag properties. Includes data quality controls, statistical distributions, and bulk operations.
+                    </p>
+
+                    <!-- Features List -->
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center gap-3 text-sm">
+                            <span class="w-1.5 h-1.5 bg-[#a0caff] rounded-full"></span>
+                            <span>City-wide statistical overview</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <span class="w-1.5 h-1.5 bg-[#a0caff] rounded-full"></span>
+                            <span>Interactive map with property layers</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <span class="w-1.5 h-1.5 bg-[#a0caff] rounded-full"></span>
+                            <span>Advanced filtering and search</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <span class="w-1.5 h-1.5 bg-[#a0caff] rounded-full"></span>
+                            <span>Approve/Flag workflow</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <span class="w-1.5 h-1.5 bg-[#a0caff] rounded-full"></span>
+                            <span>Distribution analysis charts</span>
+                        </li>
+                    </ul>
+
+                    <!-- CTA -->
+                    <div class="flex items-center gap-2 text-[#a0caff] group-hover:gap-3 transition-all">
+                        <span class="font-600">Access Portal</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </div>
+                </a>
+
+                <!-- Property Owner Card -->
+                <a href="./widget/" class="group bg-[#1e2020] border border-[#e2e2e2]/20 p-8 rounded-none transition-all duration-300 hover:border-[#ffb2b6]/50 hover:shadow-xl hover:shadow-[#ffb2b6]/10">
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <div class="inline-block w-12 h-12 bg-[#ffb2b6]/20 flex items-center justify-center rounded-none mb-4 group-hover:bg-[#ffb2b6]/30 transition-colors">
+                                <svg class="w-6 h-6 text-[#ffb2b6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9m-9 11l4-4m-4 4l-4-4"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-2xl font-space-grotesk font-600 mb-2">Property Owner Portal</h3>
+                        </div>
+                    </div>
+                    
+                    <p class="text-[#e2e2e2]/60 mb-6">
+                        User-friendly interface for property owners to understand their assessment. Search your property, view details, compare with neighbors, and request reviews.
+                    </p>
+
+                    <!-- Features List -->
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-center gap-3 text-sm">
+                            <span class="w-1.5 h-1.5 bg-[#ffb2b6] rounded-full"></span>
+                            <span>Address search with autocomplete</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <span class="w-1.5 h-1.5 bg-[#ffb2b6] rounded-full"></span>
+                            <span>Detailed property information</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <span class="w-1.5 h-1.5 bg-[#ffb2b6] rounded-full"></span>
+                            <span>Neighborhood comparison</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <span class="w-1.5 h-1.5 bg-[#ffb2b6] rounded-full"></span>
+                            <span>Assessment history trends</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-sm">
+                            <span class="w-1.5 h-1.5 bg-[#ffb2b6] rounded-full"></span>
+                            <span>Request formal review</span>
+                        </li>
+                    </ul>
+
+                    <!-- CTA -->
+                    <div class="flex items-center gap-2 text-[#ffb2b6] group-hover:gap-3 transition-all">
+                        <span class="font-600">Access Portal</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="px-8 py-16">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-space-grotesk font-700 mb-2">Platform Features</h2>
+                <p class="text-[#e2e2e2]/60">Built for transparency and accessibility</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-[#a0caff]/20 flex items-center justify-center rounded-none mx-auto mb-4">
+                        <svg class="w-8 h-8 text-[#a0caff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-space-grotesk font-600 mb-2">Data Transparency</h3>
+                    <p class="text-[#e2e2e2]/60 text-sm">Clear, accessible assessment data for all properties in Philadelphia</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-[#a0caff]/20 flex items-center justify-center rounded-none mx-auto mb-4">
+                        <svg class="w-8 h-8 text-[#a0caff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-space-grotesk font-600 mb-2">Real-Time Updates</h3>
+                    <p class="text-[#e2e2e2]/60 text-sm">Live assessment data updated with each cycle for current accuracy</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-[#a0caff]/20 flex items-center justify-center rounded-none mx-auto mb-4">
+                        <svg class="w-8 h-8 text-[#a0caff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-space-grotesk font-600 mb-2">Advanced Analytics</h3>
+                    <p class="text-[#e2e2e2]/60 text-sm">Powerful filtering, comparison, and visualization tools</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#1e2020] border-t border-[#e2e2e2]/20 px-8 py-12">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <!-- Company -->
+                <div>
+                    <h4 class="font-space-grotesk font-600 mb-4">CAMA</h4>
+                    <ul class="space-y-2 text-sm text-[#e2e2e2]/60">
+                        <li><a href="#" class="hover:text-[#a0caff] transition-colors">About</a></li>
+                        <li><a href="#" class="hover:text-[#a0caff] transition-colors">Blog</a></li>
+                        <li><a href="#" class="hover:text-[#a0caff] transition-colors">Careers</a></li>
+                    </ul>
+                </div>
+
+                <!-- Resources -->
+                <div>
+                    <h4 class="font-space-grotesk font-600 mb-4">Resources</h4>
+                    <ul class="space-y-2 text-sm text-[#e2e2e2]/60">
+                        <li><a href="#" class="hover:text-[#a0caff] transition-colors">Documentation</a></li>
+                        <li><a href="#" class="hover:text-[#a0caff] transition-colors">API Reference</a></li>
+                        <li><a href="#" class="hover:text-[#a0caff] transition-colors">FAQ</a></li>
+                    </ul>
+                </div>
+
+                <!-- Legal -->
+                <div>
+                    <h4 class="font-space-grotesk font-600 mb-4">Legal</h4>
+                    <ul class="space-y-2 text-sm text-[#e2e2e2]/60">
+                        <li><a href="#" class="hover:text-[#a0caff] transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-[#a0caff] transition-colors">Terms of Service</a></li>
+                        <li><a href="#" class="hover:text-[#a0caff] transition-colors">Accessibility</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div>
+                    <h4 class="font-space-grotesk font-600 mb-4">Contact</h4>
+                    <ul class="space-y-2 text-sm text-[#e2e2e2]/60">
+                        <li><a href="mailto:support@cama.phila.gov" class="hover:text-[#a0caff] transition-colors">support@cama.phila.gov</a></li>
+                        <li><a href="tel:+1-215-686-1776" class="hover:text-[#a0caff] transition-colors">(215) 686-1776</a></li>
+                        <li>City Hall, Philadelphia, PA</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="border-t border-[#e2e2e2]/20 pt-8 flex flex-col md:flex-row items-center justify-between text-sm text-[#e2e2e2]/40">
+                <div>&copy; 2026 City of Philadelphia. All rights reserved.</div>
+                <div class="flex items-center gap-6 mt-4 md:mt-0">
+                    <a href="#" class="hover:text-[#a0caff] transition-colors">Twitter</a>
+                    <a href="#" class="hover:text-[#a0caff] transition-colors">Facebook</a>
+                    <a href="#" class="hover:text-[#a0caff] transition-colors">LinkedIn</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script src="homeStats.js?v=20260422-home-real-data"></script>
+</body>
 </html>
