@@ -1,19 +1,14 @@
 const AssessorSidebar = (() => {
   let selectedProperty = null;
-  let toggleMode = 'assessed';
   const TRANSACTION_TREND_URL =
     'https://storage.googleapis.com/musa5090s26-team2-public/configs/transaction_volume_trend.json';
+  const CURRENT_YEAR = new Date().getFullYear();
+  const REFERENCE_YEAR = CURRENT_YEAR - 1;
 
   const init = () => {
     document
       .getElementById('clearSelectedPropertyBtn')
       ?.addEventListener('click', clearSelection);
-    document
-      .getElementById('toggleAssessedValue')
-      ?.addEventListener('click', () => setToggleMode('assessed'));
-    document
-      .getElementById('toggleMarketValue')
-      ?.addEventListener('click', () => setToggleMode('market'));
     document
       .getElementById('streetViewToggle')
       ?.addEventListener('click', toggleStreetView);
@@ -46,8 +41,9 @@ const AssessorSidebar = (() => {
     setText('selectedPropertyId', property.id);
     updateStreetViewLink(property);
     setText('detailAddress', property.address);
-    setText('detailAssessedValue', Utils.formatCurrency(property.tax_year_value));
-    setText('detailMarketValue', Utils.formatCurrency(property.market_value || property.tax_year_value));
+    setText('detailMarketValueLabel', `Market Value (${REFERENCE_YEAR})`);
+    setText('detailPredictedValueLabel', `Predicted Value (${CURRENT_YEAR})`);
+    setText('detailAssessedValue', Utils.formatCurrency(property.market_value || property.tax_year_value));
     setText('detailPredictedValue', Utils.formatCurrency(property.predicted_value));
     setText(
       'detailMetadata',
@@ -66,7 +62,7 @@ const AssessorSidebar = (() => {
       domain: [0, 1000000],
       markerValue: property.predicted_value,
     });
-    renderToggleDistribution();
+    renderMarketDistribution();
     renderTrend(property);
   };
 
@@ -86,22 +82,11 @@ const AssessorSidebar = (() => {
     }
   };
 
-  const setToggleMode = (mode) => {
-    toggleMode = mode;
-    document.getElementById('toggleAssessedValue')?.classList.toggle('active', mode === 'assessed');
-    document.getElementById('toggleMarketValue')?.classList.toggle('active', mode === 'market');
-    renderToggleDistribution();
-  };
-
-  const renderToggleDistribution = () => {
+  const renderMarketDistribution = () => {
     if (!selectedProperty) return;
-    const field = toggleMode === 'market' ? 'market_value' : 'predicted_value';
-    const markerValue =
-      toggleMode === 'market'
-        ? selectedProperty.market_value || selectedProperty.tax_year_value
-        : selectedProperty.predicted_value;
-    renderHistogram('selectedToggleDistribution', getProperties(), field, {
-      color: toggleMode === 'market' ? '#8bd7c5' : '#ffb2b6',
+    const markerValue = selectedProperty.market_value || selectedProperty.tax_year_value;
+    renderHistogram('selectedToggleDistribution', getProperties(), 'market_value', {
+      color: '#8bd7c5',
       domain: [0, 1000000],
       markerValue,
     });
@@ -113,8 +98,8 @@ const AssessorSidebar = (() => {
     container.innerHTML = '';
 
     const values = [
-      { label: 'Last Market', value: property.market_value || property.tax_year_value },
-      { label: 'Predicted', value: property.predicted_value },
+      { label: `Market (${REFERENCE_YEAR})`, value: property.market_value || property.tax_year_value },
+      { label: `Predicted (${CURRENT_YEAR})`, value: property.predicted_value },
     ];
 
     const { width, height } = getSize(container);

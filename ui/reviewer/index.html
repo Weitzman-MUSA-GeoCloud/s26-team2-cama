@@ -113,11 +113,7 @@
 
                 <div>
                     <div class="flex items-center justify-between mb-3">
-                        <h2 class="panel-title mb-0">Compare Distribution</h2>
-                        <div class="segmented-control">
-                            <button type="button" id="toggleAssessedValue" class="active">Predicted</button>
-                            <button type="button" id="toggleMarketValue">Market</button>
-                        </div>
+                        <h2 class="panel-title mb-0">Market Distribution</h2>
                     </div>
                     <div id="selectedToggleDistribution" class="chart-box h-44"></div>
                 </div>
@@ -141,9 +137,8 @@
                     <h2 class="panel-title">Property Details</h2>
                     <div class="bg-[#121414] border border-[#e2e2e2]/20 divide-y divide-[#e2e2e2]/10">
                         <div class="detail-row"><span>Address</span><strong id="detailAddress">-</strong></div>
-                        <div class="detail-row"><span>Previous Market</span><strong id="detailAssessedValue">-</strong></div>
-                        <div class="detail-row"><span>Current Market</span><strong id="detailMarketValue">-</strong></div>
-                        <div class="detail-row"><span>Predicted Value</span><strong id="detailPredictedValue">-</strong></div>
+                        <div class="detail-row"><span id="detailMarketValueLabel">Market Value</span><strong id="detailAssessedValue">-</strong></div>
+                        <div class="detail-row"><span id="detailPredictedValueLabel">Predicted Value</span><strong id="detailPredictedValue">-</strong></div>
                         <div class="detail-row"><span>Metadata</span><strong id="detailMetadata">-</strong></div>
                     </div>
                 </div>
