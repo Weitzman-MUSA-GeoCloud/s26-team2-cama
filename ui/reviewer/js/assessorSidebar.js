@@ -1,0 +1,370 @@
+const AssessorSidebar = (() => {
+  let selectedProperty = null;
+  let toggleMode = 'assessed';
+  const TRANSACTION_TREND_URL =
+    'https://storage.googleapis.com/musa5090s26-team2-public/configs/transaction_volume_trend.json';
+
+  const init = () => {
+    document
+      .getElementById('clearSelectedPropertyBtn')
+      ?.addEventListener('click', clearSelection);
+    document
+      .getElementById('toggleAssessedValue')
+      ?.addEventListener('click', () => setToggleMode('assessed'));
+    document
+      .getElementById('toggleMarketValue')
+      ?.addEventListener('click', () => setToggleMode('market'));
+    document
+      .getElementById('streetViewToggle')
+      ?.addEventListener('click', toggleStreetView);
+  };
+
+  const renderDefault = () => {
+    selectedProperty = null;
+    document.getElementById('assessorDefaultPanel')?.classList.remove('hidden');
+    document.getElementById('assessorSelectedPanel')?.classList.add('hidden');
+
+    const properties = getProperties();
+    renderHistogram('priceDistributionChart', properties, 'predicted_value', {
+      color: '#a0caff',
+      domain: [0, 1000000],
+    });
+    renderHistogram('marketDistributionChart', properties, 'market_value', {
+      color: '#8bd7c5',
+      domain: [0, 1000000],
+    });
+    renderTransactionTrend(properties);
+  };
+
+  const showProperty = (property) => {
+    if (!property) return;
+    selectedProperty = property;
+    document.getElementById('assessorDefaultPanel')?.classList.add('hidden');
+    document.getElementById('assessorSelectedPanel')?.classList.remove('hidden');
+
+    setText('selectedPropertyAddress', property.address);
+    setText('selectedPropertyId', property.id);
+    updateStreetViewLink(property);
+    setText('detailAddress', property.address);
+    setText('detailAssessedValue', Utils.formatCurrency(property.tax_year_value));
+    setText('detailMarketValue', Utils.formatCurrency(property.market_value || property.tax_year_value));
+    setText('detailPredictedValue', Utils.formatCurrency(property.predicted_value));
+    setText(
+      'detailMetadata',
+      [property.bldg_desc, property.zip_code ? `ZIP ${property.zip_code}` : null]
+        .filter(Boolean)
+        .join(' | ') || '-'
+    );
+
+    const changeAmount = property.predicted_value - property.tax_year_value;
+    const sign = changeAmount >= 0 ? '+' : '';
+    setText('selectedAbsoluteChange', `${sign}${Utils.formatCurrency(changeAmount)}`);
+    setText('selectedPercentChange', `${sign}${Utils.formatPercentage(property.change_percent)}`);
+
+    renderHistogram('selectedAssessmentDistribution', getProperties(), 'predicted_value', {
+      color: '#a0caff',
+      domain: [0, 1000000],
+      markerValue: property.predicted_value,
+    });
+    renderToggleDistribution();
+    renderTrend(property);
+  };
+
+  const clearSelection = () => {
+    selectedProperty = null;
+    if (typeof MapInteraction !== 'undefined') {
+      MapInteraction.clearSelection?.();
+    }
+    renderDefault();
+  };
+
+  const refresh = () => {
+    if (selectedProperty) {
+      showProperty(selectedProperty);
+    } else {
+      renderDefault();
+    }
+  };
+
+  const setToggleMode = (mode) => {
+    toggleMode = mode;
+    document.getElementById('toggleAssessedValue')?.classList.toggle('active', mode === 'assessed');
+    document.getElementById('toggleMarketValue')?.classList.toggle('active', mode === 'market');
+    renderToggleDistribution();
+  };
+
+  const renderToggleDistribution = () => {
+    if (!selectedProperty) return;
+    const field = toggleMode === 'market' ? 'market_value' : 'predicted_value';
+    const markerValue =
+      toggleMode === 'market'
+        ? selectedProperty.market_value || selectedProperty.tax_year_value
+        : selectedProperty.predicted_value;
+    renderHistogram('selectedToggleDistribution', getProperties(), field, {
+      color: toggleMode === 'market' ? '#8bd7c5' : '#ffb2b6',
+      domain: [0, 1000000],
+      markerValue,
+    });
+  };
+
+  const renderTrend = (property) => {
+    const container = document.getElementById('selectedValueTrend');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const values = [
+      { label: 'Last Market', value: property.market_value || property.tax_year_value },
+      { label: 'Predicted', value: property.predicted_value },
+    ];
+
+    const { width, height } = getSize(container);
+    const margin = { top: 18, right: 18, bottom: 30, left: 54 };
+    const chartW = width - margin.left - margin.right;
+    const chartH = height - margin.top - margin.bottom;
+    const svg = d3.select(container).append('svg').attr('width', width).attr('height', height);
+    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+    const x = d3.scalePoint().domain(values.map((d) => d.label)).range([0, chartW]).padding(0.5);
+    const y = d3
+      .scaleLinear()
+      .domain([0, d3.max(values, (d) => d.value) || 1])
+      .nice()
+      .range([chartH, 0]);
+
+    g.append('path')
+      .datum(values)
+      .attr('fill', 'none')
+      .attr('stroke', '#a0caff')
+      .attr('stroke-width', 2.5)
+      .attr('d', d3.line().x((d) => x(d.label)).y((d) => y(d.value)));
+    g.selectAll('circle')
+      .data(values)
+      .enter()
+      .append('circle')
+      .attr('cx', (d) => x(d.label))
+      .attr('cy', (d) => y(d.value))
+      .attr('r', 4)
+      .attr('fill', '#ffb2b6');
+    g.append('g')
+      .attr('transform', `translate(0,${chartH})`)
+      .call(d3.axisBottom(x))
+      .style('color', 'rgba(226,226,226,0.55)')
+      .style('font-size', '10px');
+    g.append('g')
+      .call(d3.axisLeft(y).ticks(3).tickFormat((d) => `$${d3.format('~s')(d)}`))
+      .style('color', 'rgba(226,226,226,0.55)')
+      .style('font-size', '10px');
+  };
+
+  const renderHistogram = (containerId, properties, field, opts = {}) => {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+
+    const values = properties
+      .map((p) => Number(p[field]))
+      .filter((v) => Number.isFinite(v) && v > 0);
+    if (!values.length) {
+      container.textContent = 'No data';
+      return;
+    }
+
+    const domain = opts.domain || [0, d3.max(values)];
+    const binCount = 20;
+    const step = (domain[1] - domain[0]) / binCount;
+    const bins = Array.from({ length: binCount }, (_, i) => ({
+      x0: domain[0] + i * step,
+      x1: domain[0] + (i + 1) * step,
+      count: 0,
+    }));
+    values.forEach((value) => {
+      const clamped = Math.min(Math.max(value, domain[0]), domain[1]);
+      let index = Math.floor((clamped - domain[0]) / step);
+      if (index >= bins.length) index = bins.length - 1;
+      bins[index].count++;
+    });
+
+    const { width, height } = getSize(container);
+    const margin = { top: 12, right: 10, bottom: 24, left: 38 };
+    const chartW = width - margin.left - margin.right;
+    const chartH = height - margin.top - margin.bottom;
+    const svg = d3.select(container).append('svg').attr('width', width).attr('height', height);
+    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+    const x = d3.scaleLinear().domain(domain).range([0, chartW]);
+    const y = d3.scaleLinear().domain([0, d3.max(bins, (b) => b.count) || 1]).nice().range([chartH, 0]);
+
+    g.selectAll('rect')
+      .data(bins)
+      .enter()
+      .append('rect')
+      .attr('x', (b) => x(b.x0) + 1)
+      .attr('y', (b) => y(b.count))
+      .attr('width', (b) => Math.max(1, x(b.x1) - x(b.x0) - 2))
+      .attr('height', (b) => chartH - y(b.count))
+      .attr('fill', opts.color || '#a0caff')
+      .attr('opacity', 0.85);
+
+    if (Number.isFinite(opts.markerValue)) {
+      const markerX = x(Math.min(Math.max(opts.markerValue, domain[0]), domain[1]));
+      g.append('line')
+        .attr('x1', markerX)
+        .attr('x2', markerX)
+        .attr('y1', 0)
+        .attr('y2', chartH)
+        .attr('stroke', '#e20546')
+        .attr('stroke-width', 2);
+    }
+
+    g.append('g')
+      .attr('transform', `translate(0,${chartH})`)
+      .call(d3.axisBottom(x).ticks(4).tickFormat((d) => `$${d / 1000}k`))
+      .style('color', 'rgba(226,226,226,0.55)')
+      .style('font-size', '10px');
+    g.append('g')
+      .call(d3.axisLeft(y).ticks(3).tickFormat(d3.format('~s')))
+      .style('color', 'rgba(226,226,226,0.55)')
+      .style('font-size', '10px');
+  };
+
+  const renderTransactionTrend = async () => {
+    const container = document.getElementById('transactionTrendChart');
+    if (!container) return;
+    container.textContent = 'Trend loading...';
+
+    try {
+      const response = await fetch(TRANSACTION_TREND_URL);
+      if (!response.ok) throw new Error(`Transaction trend ${response.status}`);
+      const data = await response.json();
+      renderLineChart(container, data, 'sale_year', 'transaction_count', {
+        color: '#8bd7c5',
+        xFormat: (d) => String(d),
+        yFormat: d3.format('~s'),
+      });
+    } catch (error) {
+      container.innerHTML =
+        '<div class="px-4 text-center text-xs text-[#e2e2e2]/45">Transaction trend data is not available.</div>';
+    }
+  };
+
+  const renderLineChart = (container, data, xField, yField, opts = {}) => {
+    container.innerHTML = '';
+    if (!data?.length) {
+      container.textContent = 'No data';
+      return;
+    }
+
+    const { width, height } = getSize(container);
+    const margin = { top: 12, right: 12, bottom: 24, left: 42 };
+    const chartW = width - margin.left - margin.right;
+    const chartH = height - margin.top - margin.bottom;
+    const svg = d3.select(container).append('svg').attr('width', width).attr('height', height);
+    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+    const x = d3
+      .scaleLinear()
+      .domain(d3.extent(data, (d) => Number(d[xField])))
+      .range([0, chartW]);
+    const y = d3
+      .scaleLinear()
+      .domain([0, d3.max(data, (d) => Number(d[yField])) || 1])
+      .nice()
+      .range([chartH, 0]);
+
+    g.append('path')
+      .datum(data)
+      .attr('fill', 'none')
+      .attr('stroke', opts.color || '#a0caff')
+      .attr('stroke-width', 2)
+      .attr(
+        'd',
+        d3
+          .line()
+          .x((d) => x(Number(d[xField])))
+          .y((d) => y(Number(d[yField])))
+      );
+
+    g.append('g')
+      .attr('transform', `translate(0,${chartH})`)
+      .call(d3.axisBottom(x).ticks(4).tickFormat(opts.xFormat || ((d) => d)))
+      .style('color', 'rgba(226,226,226,0.55)')
+      .style('font-size', '10px');
+    g.append('g')
+      .call(d3.axisLeft(y).ticks(3).tickFormat(opts.yFormat || d3.format('~s')))
+      .style('color', 'rgba(226,226,226,0.55)')
+      .style('font-size', '10px');
+  };
+
+  const getProperties = () => DataManager.getFilteredProperties();
+
+  const getSize = (container) => ({
+    width: Math.max(container.clientWidth || 260, 220),
+    height: Math.max(container.clientHeight || 150, 120),
+  });
+
+  const setText = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value || '-';
+  };
+
+  const buildStreetViewSrc = (lat, lng) =>
+    `https://www.google.com/maps?layer=c&cbll=${lat},${lng}&cbp=11,0,0,0,0&output=svembed`;
+
+  const updateStreetViewLink = (property) => {
+    const toggle = document.getElementById('streetViewToggle');
+    const container = document.getElementById('streetViewContainer');
+    const frame = document.getElementById('streetViewFrame');
+    const label = document.getElementById('streetViewToggleLabel');
+    if (!toggle || !container || !frame) return;
+
+    // Always collapse + clear iframe when switching property so the old view doesn't linger
+    container.classList.add('hidden');
+    toggle.setAttribute('aria-expanded', 'false');
+    if (label) label.textContent = 'View Street View';
+    frame.src = 'about:blank';
+
+    const lat = Number(property?.lat);
+    const lng = Number(property?.lng);
+    if (Number.isFinite(lat) && Number.isFinite(lng)) {
+      toggle.disabled = false;
+      toggle.classList.remove('opacity-50', 'cursor-not-allowed');
+      toggle.dataset.lat = String(lat);
+      toggle.dataset.lng = String(lng);
+    } else {
+      toggle.disabled = true;
+      toggle.classList.add('opacity-50', 'cursor-not-allowed');
+      delete toggle.dataset.lat;
+      delete toggle.dataset.lng;
+    }
+  };
+
+  const toggleStreetView = () => {
+    const toggle = document.getElementById('streetViewToggle');
+    const container = document.getElementById('streetViewContainer');
+    const frame = document.getElementById('streetViewFrame');
+    const label = document.getElementById('streetViewToggleLabel');
+    if (!toggle || !container || !frame) return;
+
+    const lat = Number(toggle.dataset.lat);
+    const lng = Number(toggle.dataset.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+    const isHidden = container.classList.contains('hidden');
+    if (isHidden) {
+      frame.src = buildStreetViewSrc(lat, lng);
+      container.classList.remove('hidden');
+      toggle.setAttribute('aria-expanded', 'true');
+      if (label) label.textContent = 'Hide Street View';
+    } else {
+      container.classList.add('hidden');
+      toggle.setAttribute('aria-expanded', 'false');
+      if (label) label.textContent = 'View Street View';
+      frame.src = 'about:blank';
+    }
+  };
+
+  return {
+    init,
+    renderDefault,
+    showProperty,
+    clearSelection,
+    refresh,
+  };
+})();

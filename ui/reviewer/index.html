@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAMA Philadelphia - Housing Assessor Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/maplibre-gl@4.0.0/dist/maplibre-gl.css" rel="stylesheet">
+    <script src="https://unpkg.com/maplibre-gl@4.0.0/dist/maplibre-gl.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="styles.css?v=20260422-revert-residential">
+</head>
+<body class="bg-[#121414] text-[#e2e2e2] font-inter">
+    <nav class="bg-[#1e2020] border-b border-[#e2e2e2]/20 px-8 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <a href="../" class="text-lg font-space-grotesk font-600 hover:text-[#a0caff] transition-colors">CAMA PHILADELPHIA</a>
+            <span class="text-xs text-[#e2e2e2]/40">Housing Assessor Portal</span>
+        </div>
+        <div class="flex items-center gap-6">
+            <a href="../" class="text-sm hover:text-[#a0caff] transition-colors">Home</a>
+            <a href="../widget/" class="text-sm hover:text-[#a0caff] transition-colors">Property Owner</a>
+            <a href="#" class="text-sm hover:text-[#a0caff] transition-colors">Documentation</a>
+            <a href="#" class="text-sm hover:text-[#a0caff] transition-colors">Support</a>
+        </div>
+    </nav>
+
+    <main class="flex h-[calc(100vh-65px)] overflow-hidden">
+        <aside id="leftPanel" class="w-96 bg-[#1e2020] border-r border-[#e2e2e2]/20 overflow-y-auto p-6">
+            <section id="assessorDefaultPanel" class="space-y-6">
+                <div>
+                    <h1 class="text-xl font-space-grotesk font-700">Citywide Assessment Review</h1>
+                    <p class="text-xs text-[#e2e2e2]/50 mt-2">Search or click a parcel to inspect property-level values.</p>
+                </div>
+
+                <div>
+                    <h2 class="panel-title">Predicted Value Distribution</h2>
+                    <div id="priceDistributionChart" class="chart-box h-44">Chart loading...</div>
+                </div>
+
+                <div>
+                    <h2 class="panel-title">Market Value Distribution</h2>
+                    <div id="marketDistributionChart" class="chart-box h-44">Chart loading...</div>
+                </div>
+
+                <div>
+                    <h2 class="panel-title">Transaction Volume Trend</h2>
+                    <div id="transactionTrendChart" class="chart-box h-40">Trend loading...</div>
+                </div>
+
+                <div>
+                    <h2 class="panel-title">Filters</h2>
+                    <div class="space-y-4">
+                        <div class="filter-box">
+                            <label class="filter-label">Predicted Value Range</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="number" min="0" max="10000000" step="50000" value="0" id="priceMinInput" aria-label="Minimum assessed value">
+                                <input type="number" min="0" max="10000000" step="50000" value="5000000" id="priceMaxInput" aria-label="Maximum assessed value">
+                            </div>
+                            <div class="filter-value" id="priceRangeValue">$0 - $5,000,000</div>
+                        </div>
+
+                        <div class="filter-box">
+                            <label class="filter-label">Change % Range</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="number" min="-100" max="500" step="1" value="-50" id="changeMinInput" aria-label="Minimum change percentage">
+                                <input type="number" min="-100" max="500" step="1" value="50" id="changeMaxInput" aria-label="Maximum change percentage">
+                            </div>
+                            <div class="filter-value" id="changeRangeValue">-50% to +50%</div>
+                        </div>
+
+                        <button id="confirmFiltersBtn" class="primary-action">Confirm Filters</button>
+                        <button id="resetFiltersBtn" class="secondary-action">Reset Filters</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="assessorSelectedPanel" class="hidden space-y-6">
+                <button id="clearSelectedPropertyBtn" class="text-xs text-[#a0caff] hover:text-[#ffb2b6]">Back to citywide view</button>
+
+                <div>
+                    <h1 id="selectedPropertyAddress" class="text-xl font-space-grotesk font-700 leading-tight">-</h1>
+                    <p class="text-xs text-[#e2e2e2]/45 mt-1">OPA <span id="selectedPropertyId">-</span></p>
+                    <button
+                        type="button"
+                        id="streetViewToggle"
+                        aria-expanded="false"
+                        aria-controls="streetViewContainer"
+                        class="inline-flex items-center gap-2 mt-3 px-3 py-2 text-xs font-600 bg-[#a0caff] hover:bg-[#a0caff]/80 text-[#121414] transition-colors"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        <span id="streetViewToggleLabel">View Street View</span>
+                    </button>
+                    <div id="streetViewContainer" class="hidden mt-3 border border-[#e2e2e2]/20 overflow-hidden" style="height:260px;">
+                        <iframe
+                            id="streetViewFrame"
+                            class="w-full h-full"
+                            style="border:0;"
+                            loading="lazy"
+                            allow="fullscreen"
+                            referrerpolicy="no-referrer-when-downgrade"
+                            title="Google Street View"
+                        ></iframe>
+                    </div>
+                </div>
+
+                <div>
+                    <h2 class="panel-title">Predicted Value Distribution</h2>
+                    <div id="selectedAssessmentDistribution" class="chart-box h-44"></div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="panel-title mb-0">Compare Distribution</h2>
+                        <div class="segmented-control">
+                            <button type="button" id="toggleAssessedValue" class="active">Predicted</button>
+                            <button type="button" id="toggleMarketValue">Market</button>
+                        </div>
+                    </div>
+                    <div id="selectedToggleDistribution" class="chart-box h-44"></div>
+                </div>
+
+                <div>
+                    <h2 class="panel-title">Property Value Trend</h2>
+                    <div id="selectedValueTrend" class="chart-box h-40"></div>
+                    <div class="grid grid-cols-2 gap-3 mt-3">
+                        <div class="metric-box">
+                            <span>Absolute Change</span>
+                            <strong id="selectedAbsoluteChange">-</strong>
+                        </div>
+                        <div class="metric-box">
+                            <span>Percent Change</span>
+                            <strong id="selectedPercentChange">-</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h2 class="panel-title">Property Details</h2>
+                    <div class="bg-[#121414] border border-[#e2e2e2]/20 divide-y divide-[#e2e2e2]/10">
+                        <div class="detail-row"><span>Address</span><strong id="detailAddress">-</strong></div>
+                        <div class="detail-row"><span>Previous Market</span><strong id="detailAssessedValue">-</strong></div>
+                        <div class="detail-row"><span>Current Market</span><strong id="detailMarketValue">-</strong></div>
+                        <div class="detail-row"><span>Predicted Value</span><strong id="detailPredictedValue">-</strong></div>
+                        <div class="detail-row"><span>Metadata</span><strong id="detailMetadata">-</strong></div>
+                    </div>
+                </div>
+            </section>
+        </aside>
+
+        <div id="leftPanelResizer" class="panel-resizer-x" title="Drag to resize sidebar"></div>
+
+        <section class="flex-1 flex flex-col overflow-hidden">
+            <div class="bg-[#1e2020] border-b border-[#e2e2e2]/20 px-6 py-4 flex items-center justify-between gap-6">
+                <div class="flex items-center gap-3">
+                    <button id="toggleLeftPanelBtn" class="layout-toggle-btn" type="button" title="Show/hide sidebar">Sidebar</button>
+                    <button id="toggleBottomPanelBtn" class="layout-toggle-btn" type="button" title="Show/hide charts">Charts</button>
+                    <div class="text-sm font-space-grotesk font-600">Data Visualization</div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="w-64">
+                        <div id="mapLegendGradient" class="h-3 border border-[#e2e2e2]/20 reviewer-gradient-legend"></div>
+                        <div id="mapLegendLabels" class="flex justify-between text-[10px] text-[#e2e2e2]/50 mt-1">
+                            <span>$0</span><span>$250k</span><span>$500k</span><span>$1M+</span>
+                        </div>
+                    </div>
+
+                    <div class="relative w-80">
+                        <input type="text" placeholder="Search address or OPA ID..." id="addressSearch" class="w-full bg-[#121414] text-[#e2e2e2] px-3 py-2 text-sm border border-[#e2e2e2]/20 focus:outline-none focus:border-[#a0caff]">
+                        <div id="reviewerSearchResults" class="hidden absolute top-full left-0 right-0 mt-1 bg-[#1e2020] border border-[#e2e2e2]/20 z-20 shadow-lg max-h-72 overflow-y-auto"></div>
+                    </div>
+
+                    <select id="basemapSelect" aria-label="Basemap" class="text-xs">
+                        <option value="light">Map</option>
+                        <option value="satellite">Satellite</option>
+                    </select>
+
+                    <div class="border-l border-[#e2e2e2]/20 pl-4 flex items-center gap-3">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="toggleChoropleth" class="accent-[#a0caff]">
+                            <span class="text-xs">Color by Value</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="toggleParcels" checked class="accent-[#a0caff]">
+                            <span class="text-xs">Show Parcels</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="map" class="flex-1 bg-[#121414] relative overflow-hidden">
+                <div class="absolute inset-0 flex items-center justify-center map-placeholder">
+                    <div class="text-center">
+                        <div class="text-lg text-[#e2e2e2]/40 mb-2">Map Loading...</div>
+                        <div class="text-xs text-[#e2e2e2]/30">Vector tiles will display parcel geometry</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bottomPanelResizer" class="panel-resizer-y" title="Drag to resize charts"></div>
+            <div id="bottomPanel" class="bg-[#1e2020] border-t border-[#e2e2e2]/20 p-6 h-64 overflow-x-auto">
+                <div class="grid grid-cols-2 gap-6 h-full">
+                    <button type="button" class="chart-expand-card bg-[#121414] border border-[#e2e2e2]/20 p-4 text-left" data-chart="tax">
+                        <h3 class="text-xs font-space-grotesk font-600 uppercase tracking-wider text-[#e2e2e2]/60 mb-4">Market Value Distribution</h3>
+                        <div id="bottomLeftChart" class="w-full h-full flex items-center justify-center text-xs text-[#e2e2e2]/40">Chart placeholder</div>
+                    </button>
+                    <button type="button" class="chart-expand-card bg-[#121414] border border-[#e2e2e2]/20 p-4 text-left" data-chart="current">
+                        <h3 class="text-xs font-space-grotesk font-600 uppercase tracking-wider text-[#e2e2e2]/60 mb-4">Predicted Value Distribution</h3>
+                        <div id="bottomRightChart" class="w-full h-full flex items-center justify-center text-xs text-[#e2e2e2]/40">Chart placeholder</div>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="propertyPopup" class="hidden"></div>
+
+    <div id="chartModal" class="hidden fixed inset-0 z-50 bg-black/70 p-6">
+        <div class="h-full bg-[#121414] border border-[#e2e2e2]/20 flex flex-col">
+            <div class="px-5 py-4 border-b border-[#e2e2e2]/20 flex items-center justify-between">
+                <div>
+                    <h2 id="chartModalTitle" class="text-lg font-space-grotesk font-600">Chart</h2>
+                    <p class="text-xs text-[#e2e2e2]/45 mt-1">Use mouse wheel to zoom. Double-click to reset.</p>
+                </div>
+                <button id="closeChartModalBtn" type="button" class="text-[#e2e2e2]/60 hover:text-[#e2e2e2] text-2xl leading-none">&times;</button>
+            </div>
+            <div id="chartModalBody" class="flex-1 min-h-0 p-5"></div>
+        </div>
+    </div>
+
+    <script src="js/utils.js?v=20260422-revert-residential"></script>
+    <script src="js/dataManager.js?v=20260422-revert-residential"></script>
+    <script src="js/mapInteraction.js?v=20260422-revert-residential"></script>
+    <script src="js/chartFiltering.js?v=20260422-revert-residential"></script>
+    <script src="js/propertyPopup.js?v=20260422-revert-residential"></script>
+    <script src="js/distributionChart.js?v=20260422-revert-residential"></script>
+    <script src="js/assessorSidebar.js?v=20260422-revert-residential"></script>
+    <script src="js/main.js?v=20260422-revert-residential"></script>
+    <script src="js/layoutControls.js?v=20260422-revert-residential"></script>
+</body>
+</html>

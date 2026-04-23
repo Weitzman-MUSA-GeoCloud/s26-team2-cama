@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAMA Philadelphia - Property Owner Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/maplibre-gl@4.0.0/dist/maplibre-gl.css" rel="stylesheet">
+    <script src="https://unpkg.com/maplibre-gl@4.0.0/dist/maplibre-gl.js"></script>
+    <link rel="stylesheet" href="styles.css?v=20260422-owner-portal-layout">
+</head>
+<body class="bg-[#121414] text-[#e2e2e2] font-inter">
+    <nav class="bg-[#1e2020] border-b border-[#e2e2e2]/20 px-8 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <a href="../" class="text-lg font-space-grotesk font-600 hover:text-[#a0caff] transition-colors">CAMA PHILADELPHIA</a>
+            <span class="text-xs text-[#e2e2e2]/40">Property Owner Portal</span>
+        </div>
+        <div class="flex items-center gap-6">
+            <a href="../" class="text-sm hover:text-[#a0caff] transition-colors">Home</a>
+            <a href="../reviewer/" class="text-sm hover:text-[#a0caff] transition-colors">Tax Assessor</a>
+            <a href="#" class="text-sm hover:text-[#a0caff] transition-colors">FAQ</a>
+            <a href="#" class="text-sm hover:text-[#a0caff] transition-colors">Contact</a>
+        </div>
+    </nav>
+
+    <main class="grid grid-cols-1 lg:grid-cols-[380px_1fr] h-[calc(100vh-65px)] overflow-hidden">
+        <aside class="bg-[#1e2020] border-r border-[#e2e2e2]/20 p-6 overflow-y-auto">
+            <div class="mb-6">
+                <h1 class="text-2xl font-space-grotesk font-700">Find Your Property</h1>
+                <p class="text-sm text-[#e2e2e2]/55 mt-2">Search your address or OPA ID to view the latest predicted value.</p>
+            </div>
+
+            <div class="mb-6">
+                <label class="text-xs text-[#e2e2e2]/60 uppercase tracking-wider block mb-3">For example</label>
+                <div id="sampleAddressList" class="flex flex-wrap gap-2">
+                    <button type="button" class="sample-address sample-chip" data-address="1210 PINE ST">1210 PINE ST</button>
+                    <button type="button" class="sample-address sample-chip" data-address="5741 MARKET ST">5741 MARKET ST</button>
+                    <button type="button" class="sample-address sample-chip" data-address="4418 MARKET ST">4418 MARKET ST</button>
+                    <button type="button" class="sample-address sample-chip" data-address="5408 MARKET ST">5408 MARKET ST</button>
+                    <button type="button" class="sample-address sample-chip" data-address="936 NEW MARKET ST">936 NEW MARKET ST</button>
+                </div>
+            </div>
+
+            <div class="flex gap-2 mb-4 border-b border-[#e2e2e2]/20">
+                <button id="searchByAddressTab" class="px-4 py-2 text-sm font-600 text-[#a0caff] border-b-2 border-[#a0caff]">Address</button>
+                <button id="searchByIdTab" class="px-4 py-2 text-sm font-600 text-[#e2e2e2]/60 hover:text-[#e2e2e2] border-b-2 border-transparent">OPA ID</button>
+            </div>
+
+            <div id="addressSearchContainer" class="relative mb-3">
+                <input type="text" id="addressSearch" placeholder="Enter address..." class="w-full bg-[#121414] text-[#e2e2e2] px-4 py-3 pr-24 text-sm border border-[#e2e2e2]/20 focus:outline-none focus:border-[#a0caff]">
+                <button id="searchBtn" class="absolute right-0 top-0 h-full px-5 bg-[#a0caff] hover:bg-[#a0caff]/90 text-[#121414] font-600">Search</button>
+                <div id="autocompleteDropdown" class="hidden absolute top-full left-0 right-0 mt-1 bg-[#1e2020] border border-[#e2e2e2]/20 z-20 shadow-lg">
+                    <div id="autocompleteList" class="max-h-64 overflow-y-auto"></div>
+                </div>
+            </div>
+
+            <div id="idSearchContainer" class="relative mb-3 hidden">
+                <input type="text" id="opaIdSearch" placeholder="Enter OPA ID..." class="w-full bg-[#121414] text-[#e2e2e2] px-4 py-3 pr-24 text-sm border border-[#e2e2e2]/20 focus:outline-none focus:border-[#a0caff]">
+                <button id="searchByIdBtn" class="absolute right-0 top-0 h-full px-5 bg-[#a0caff] hover:bg-[#a0caff]/90 text-[#121414] font-600">Search</button>
+            </div>
+
+            <div id="searchStatus" class="mb-6 text-sm text-[#e2e2e2]/60" aria-live="polite"></div>
+
+            <div id="emptyState" class="border border-[#e2e2e2]/20 bg-[#121414] p-5 text-sm text-[#e2e2e2]/55">
+                Select a property to see value change, property details, and location.
+            </div>
+
+            <section id="propertySection" class="hidden space-y-5">
+                <div class="bg-[#121414] border border-[#e2e2e2]/20 p-5">
+                    <label class="text-xs text-[#e2e2e2]/60 uppercase tracking-wider">Value Change</label>
+                    <div id="changePercent" class="text-3xl font-space-grotesk font-700 mt-3">-</div>
+                    <div id="changeAmount" class="text-sm text-[#e2e2e2]/60 mt-2">-</div>
+                    <div class="w-full h-2 bg-[#1e2020] mt-4 overflow-hidden">
+                        <div id="changeBar" class="h-full bg-[#e20546] w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-[#121414] border border-[#e2e2e2]/20 p-4">
+                        <label class="text-xs text-[#e2e2e2]/60 uppercase tracking-wider">Last Market</label>
+                        <div id="propertyLastValue" class="text-xl font-space-grotesk font-700 text-[#a0caff] mt-3">-</div>
+                        <div id="propertyLastYear" class="text-xs text-[#e2e2e2]/40 mt-1">-</div>
+                    </div>
+                    <div class="bg-[#121414] border border-[#e2e2e2]/20 p-4">
+                        <label class="text-xs text-[#e2e2e2]/60 uppercase tracking-wider">Predicted</label>
+                        <div id="propertyCurrentValue" class="text-xl font-space-grotesk font-700 text-[#ffb2b6] mt-3">-</div>
+                        <div id="propertyCurrentYear" class="text-xs text-[#e2e2e2]/40 mt-1">-</div>
+                    </div>
+                </div>
+
+                <div class="bg-[#121414] border border-[#e2e2e2]/20 divide-y divide-[#e2e2e2]/10">
+                    <div class="owner-detail-row"><span>Address</span><strong id="propertyAddress">-</strong></div>
+                    <div class="owner-detail-row"><span>OPA ID</span><strong id="propertyId">-</strong></div>
+                    <div class="owner-detail-row"><span>Property Type</span><strong id="propertyType">-</strong></div>
+                    <div class="owner-detail-row"><span>Lot Size</span><strong id="propertyLotSize">-</strong></div>
+                    <div class="owner-detail-row"><span>Latest Sale</span><strong id="propertyLatestSale">Not available in current dataset</strong></div>
+                </div>
+            </section>
+
+            <div id="sidebarSection" class="hidden"></div>
+        </aside>
+
+        <section class="flex flex-col min-w-0">
+            <div class="bg-[#1e2020] border-b border-[#e2e2e2]/20 px-6 py-4 flex items-center justify-between gap-6">
+                <h2 class="text-sm font-space-grotesk font-600">Property Map</h2>
+                <div class="flex items-center gap-5">
+                    <div class="w-72" aria-label="Predicted value color legend">
+                        <div class="text-[10px] text-[#e2e2e2]/45 uppercase tracking-wider mb-1">Predicted Value</div>
+                        <div class="h-3 border border-[#e2e2e2]/20 owner-gradient-legend"></div>
+                        <div id="ownerLegendLabels" class="flex justify-between text-[10px] text-[#e2e2e2]/50 mt-1">
+                            <span>Loading</span>
+                        </div>
+                    </div>
+                    <label class="flex items-center gap-2 cursor-pointer text-sm">
+                        <input type="checkbox" id="toggleParcels" checked class="accent-[#a0caff]">
+                        <span>Show Parcels</span>
+                    </label>
+                </div>
+            </div>
+            <div id="map" class="flex-1 bg-[#1e2020]">
+                <div class="map-placeholder text-center">
+                    <div class="text-[#e2e2e2]/40 text-sm">Map loading...</div>
+                    <div class="text-xs text-[#e2e2e2]/30 mt-1">Search or click a parcel to inspect your property</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/utils.js?v=20260422-owner-portal-layout"></script>
+    <script src="js/mapInteraction.js?v=20260422-owner-portal-layout"></script>
+    <script src="js/search.js?v=20260422-owner-portal-layout"></script>
+    <script src="js/propertyDisplay.js?v=20260422-owner-portal-layout"></script>
+    <script src="js/chartRenderer.js?v=20260422-owner-portal-layout"></script>
+    <script src="js/main.js?v=20260422-owner-portal-layout"></script>
+</body>
+</html>
