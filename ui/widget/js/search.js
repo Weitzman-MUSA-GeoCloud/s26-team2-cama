@@ -25,10 +25,7 @@ const Search = (() => {
       isDataLoading = false;
 
       console.log(`Loaded ${allProperties.length} properties for search`);
-      setSearchStatus(
-        `Ready. ${allProperties.length.toLocaleString()} properties loaded.`,
-        'success'
-      );
+      setSearchStatus('Properties are ready to explore.', 'success');
     } catch (error) {
       isDataLoading = false;
       console.error('Error initializing search:', error);
@@ -165,7 +162,7 @@ const Search = (() => {
         autocompleteDropdown.classList.add('hidden');
         setSearchStatus(
           isDataLoaded
-            ? `${allProperties.length.toLocaleString()} properties loaded.`
+            ? 'Properties are ready to explore.'
             : 'Loading property data...'
         );
         return;
@@ -217,17 +214,32 @@ const Search = (() => {
     sampleAddressButtons.forEach((button) => {
       button.addEventListener('click', () => {
         const address = button.dataset.address;
-        if (!address) return;
+        const propertyId = button.dataset.id;
 
-        addressSearchContainer.classList.remove('hidden');
-        idSearchContainer.classList.add('hidden');
-        addressTab.classList.add('text-[#a0caff]', 'border-[#a0caff]');
-        addressTab.classList.remove('text-[#e2e2e2]/60', 'border-transparent');
-        idTab.classList.remove('text-[#a0caff]', 'border-[#a0caff]');
-        idTab.classList.add('text-[#e2e2e2]/60', 'border-transparent');
+        if (address) {
+          addressSearchContainer.classList.remove('hidden');
+          idSearchContainer.classList.add('hidden');
+          addressTab.classList.add('text-[#a0caff]', 'border-[#a0caff]');
+          addressTab.classList.remove('text-[#e2e2e2]/60', 'border-transparent');
+          idTab.classList.remove('text-[#a0caff]', 'border-[#a0caff]');
+          idTab.classList.add('text-[#e2e2e2]/60', 'border-transparent');
 
-        addressInput.value = address;
-        performSearch(address);
+          addressInput.value = address;
+          performSearch(address);
+          return;
+        }
+
+        if (propertyId) {
+          addressSearchContainer.classList.add('hidden');
+          idSearchContainer.classList.remove('hidden');
+          idTab.classList.add('text-[#a0caff]', 'border-[#a0caff]');
+          idTab.classList.remove('text-[#e2e2e2]/60', 'border-transparent');
+          addressTab.classList.remove('text-[#a0caff]', 'border-[#a0caff]');
+          addressTab.classList.add('text-[#e2e2e2]/60', 'border-transparent');
+
+          if (opaIdInput) opaIdInput.value = propertyId;
+          searchById(propertyId);
+        }
       });
     });
   };
