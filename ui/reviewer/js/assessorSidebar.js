@@ -34,6 +34,8 @@ const AssessorSidebar = (() => {
   const showProperty = (property) => {
     if (!property) return;
     selectedProperty = property;
+    const hasPredictedValue = Number.isFinite(property.predicted_value);
+    const baselineValue = property.market_value || property.tax_year_value || null;
     document.getElementById('assessorDefaultPanel')?.classList.add('hidden');
     document.getElementById('assessorSelectedPanel')?.classList.remove('hidden');
 
@@ -43,8 +45,8 @@ const AssessorSidebar = (() => {
     setText('detailAddress', property.address);
     setText('detailMarketValueLabel', `Market Value (${REFERENCE_YEAR})`);
     setText('detailPredictedValueLabel', `Predicted Value (${CURRENT_YEAR})`);
-    setText('detailAssessedValue', Utils.formatCurrency(property.market_value || property.tax_year_value));
-    setText('detailPredictedValue', Utils.formatCurrency(property.predicted_value));
+    setText('detailAssessedValue', Utils.formatCurrency(baselineValue));
+    setText('detailPredictedValue', Utils.formatCurrency(hasPredictedValue ? property.predicted_value : null));
     setText(
       'detailMetadata',
       [property.bldg_desc, property.zip_code ? `ZIP ${property.zip_code}` : null]
@@ -52,15 +54,25 @@ const AssessorSidebar = (() => {
         .join(' | ') || '-'
     );
 
-    const changeAmount = property.predicted_value - property.tax_year_value;
-    const sign = changeAmount >= 0 ? '+' : '';
-    setText('selectedAbsoluteChange', `${sign}${Utils.formatCurrency(changeAmount)}`);
-    setText('selectedPercentChange', `${sign}${Utils.formatPercentage(property.change_percent)}`);
+    if (hasPredictedValue && Number.isFinite(property.tax_year_value)) {
+      const changeAmount = property.predicted_value - property.tax_year_value;
+      const sign = changeAmount >= 0 ? '+' : '';
+      setText('selectedAbsoluteChange', `${sign}${Utils.formatCurrency(changeAmount)}`);
+      setText(
+        'selectedPercentChange',
+        Number.isFinite(property.change_percent)
+          ? `${sign}${Utils.formatPercentage(property.change_percent)}`
+          : '-'
+      );
+    } else {
+      setText('selectedAbsoluteChange', '-');
+      setText('selectedPercentChange', '-');
+    }
 
     renderHistogram('selectedAssessmentDistribution', getProperties(), 'predicted_value', {
       color: '#a0caff',
       domain: [0, 1000000],
-      markerValue: property.predicted_value,
+      markerValue: hasPredictedValue ? property.predicted_value : null,
     });
     renderMarketDistribution();
     renderTrend(property);
@@ -99,8 +111,10 @@ const AssessorSidebar = (() => {
 
     const values = [
       { label: `Market (${REFERENCE_YEAR})`, value: property.market_value || property.tax_year_value },
-      { label: `Predicted (${CURRENT_YEAR})`, value: property.predicted_value },
-    ];
+      Number.isFinite(property.predicted_value)
+        ? { label: `Predicted (${CURRENT_YEAR})`, value: property.predicted_value }
+        : null,
+    ].filter(Boolean);
 
     const { width, height } = getSize(container);
     const margin = { top: 18, right: 18, bottom: 30, left: 54 };

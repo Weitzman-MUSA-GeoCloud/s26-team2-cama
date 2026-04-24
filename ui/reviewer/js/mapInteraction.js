@@ -16,6 +16,9 @@ const MapInteraction = (() => {
   const VECTOR_TILE_URL =
     'https://storage.googleapis.com/musa5090s26-team2-public/tiles/properties/{z}/{x}/{y}.pbf';
   const VECTOR_SOURCE_LAYER = 'property_tile_info';
+  const MARKET_TILE_URL =
+    'https://storage.googleapis.com/musa5090s26-team2-public/tiles/residential_market/{z}/{x}/{y}.pbf';
+  const MARKET_SOURCE_LAYER = 'residential_market_value';
   const METADATA_URL =
     'https://storage.googleapis.com/musa5090s26-team2-public/configs/map_style_metadata.json';
   const BASEMAPS = {
@@ -96,6 +99,76 @@ const MapInteraction = (() => {
    */
   const setupMapLayers = () => {
     if (!map) return;
+
+    if (!map.getSource('residential-market-parcels')) {
+      map.addSource('residential-market-parcels', {
+        type: 'vector',
+        tiles: [MARKET_TILE_URL],
+        minzoom: 12,
+        maxzoom: 18,
+      });
+    }
+
+    if (!map.getLayer('residential-market-fill')) {
+      map.addLayer({
+        id: 'residential-market-fill',
+        type: 'fill',
+        source: 'residential-market-parcels',
+        'source-layer': MARKET_SOURCE_LAYER,
+        paint: {
+          'fill-color': '#b7c0c8',
+          'fill-opacity': 0.01,
+        },
+      });
+    }
+
+    if (!map.getLayer('residential-market-outline')) {
+      map.addLayer({
+        id: 'residential-market-outline',
+        type: 'line',
+        source: 'residential-market-parcels',
+        'source-layer': MARKET_SOURCE_LAYER,
+        paint: {
+          'line-color': '#626b73',
+          'line-width': [
+            'interpolate', ['linear'], ['zoom'],
+            11, 0.12,
+            15, 0.45,
+            18, 0.9,
+          ],
+          'line-opacity': 0.45,
+        },
+      });
+    }
+
+    if (!map.getLayer('residential-market-highlight')) {
+      map.addLayer({
+        id: 'residential-market-highlight',
+        type: 'fill',
+        source: 'residential-market-parcels',
+        'source-layer': MARKET_SOURCE_LAYER,
+        paint: {
+          'fill-color': '#ffe66d',
+          'fill-opacity': 0.25,
+        },
+        filter: ['==', ['to-string', ['get', 'property_id']], ''],
+      });
+    }
+
+    if (!map.getLayer('residential-market-highlight-outline')) {
+      map.addLayer({
+        id: 'residential-market-highlight-outline',
+        type: 'line',
+        source: 'residential-market-parcels',
+        'source-layer': MARKET_SOURCE_LAYER,
+        paint: {
+          'line-color': '#ffe66d',
+          'line-width': 2.5,
+          'line-opacity': 0.95,
+        },
+        filter: ['==', ['to-string', ['get', 'property_id']], ''],
+      });
+    }
 
     // Idempotent: only add if missing (setStyle wipes them, but guard anyway)
     if (!map.getSource('property-parcels')) {
@@ -190,13 +263,25 @@ const MapInteraction = (() => {
    * we're on satellite, and restore the original dark outline on light.
    */
   const applyOutlineStyleForBasemap = () => {
-    if (!map?.getLayer('property-parcels-outline')) return;
+    if (!map) return;
     if (currentBasemap === 'satellite') {
-      map.setPaintProperty('property-parcels-outline', 'line-color', '#ffffff');
-      map.setPaintProperty('property-parcels-outline', 'line-opacity', 0.65);
+      if (map.getLayer('property-parcels-outline')) {
+        map.setPaintProperty('property-parcels-outline', 'line-color', '#ffffff');
+        map.setPaintProperty('property-parcels-outline', 'line-opacity', 0.65);
+      }
+      if (map.getLayer('residential-market-outline')) {
+        map.setPaintProperty('residential-market-outline', 'line-color', '#f3f6f8');
+        map.setPaintProperty('residential-market-outline', 'line-opacity', 0.55);
+      }
     } else {
-      map.setPaintProperty('property-parcels-outline', 'line-color', '#101414');
-      map.setPaintProperty('property-parcels-outline', 'line-opacity', 0.72);
+      if (map.getLayer('property-parcels-outline')) {
+        map.setPaintProperty('property-parcels-outline', 'line-color', '#101414');
+        map.setPaintProperty('property-parcels-outline', 'line-opacity', 0.72);
+      }
+      if (map.getLayer('residential-market-outline')) {
+        map.setPaintProperty('residential-market-outline', 'line-color', '#626b73');
+        map.setPaintProperty('residential-market-outline', 'line-opacity', 0.45);
+      }
     }
   };
 
@@ -206,36 +291,113 @@ const MapInteraction = (() => {
   const setupMapEvents = () => {
     if (!map) return;
 
-    // Click on property parcel
-    map.on('click', 'property-parcels-fill', (e) => {
-      if (e.features.length > 0) {
-        handleParcelClick(e.features[0]);
-      }
-    });
+    const interactiveLayers = ['property-parcels-fill', 'residential-market-fill'];
+    interactiveLayers.forEach((layerId) => {
+      map.on('click', layerId, (e) => {
+        if (e.features.length > 0) {
+          handleParcelClick(e.features[0], e.lngLat);
+        }
+      });
 
-    // Hover over parcel
-    map.on('mousemove', 'property-parcels-fill', (e) => {
-      if (e.features.length > 0) {
-        const propertyId = e.features[0].properties.property_id;
-        highlightProperty(propertyId);
-      }
-    });
+      map.on('mousemove', layerId, (e) => {
+        if (e.features.length > 0) {
+          const propertyId = e.features[0].properties.property_id;
+          highlightProperty(propertyId);
+        }
+      });
 
-    map.on('mouseenter', 'property-parcels-fill', () => {
-      map.getCanvas().style.cursor = 'pointer';
-    });
+      map.on('mouseenter', layerId, () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
 
-    map.on('mouseleave', 'property-parcels-fill', () => {
-      map.getCanvas().style.cursor = '';
-      if (!selectedProperty) clearHighlight();
+      map.on('mouseleave', layerId, () => {
+        map.getCanvas().style.cursor = '';
+        if (!selectedProperty) clearHighlight();
+      });
     });
 
     map.on('click', (e) => {
       const parcelHits = map.queryRenderedFeatures(e.point, {
-        layers: ['property-parcels-fill'],
+        layers: ['property-parcels-fill', 'residential-market-fill'],
       });
-      if (parcelHits.length === 0 && !selectedProperty) clearHighlight();
+      if (parcelHits.length > 0) return;
+
+      const nearestFeature = findNearestParcelFeature(e.point);
+      if (nearestFeature) {
+        handleParcelClick(nearestFeature, e.lngLat);
+        return;
+      }
+
+      if (!selectedProperty) clearHighlight();
     });
+  };
+
+  const findNearestParcelFeature = (point) => {
+    if (!map || !point) return null;
+
+    const layers = ['property-parcels-fill', 'residential-market-fill'];
+    const radii = [8, 16, 32, 64, 128];
+
+    for (const radius of radii) {
+      const features = map.queryRenderedFeatures(
+        [
+          [point.x - radius, point.y - radius],
+          [point.x + radius, point.y + radius],
+        ],
+        { layers }
+      );
+
+      if (!features.length) continue;
+
+      const ranked = features
+        .map((feature) => ({
+          feature,
+          distance: distanceToFeatureCenter(point, feature),
+        }))
+        .sort((a, b) => a.distance - b.distance);
+
+      return ranked[0]?.feature || null;
+    }
+
+    return null;
+  };
+
+  const distanceToFeatureCenter = (point, feature) => {
+    const center = getFeatureCenter(feature);
+    if (!center) return Number.POSITIVE_INFINITY;
+    const projected = map.project(center);
+    const dx = projected.x - point.x;
+    const dy = projected.y - point.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const getFeatureCenter = (feature) => {
+    const geometry = feature?.geometry;
+    if (!geometry?.coordinates) return null;
+
+    if (geometry.type === 'Point') {
+      return geometry.coordinates;
+    }
+
+    const pickRing =
+      geometry.type === 'Polygon'
+        ? geometry.coordinates[0]
+        : geometry.type === 'MultiPolygon'
+          ? geometry.coordinates[0]?.[0]
+          : null;
+
+    if (!pickRing?.length) return null;
+
+    const totals = pickRing.reduce(
+      (acc, coord) => {
+        acc.lng += Number(coord[0] || 0);
+        acc.lat += Number(coord[1] || 0);
+        return acc;
+      },
+      { lng: 0, lat: 0 }
+    );
+
+    return [totals.lng / pickRing.length, totals.lat / pickRing.length];
   };
 
   /**
@@ -252,13 +414,12 @@ const MapInteraction = (() => {
    * Handle parcel click from vector tiles
    * @param {object} feature - Map feature object
    */
-  const handleParcelClick = (feature) => {
+  const handleParcelClick = (feature, lngLat = null) => {
     const propertyId = feature.properties.property_id;
     const property = DataManager.getPropertyById(propertyId);
 
     if (!property) {
-      // If property not in local data, show parcel information from GeoJSON
-      showParcelInfo(feature);
+      showParcelInfo(feature, lngLat);
       return;
     }
 
@@ -271,29 +432,57 @@ const MapInteraction = (() => {
       PropertyPopup.open(property);
     }
 
-    flyToProperty([property.lng, property.lat]);
+    if (Number.isFinite(property.lng) && Number.isFinite(property.lat)) {
+      flyToProperty([property.lng, property.lat]);
+    } else if (lngLat) {
+      flyToProperty([lngLat.lng, lngLat.lat]);
+    }
   };
 
   /**
    * Show parcel information popup
    * @param {object} feature - Parcel feature
    */
-  const showParcelInfo = (feature) => {
+  const showParcelInfo = (feature, lngLat = null) => {
     const props = feature.properties;
-    const lastYearValue = props.log_price ? Math.exp(Number(props.log_price)) : Number(props.predicted_value || 0);
-    const predictedValue = Number(props.predicted_value || 0);
+    const predictedValue = Number(props.predicted_value);
+    const marketValue = Number(props.market_value);
+    const lastYearValue = Number.isFinite(marketValue)
+      ? marketValue
+      : props.log_price
+        ? Math.exp(Number(props.log_price))
+        : Number.isFinite(predictedValue)
+          ? predictedValue
+          : null;
 
-    // Map GeoJSON properties to expected format
     const info = {
       id: String(props.property_id || ''),
-      address: props.address || 'Address not available',
+      address: props.address || `Property ${props.property_id || ''}`,
       tax_year_value: lastYearValue,
-      predicted_value: predictedValue,
-      change_percent: lastYearValue ? ((predictedValue - lastYearValue) / lastYearValue) * 100 : 0,
-      property_type: props.bldg_desc || 'Unknown',
+      market_value: lastYearValue,
+      predicted_value: Number.isFinite(predictedValue) ? predictedValue : null,
+      change_percent:
+        Number.isFinite(lastYearValue) && Number.isFinite(predictedValue) && lastYearValue > 0
+          ? ((predictedValue - lastYearValue) / lastYearValue) * 100
+          : null,
+      property_type: props.bldg_desc || 'Residential',
       last_inspection: null,
+      bldg_desc: props.bldg_desc || 'Residential parcel',
+      lat: lngLat?.lat ?? null,
+      lng: lngLat?.lng ?? null,
     };
 
+    selectedProperty = info;
+    highlightProperty(info.id);
+    const center =
+      Number.isFinite(info.lng) && Number.isFinite(info.lat)
+        ? [info.lng, info.lat]
+        : lngLat
+          ? [lngLat.lng, lngLat.lat]
+          : getFeatureCenter(feature);
+    if (center) {
+      flyToProperty(center);
+    }
     if (typeof PropertyPopup !== 'undefined') {
       if (typeof AssessorSidebar !== 'undefined') {
         AssessorSidebar.showProperty(info);
@@ -318,7 +507,12 @@ const MapInteraction = (() => {
       ['to-string', ['get', 'property_id']],
       currentlyHighlighted,
     ];
-    ['property-parcels-highlight', 'property-parcels-highlight-outline'].forEach(
+    [
+      'property-parcels-highlight',
+      'property-parcels-highlight-outline',
+      'residential-market-highlight',
+      'residential-market-highlight-outline',
+    ].forEach(
       (layerId) => {
         if (map.getLayer(layerId)) map.setFilter(layerId, filter);
       }
@@ -356,7 +550,12 @@ const MapInteraction = (() => {
   const clearHighlight = () => {
     currentlyHighlighted = null;
     const emptyFilter = ['==', ['to-string', ['get', 'property_id']], ''];
-    ['property-parcels-highlight', 'property-parcels-highlight-outline'].forEach(
+    [
+      'property-parcels-highlight',
+      'property-parcels-highlight-outline',
+      'residential-market-highlight',
+      'residential-market-highlight-outline',
+    ].forEach(
       (layerId) => {
         if (map?.getLayer(layerId)) map.setFilter(layerId, emptyFilter);
       }
@@ -500,6 +699,21 @@ const MapInteraction = (() => {
     if (!map) return;
 
     ['property-parcels-fill', 'property-parcels-outline'].forEach((layerId) => {
+      const layer = map.getLayer(layerId);
+      if (layer) {
+        map.setLayoutProperty(
+          layerId,
+          'visibility',
+          visible ? 'visible' : 'none'
+        );
+      }
+    });
+    [
+      'residential-market-fill',
+      'residential-market-outline',
+      'residential-market-highlight',
+      'residential-market-highlight-outline',
+    ].forEach((layerId) => {
       const layer = map.getLayer(layerId);
       if (layer) {
         map.setLayoutProperty(

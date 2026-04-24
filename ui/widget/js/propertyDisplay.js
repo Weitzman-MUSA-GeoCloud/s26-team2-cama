@@ -62,8 +62,12 @@ const PropertyDisplay = (() => {
     setElementText('propertyLotSize', Utils.formatLotSize(property.lot_size));
 
     // Assessment Values
-    const lastValue = property.last_year_value || property.tax_year_value;
-    const currentValue = property.predicted_value || property.tax_year_value;
+    const lastValue = Number.isFinite(property.last_year_value)
+      ? property.last_year_value
+      : property.tax_year_value;
+    const currentValue = Number.isFinite(property.predicted_value)
+      ? property.predicted_value
+      : null;
 
     setElementText('propertyLastValue', Utils.formatCurrency(lastValue));
     setElementText('propertyLastYear', `(${new Date().getFullYear() - 1})`);
@@ -72,8 +76,14 @@ const PropertyDisplay = (() => {
     setElementText('propertyCurrentYear', `(${new Date().getFullYear()})`);
 
     // Change Information
-    const dollarChange = currentValue - lastValue;
-    const percentChange = Utils.calculatePercentChange(lastValue, currentValue);
+    const dollarChange =
+      Number.isFinite(currentValue) && Number.isFinite(lastValue)
+        ? currentValue - lastValue
+        : null;
+    const percentChange =
+      Number.isFinite(currentValue) && Number.isFinite(lastValue)
+        ? Utils.calculatePercentChange(lastValue, currentValue)
+        : null;
 
     setElementText('changeAmount', Utils.formatCurrency(dollarChange));
     setElementText('changePercent', Utils.formatPercentage(percentChange));
@@ -81,10 +91,12 @@ const PropertyDisplay = (() => {
     // Update change bar width (max 100 pixels for 100% change)
     const changeBar = document.getElementById('changeBar');
     if (changeBar) {
-      const barWidth = Math.min(Math.abs(percentChange), 100);
+      const barWidth = Number.isFinite(percentChange)
+        ? Math.min(Math.abs(percentChange), 100)
+        : 0;
       changeBar.style.width = barWidth + '%';
       changeBar.style.backgroundColor =
-        percentChange > 0 ? '#ffb2b6' : '#a0caff';
+        Number.isFinite(percentChange) && percentChange > 0 ? '#ffb2b6' : '#a0caff';
     }
 
     // Tax Status

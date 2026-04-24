@@ -10,6 +10,9 @@ const MapInteraction = (() => {
   const VECTOR_TILE_URL =
     'https://storage.googleapis.com/musa5090s26-team2-public/tiles/properties/{z}/{x}/{y}.pbf';
   const VECTOR_SOURCE_LAYER = 'property_tile_info';
+  const MARKET_TILE_URL =
+    'https://storage.googleapis.com/musa5090s26-team2-public/tiles/residential_market/{z}/{x}/{y}.pbf';
+  const MARKET_SOURCE_LAYER = 'residential_market_value';
   const METADATA_URL =
     'https://storage.googleapis.com/musa5090s26-team2-public/configs/map_style_metadata.json';
 
@@ -63,6 +66,63 @@ const MapInteraction = (() => {
    */
   const setupMapLayers = () => {
     if (!map) return;
+
+    if (!map.getSource('residential-market-parcels')) {
+      map.addSource('residential-market-parcels', {
+        type: 'vector',
+        tiles: [MARKET_TILE_URL],
+        minzoom: 12,
+        maxzoom: 18,
+      });
+
+      map.addLayer({
+        id: 'residential-market-fill',
+        type: 'fill',
+        source: 'residential-market-parcels',
+        'source-layer': MARKET_SOURCE_LAYER,
+        paint: {
+          'fill-color': '#b7c0c8',
+          'fill-opacity': 0.01,
+        },
+      });
+
+      map.addLayer({
+        id: 'residential-market-outline',
+        type: 'line',
+        source: 'residential-market-parcels',
+        'source-layer': MARKET_SOURCE_LAYER,
+        paint: {
+          'line-color': '#626b73',
+          'line-width': 0.35,
+          'line-opacity': 0.45,
+        },
+      });
+
+      map.addLayer({
+        id: 'residential-market-highlight-fill',
+        type: 'fill',
+        source: 'residential-market-parcels',
+        'source-layer': MARKET_SOURCE_LAYER,
+        paint: {
+          'fill-color': '#000000',
+          'fill-opacity': 0.28,
+        },
+        filter: ['==', ['to-string', ['get', 'property_id']], ''],
+      });
+
+      map.addLayer({
+        id: 'residential-market-highlight-outline',
+        type: 'line',
+        source: 'residential-market-parcels',
+        'source-layer': MARKET_SOURCE_LAYER,
+        paint: {
+          'line-color': '#000000',
+          'line-width': 3,
+          'line-opacity': 0.95,
+        },
+        filter: ['==', ['to-string', ['get', 'property_id']], ''],
+      });
+    }
 
     // Add property parcels as Mapbox Vector Tiles (PBF) from GCS.
     if (!map.getSource('property-parcels')) {
@@ -147,33 +207,64 @@ const MapInteraction = (() => {
         highlightProperty(highlightedPropertyId);
       }
 
-      // Add click event for parcels
+      const openPropertyFromFeature = (feature, lngLat = null) => {
+        const props = feature.properties;
+        if (typeof PropertyDisplay === 'undefined') return;
+
+        const predictedValue = Number(props.predicted_value);
+        const marketValue = Number(props.market_value);
+        const lastYearValue = Number.isFinite(marketValue)
+          ? marketValue
+          : props.log_price
+            ? Math.exp(Number(props.log_price))
+            : Number.isFinite(predictedValue)
+              ? predictedValue
+              : null;
+        const propertyData = {
+          id: String(props.property_id || ''),
+          address: props.address || `Property ${props.property_id || ''}`,
+          lat: lngLat?.lat ?? null,
+          lng: lngLat?.lng ?? null,
+          last_year_value: lastYearValue,
+          tax_year_value: lastYearValue,
+          market_value: lastYearValue,
+          predicted_value: Number.isFinite(predictedValue) ? predictedValue : null,
+          property_type: props.bldg_desc || 'Residential',
+          lot_size: Number(props.gross_area || 0),
+          year_built: null,
+          tax_status: 'Current',
+          neighborhood: null,
+        };
+        propertyData.change_percent =
+          Number.isFinite(propertyData.predicted_value) && Number.isFinite(propertyData.last_year_value) && propertyData.last_year_value > 0
+            ? ((propertyData.predicted_value - propertyData.last_year_value) / propertyData.last_year_value) * 100
+            : null;
+        highlightProperty(propertyData.id);
+        const center =
+          Number.isFinite(propertyData.lng) && Number.isFinite(propertyData.lat)
+            ? [propertyData.lng, propertyData.lat]
+            : lngLat
+              ? [lngLat.lng, lngLat.lat]
+              : getFeatureCenter(feature);
+        if (center) {
+          map.flyTo({
+            center,
+            zoom: 17,
+            duration: 1000,
+          });
+        }
+        PropertyDisplay.displayProperty(propertyData);
+      };
+
       map.on('click', 'property-parcels-fill', (e) => {
         if (e.features.length > 0) {
-          const feature = e.features[0];
-          const props = feature.properties;
-          if (typeof PropertyDisplay !== 'undefined') {
-            // Map GeoJSON properties to PropertyDisplay format
-            const propertyData = {
-              id: String(props.property_id || ''),
-              address: props.address || 'Address not available',
-              lat: null,
-              lng: null,
-              last_year_value: props.log_price ? Math.exp(Number(props.log_price)) : Number(props.predicted_value || 0),
-              tax_year_value: props.log_price ? Math.exp(Number(props.log_price)) : Number(props.predicted_value || 0),
-              predicted_value: Number(props.predicted_value || 0),
-              property_type: props.bldg_desc || 'Unknown',
-              lot_size: Number(props.gross_area || 0),
-              year_built: null,
-              tax_status: 'Current',
-              neighborhood: null,
-            };
-            propertyData.change_percent = propertyData.last_year_value
-              ? ((propertyData.predicted_value - propertyData.last_year_value) / propertyData.last_year_value) * 100
-              : 0;
-            highlightProperty(propertyData.id);
-            PropertyDisplay.displayProperty(propertyData);
-          }
+          openPropertyFromFeature(e.features[0], e.lngLat);
+        }
+      });
+
+      map.on('click', 'residential-market-fill', (e) => {
+        if (e.features.length > 0) {
+          openPropertyFromFeature(e.features[0], e.lngLat);
         }
       });
 
@@ -183,6 +274,24 @@ const MapInteraction = (() => {
       });
       map.on('mouseleave', 'property-parcels-fill', () => {
         map.getCanvas().style.cursor = '';
+      });
+      map.on('mouseenter', 'residential-market-fill', () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+      map.on('mouseleave', 'residential-market-fill', () => {
+        map.getCanvas().style.cursor = '';
+      });
+
+      map.on('click', (e) => {
+        const parcelHits = map.queryRenderedFeatures(e.point, {
+          layers: ['property-parcels-fill', 'residential-market-fill'],
+        });
+        if (parcelHits.length > 0) return;
+
+        const nearestFeature = findNearestParcelFeature(e.point);
+        if (nearestFeature) {
+          openPropertyFromFeature(nearestFeature, e.lngLat);
+        }
       });
     }
 
@@ -310,7 +419,12 @@ const MapInteraction = (() => {
 
     highlightedPropertyId = String(propertyId || '');
     const filter = ['==', ['to-string', ['get', 'property_id']], highlightedPropertyId];
-    ['property-parcels-highlight-fill', 'property-parcels-highlight-outline'].forEach((layerId) => {
+    [
+      'property-parcels-highlight-fill',
+      'property-parcels-highlight-outline',
+      'residential-market-highlight-fill',
+      'residential-market-highlight-outline',
+    ].forEach((layerId) => {
       if (map.getLayer(layerId)) {
         map.setFilter(layerId, filter);
       }
@@ -336,11 +450,84 @@ const MapInteraction = (() => {
   const clearHighlight = () => {
     highlightedPropertyId = '';
     const filter = ['==', ['to-string', ['get', 'property_id']], ''];
-    ['property-parcels-highlight-fill', 'property-parcels-highlight-outline'].forEach((layerId) => {
+    [
+      'property-parcels-highlight-fill',
+      'property-parcels-highlight-outline',
+      'residential-market-highlight-fill',
+      'residential-market-highlight-outline',
+    ].forEach((layerId) => {
       if (map.getLayer(layerId)) {
         map.setFilter(layerId, filter);
       }
     });
+  };
+
+  const findNearestParcelFeature = (point) => {
+    if (!map || !point) return null;
+
+    const layers = ['property-parcels-fill', 'residential-market-fill'];
+    const radii = [8, 16, 32, 64, 128];
+
+    for (const radius of radii) {
+      const features = map.queryRenderedFeatures(
+        [
+          [point.x - radius, point.y - radius],
+          [point.x + radius, point.y + radius],
+        ],
+        { layers }
+      );
+
+      if (!features.length) continue;
+
+      const ranked = features
+        .map((feature) => ({
+          feature,
+          distance: distanceToFeatureCenter(point, feature),
+        }))
+        .sort((a, b) => a.distance - b.distance);
+
+      return ranked[0]?.feature || null;
+    }
+
+    return null;
+  };
+
+  const distanceToFeatureCenter = (point, feature) => {
+    const center = getFeatureCenter(feature);
+    if (!center) return Number.POSITIVE_INFINITY;
+    const projected = map.project(center);
+    const dx = projected.x - point.x;
+    const dy = projected.y - point.y;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  const getFeatureCenter = (feature) => {
+    const geometry = feature?.geometry;
+    if (!geometry?.coordinates) return null;
+
+    if (geometry.type === 'Point') {
+      return geometry.coordinates;
+    }
+
+    const ring =
+      geometry.type === 'Polygon'
+        ? geometry.coordinates[0]
+        : geometry.type === 'MultiPolygon'
+          ? geometry.coordinates[0]?.[0]
+          : null;
+
+    if (!ring?.length) return null;
+
+    const totals = ring.reduce(
+      (acc, coord) => {
+        acc.lng += Number(coord[0] || 0);
+        acc.lat += Number(coord[1] || 0);
+        return acc;
+      },
+      { lng: 0, lat: 0 }
+    );
+
+    return [totals.lng / ring.length, totals.lat / ring.length];
   };
 
   const resize = () => {
@@ -421,6 +608,10 @@ const MapInteraction = (() => {
     if (!map) return;
 
     [
+      'residential-market-fill',
+      'residential-market-outline',
+      'residential-market-highlight-fill',
+      'residential-market-highlight-outline',
       'property-parcels-fill',
       'property-parcels-outline',
       'property-parcels-highlight-fill',
