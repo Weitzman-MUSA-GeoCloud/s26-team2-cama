@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -201,7 +201,15 @@
                     </div>
 
                     <div class="relative w-80">
-                        <input type="text" placeholder="Search address or OPA ID..." id="addressSearch" class="w-full bg-[#121414] text-[#e2e2e2] px-3 py-2 text-sm border border-[#e2e2e2]/20 focus:outline-none focus:border-[#a0caff]">
+                        <input type="text" placeholder="Search address or OPA ID..." id="addressSearch" class="w-full bg-[#121414] text-[#e2e2e2] pl-3 pr-10 py-2 text-sm border border-[#e2e2e2]/20 focus:outline-none focus:border-[#a0caff]">
+                        <button
+                            type="button"
+                            id="clearAddressSearch"
+                            aria-label="Clear search"
+                            class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 items-center justify-center text-[#e2e2e2]/45 hover:text-[#ffffff] hover:bg-[#e2e2e2]/10 transition-colors"
+                        >
+                            &times;
+                        </button>
                         <div id="reviewerSearchResults" class="hidden absolute top-full left-0 right-0 mt-1 bg-[#1e2020] border border-[#e2e2e2]/20 z-20 shadow-lg max-h-72 overflow-y-auto"></div>
                     </div>
 
@@ -212,7 +220,7 @@
 
                     <div class="border-l border-[#e2e2e2]/20 pl-4 flex items-center gap-3">
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="toggleChoropleth" class="accent-[#a0caff]">
+                            <input type="checkbox" id="toggleChoropleth" checked class="accent-[#a0caff]">
                             <span class="text-xs">Color by Value</span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer">
@@ -274,3 +282,5 @@
     <script src="js/layoutControls.js?v=20260424-reviewer-loading-cover"></script>
 </body>
 </html>
+
+

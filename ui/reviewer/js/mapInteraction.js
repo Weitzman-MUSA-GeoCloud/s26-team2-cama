@@ -10,7 +10,7 @@ const MapInteraction = (() => {
   let selectedProperty = null;
   let currentTileFilter = ['all'];
   let selectedMarker = null;
-  let choroplethEnabled = false;
+  let choroplethEnabled = true;
   let metadata = null;
   let currentBasemap = 'light';
   const VECTOR_TILE_URL =
@@ -48,23 +48,23 @@ const MapInteraction = (() => {
     mapContainer = document.getElementById('map');
 
     if (!mapContainer) {
-      console.error('âŒ Map container not found');
+      console.error('â?Map container not found');
       return;
     }
 
     if (typeof maplibregl === 'undefined') {
-      console.error('âŒ Maplibre GL JS not loaded');
+      console.error('â?Maplibre GL JS not loaded');
       return;
     }
 
-    console.log('âœ“ Starting map initialization...');
+    console.log('âœ?Starting map initialization...');
 
     // Default map options
     const defaultOptions = {
       container: mapContainer,
       style: options.style || BASEMAPS.light,
-      center: options.center || [-75.1652, 39.9526], // Philadelphia center
-      zoom: options.zoom || 11,
+      center: options.center || [-75.16379, 39.95233], // Philadelphia City Hall
+      zoom: options.zoom || 14.6,
       pitch: 0,
       bearing: 0,
     };
@@ -82,6 +82,7 @@ const MapInteraction = (() => {
         hidePlaceholder();
         loadStyleMetadata();
         setupMapLayers();
+        syncLayerControlsFromUi();
         setupMapEvents();
         loadPropertyData();
       });
@@ -400,6 +401,30 @@ const MapInteraction = (() => {
     return [totals.lng / pickRing.length, totals.lat / pickRing.length];
   };
 
+  const getRepresentativeProperty = (properties = []) => {
+    if (!properties.length) return null;
+
+    const centroid = properties.reduce(
+      (acc, property) => {
+        acc.lng += property.lng;
+        acc.lat += property.lat;
+        return acc;
+      },
+      { lng: 0, lat: 0 }
+    );
+
+    const targetLng = centroid.lng / properties.length;
+    const targetLat = centroid.lat / properties.length;
+
+    return properties
+      .map((property) => ({
+        property,
+        distance:
+          Math.abs(property.lng - targetLng) + Math.abs(property.lat - targetLat),
+      }))
+      .sort((a, b) => a.distance - b.distance)[0]?.property || properties[0];
+  };
+
   /**
    * Load property data onto map
    * @param {array} properties - Property objects to display
@@ -562,7 +587,7 @@ const MapInteraction = (() => {
     );
   };
 
-  // Kept for API compatibility â€” selection is now expressed only via the
+  // Kept for API compatibility â€?selection is now expressed only via the
   // parcel highlight layers (no point marker), matching the Atlas look.
   const showMarker = () => {
     selectedMarker?.remove();
@@ -712,16 +737,23 @@ const MapInteraction = (() => {
       return;
     }
 
-    const bounds = getBounds();
-    if (!bounds) return;
+    const representative = getRepresentativeProperty(properties);
+    if (!representative) return;
 
-    map.fitBounds(
-      [
-        [bounds.minLng, bounds.minLat],
-        [bounds.maxLng, bounds.maxLat],
-      ],
-      { padding: 50 }
-    );
+    let targetZoom = 16.3;
+    if (properties.length <= 4) targetZoom = 17.1;
+    else if (properties.length <= 12) targetZoom = 16.8;
+    else if (properties.length <= 40) targetZoom = 16.4;
+    else if (properties.length <= 120) targetZoom = 16.0;
+    else if (properties.length <= 350) targetZoom = 15.6;
+    else targetZoom = 15.2;
+
+    map.flyTo({
+      center: [representative.lng, representative.lat],
+      zoom: targetZoom,
+      duration: 1100,
+      essential: true,
+    });
   };
 
   /**
@@ -763,6 +795,21 @@ const MapInteraction = (() => {
     applyChoroplethStyle();
   };
 
+  const syncLayerControlsFromUi = () => {
+    const parcelsCheckbox = document.getElementById('toggleParcels');
+    const choroplethCheckbox = document.getElementById('toggleChoropleth');
+
+    if (parcelsCheckbox) {
+      toggleParcelLayer(parcelsCheckbox.checked);
+    }
+
+    if (choroplethCheckbox) {
+      choroplethEnabled = choroplethCheckbox.checked;
+    }
+
+    applyChoroplethStyle();
+  };
+
   const applyChoroplethStyle = () => {
     if (!map?.getLayer('property-parcels-fill')) return;
 
@@ -794,9 +841,10 @@ const MapInteraction = (() => {
       const response = await fetch(METADATA_URL);
       if (!response.ok) throw new Error(`Metadata ${response.status}`);
       metadata = await response.json();
-      applyChoroplethStyle();
+      syncLayerControlsFromUi();
     } catch (error) {
       console.warn('Unable to load map style metadata:', error);
+      syncLayerControlsFromUi();
     }
   };
 
@@ -871,7 +919,7 @@ const MapInteraction = (() => {
     };
     map.on('styledata', styleDataHandler);
 
-    // Fallback poll â€” guarantees layers come back even if the above events
+    // Fallback poll â€?guarantees layers come back even if the above events
     // never fire as expected.
     const pollStart = Date.now();
     const poll = () => {
@@ -887,7 +935,7 @@ const MapInteraction = (() => {
     setTimeout(poll, 80);
 
     // `diff: false` forces MapLibre to completely reset the style rather than
-    // attempting a minimal diff â€” otherwise our custom source/layers can be
+    // attempting a minimal diff â€?otherwise our custom source/layers can be
     // left in an inconsistent "half-migrated" state.
     map.setStyle(styleToApply, { diff: false });
   };
@@ -923,3 +971,4 @@ const MapInteraction = (() => {
     clearSelection,
   };
 })();
+

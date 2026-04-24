@@ -14,6 +14,7 @@ const ChartFiltering = (() => {
   const confirmFiltersBtn = document.getElementById('confirmFiltersBtn');
   const resetFiltersBtn = document.getElementById('resetFiltersBtn');
   const searchInput = document.getElementById('addressSearch');
+  const clearSearchBtn = document.getElementById('clearAddressSearch');
   const searchResults = document.getElementById('reviewerSearchResults');
   const activeFiltersSummary = document.getElementById('activeFiltersSummary');
   const presetButtons = Array.from(
@@ -58,6 +59,7 @@ const ChartFiltering = (() => {
     });
 
     setupAddressSearch();
+    syncSearchUi();
     renderActiveFilters();
   };
 
@@ -199,6 +201,7 @@ const ChartFiltering = (() => {
 
     searchInput.addEventListener('input', Utils.debounce(() => {
       const term = searchInput.value.trim();
+      syncSearchUi();
       triggerFilterChange({ searchTerm: term });
       renderSearchResults(term);
     }, 250));
@@ -216,6 +219,8 @@ const ChartFiltering = (() => {
         searchResults.classList.add('hidden');
       }
     });
+
+    clearSearchBtn?.addEventListener('click', clearSearchAndSelection);
   };
 
   const renderSearchResults = (term) => {
@@ -256,6 +261,7 @@ const ChartFiltering = (() => {
   const selectSearchResult = (property) => {
     if (searchInput) searchInput.value = property.address;
     if (searchResults) searchResults.classList.add('hidden');
+    syncSearchUi();
 
     triggerFilterChange({ searchTerm: property.address });
     if (typeof MapInteraction !== 'undefined') {
@@ -266,6 +272,24 @@ const ChartFiltering = (() => {
     if (typeof AssessorSidebar !== 'undefined') {
       AssessorSidebar.showProperty(property);
     }
+  };
+
+  const clearSearchAndSelection = () => {
+    if (searchInput) searchInput.value = '';
+    if (searchResults) {
+      searchResults.classList.add('hidden');
+      searchResults.innerHTML = '';
+    }
+    syncSearchUi();
+    triggerFilterChange({ searchTerm: '' });
+    AssessorSidebar?.clearSelection?.();
+  };
+
+  const syncSearchUi = () => {
+    if (!clearSearchBtn || !searchInput) return;
+    const hasValue = Boolean(searchInput.value.trim());
+    clearSearchBtn.classList.toggle('hidden', !hasValue);
+    clearSearchBtn.classList.toggle('inline-flex', hasValue);
   };
 
   const triggerFilterChange = (newFilters) => {
@@ -451,6 +475,7 @@ const ChartFiltering = (() => {
         filters.changeMax ?? configuredRanges.defaultChangeMax
       );
     }
+    syncSearchUi();
     renderActiveFilters();
   };
 
@@ -470,5 +495,6 @@ const ChartFiltering = (() => {
     handleResetFilters,
     applyRangeFilters,
     syncUiFromFilters,
+    clearSearchAndSelection,
   };
 })();

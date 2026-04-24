@@ -1032,26 +1032,114 @@ const DistributionChart = (() => {
       hasActiveBin &&
       Math.round(bin.x0) === Math.round(opts.activeBin.x0) &&
       Math.round(bin.x1) === Math.round(opts.activeBin.x1);
+    const baseX = (bin) => x(bin.x0) + 1;
+    const baseY = (bin) => y(bin.count);
+    const baseWidth = (bin) => Math.max(6, x(bin.x1) - x(bin.x0) - 2);
+    const baseHeight = (bin) => Math.max(2, chartH - y(bin.count));
+    const hoverWidth = (bin) => Math.max(baseWidth(bin) + 10, 14);
+    const hoverHeight = (bin) => Math.max(baseHeight(bin) + 12, 18);
+    const hoverX = (bin) =>
+      Math.max(0, baseX(bin) - (hoverWidth(bin) - baseWidth(bin)) / 2);
+    const hoverY = (bin) => Math.max(0, chartH - hoverHeight(bin));
 
-    g.selectAll('rect')
+    const fillColor = (bin, hovered = false) => {
+      if (matchesActiveBin(bin)) return opts.activeColor || '#ffffff';
+      if (hovered) return opts.hoverColor || '#f4f8ff';
+      return opts.color || colors.blue;
+    };
+
+    const opacityValue = (bin, hovered = false) => {
+      if (matchesActiveBin(bin)) return 1;
+      if (hovered) return 1;
+      return hasActiveBin ? 0.2 : 0.85;
+    };
+
+    const strokeColor = (bin, hovered = false) => {
+      if (matchesActiveBin(bin) || hovered) return opts.color || colors.blue;
+      return 'transparent';
+    };
+
+    const strokeWidth = (bin, hovered = false) => {
+      if (matchesActiveBin(bin)) return 3;
+      if (hovered) return 2;
+      return 0;
+    };
+
+    const filterValue = (bin, hovered = false) => {
+      if (matchesActiveBin(bin)) return 'drop-shadow(0 0 8px rgba(160,202,255,0.45))';
+      if (hovered) return 'drop-shadow(0 0 10px rgba(255,255,255,0.22))';
+      return 'none';
+    };
+
+    const applyBaseState = (selection, bin) => {
+      selection
+        .transition()
+        .duration(140)
+        .attr('x', baseX(bin))
+        .attr('y', baseY(bin))
+        .attr('width', baseWidth(bin))
+        .attr('height', baseHeight(bin))
+        .attr('fill', fillColor(bin, false))
+        .attr('opacity', opacityValue(bin, false))
+        .attr('stroke', strokeColor(bin, false))
+        .attr('stroke-width', strokeWidth(bin, false))
+        .style('filter', filterValue(bin, false));
+    };
+
+    const applyHoverState = (selection, bin) => {
+      selection
+        .raise()
+        .transition()
+        .duration(140)
+        .attr('x', hoverX(bin))
+        .attr('y', hoverY(bin))
+        .attr('width', hoverWidth(bin))
+        .attr('height', hoverHeight(bin))
+        .attr('fill', fillColor(bin, true))
+        .attr('opacity', opacityValue(bin, true))
+        .attr('stroke', strokeColor(bin, true))
+        .attr('stroke-width', strokeWidth(bin, true))
+        .style('filter', filterValue(bin, true));
+    };
+
+    const bars = g.selectAll('rect.hist-bar')
       .data(bins)
       .enter()
       .append('rect')
-      .attr('x', (b) => x(b.x0) + 1)
-      .attr('y', (b) => y(b.count))
-      .attr('width', (b) => Math.max(0, x(b.x1) - x(b.x0) - 2))
-      .attr('height', (b) => chartH - y(b.count))
-      .attr('fill', (b) => {
-        if (!matchesActiveBin(b)) return opts.color || colors.blue;
-        return opts.activeColor || '#ffffff';
-      })
-      .attr('opacity', (b) => (hasActiveBin ? (matchesActiveBin(b) ? 1 : 0.2) : 0.85))
-      .attr('stroke', (b) => (matchesActiveBin(b) ? opts.color || colors.blue : 'transparent'))
-      .attr('stroke-width', (b) => (matchesActiveBin(b) ? 3 : 0))
+      .attr('class', 'hist-bar')
+      .attr('x', (b) => baseX(b))
+      .attr('y', (b) => baseY(b))
+      .attr('width', (b) => baseWidth(b))
+      .attr('height', (b) => baseHeight(b))
+      .attr('fill', (b) => fillColor(b, false))
+      .attr('opacity', (b) => opacityValue(b, false))
+      .attr('stroke', (b) => strokeColor(b, false))
+      .attr('stroke-width', (b) => strokeWidth(b, false))
       .style('cursor', typeof opts.onBarClick === 'function' ? 'pointer' : 'default')
-      .style('filter', (b) =>
-        matchesActiveBin(b) ? 'drop-shadow(0 0 8px rgba(160,202,255,0.45))' : 'none'
-      )
+      .style('filter', (b) => filterValue(b, false))
+      .style('pointer-events', 'none')
+      .style('transform-box', 'fill-box')
+      .style('transform-origin', 'center bottom');
+
+    g.selectAll('rect.hist-hit-area')
+      .data(bins)
+      .enter()
+      .append('rect')
+      .attr('class', 'hist-hit-area')
+      .attr('x', (b) => x(b.x0))
+      .attr('y', 0)
+      .attr('width', (b) => Math.max(10, x(b.x1) - x(b.x0)))
+      .attr('height', chartH)
+      .attr('fill', 'transparent')
+      .style('cursor', typeof opts.onBarClick === 'function' ? 'pointer' : 'default')
+      .on('mouseenter', function (_, bin) {
+        const bar = bars.filter((candidate) => candidate === bin);
+        applyHoverState(bar, bin);
+      })
+      .on('mouseleave', function (_, bin) {
+        const bar = bars.filter((candidate) => candidate === bin);
+        applyBaseState(bar, bin);
+      })
       .on('click', (_, bin) => {
         if (typeof opts.onBarClick === 'function') {
           opts.onBarClick(bin);

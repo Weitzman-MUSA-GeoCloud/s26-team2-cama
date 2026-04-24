@@ -1,4 +1,4 @@
-ï»¿/**
+/**
  * Main Module for Tax Assessor Review Interface
  * Initializes and connects all modules
  */
@@ -20,35 +20,35 @@ const App = (() => {
     try {
       // Step 1: Initialize popup module
       PropertyPopup.init();
-      console.log('é‰?Property Popup initialized');
+      console.log('âœ?Property Popup initialized');
 
       // Step 2: Load real property data from GCS GeoJSON
-      console.log('é¦ƒæ‘œ Loading property data from GeoJSON...');
+      console.log('ðŸ“¥ Loading property data from GeoJSON...');
       const properties = await DataManager.loadGeoJSON();
-      console.log(`é‰?Loaded ${properties.length} properties`);
+      console.log(`âœ?Loaded ${properties.length} properties`);
 
       // Step 3: Initialize map AFTER data is loaded
-      console.log('é¦ƒæ¤‡é””?Initializing map...');
+      console.log('ðŸ—ºï¸?Initializing map...');
       MapInteraction.init({
-        center: [-75.1652, 39.9526], // Philadelphia
-        zoom: 11,
+        center: [-75.16379, 39.95233], // Philadelphia City Hall
+        zoom: 14.6,
       });
-      console.log('é‰?Map initialized');
+      console.log('âœ?Map initialized');
 
       // Step 4: Wait a moment for map to fully load, then load properties
       setTimeout(() => {
         MapInteraction.loadPropertyData(properties);
-        console.log('é‰?Properties loaded on map');
+        console.log('âœ?Properties loaded on map');
       }, 500);
 
       // Step 5: Initialize distribution charts (Issue #18 & #19)
       DistributionChart.init();
-      console.log('é‰?Distribution charts initialized');
+      console.log('âœ?Distribution charts initialized');
 
       // Step 6: Initialize chart filtering
       ChartFiltering.init(handleFilterChange);
       ChartFiltering.configureRanges?.(DataManager.getFilterExtents());
-      console.log('é‰?Chart filtering initialized');
+      console.log('âœ?Chart filtering initialized');
 
       if (typeof AssessorSidebar !== 'undefined') {
         AssessorSidebar.init();
@@ -56,29 +56,29 @@ const App = (() => {
 
       // Step 7: Setup event listeners
       setupEventListeners();
-      console.log('é‰?Event listeners setup');
+      console.log('âœ?Event listeners setup');
 
       // Step 8: Display initial statistics
       displayStatistics();
       updateFilteredResultCount(DataManager.getFilteredProperties());
-      console.log('é‰?Statistics displayed');
+      console.log('âœ?Statistics displayed');
 
       // Step 9: Display initial data
       displayFilteredProperties();
-      console.log('é‰?Initial data loaded');
+      console.log('âœ?Initial data loaded');
 
       // Step 10: Render sidebar distribution mini-charts
       renderSidebarCharts();
       if (typeof AssessorSidebar !== 'undefined') {
         AssessorSidebar.renderDefault();
       }
-      console.log('é‰?Sidebar distribution charts rendered');
+      console.log('âœ?Sidebar distribution charts rendered');
 
       console.log('Application ready!');
       loadingCoverReady = true;
       hideLoadingCoverIfReady();
     } catch (error) {
-      console.error('é‰‚?Error initializing application:', error);
+      console.error('â?Error initializing application:', error);
       PropertyPopup.showNotification(
         'Error loading application. Please refresh.',
         'error'
@@ -296,6 +296,13 @@ const App = (() => {
       });
     }
 
+    if (toggleParcels) {
+      MapInteraction.toggleParcelLayer(toggleParcels.checked);
+    }
+    if (toggleChoropleth) {
+      MapInteraction.toggleChoropleth(toggleChoropleth.checked);
+    }
+
     const basemapSelect = document.getElementById('basemapSelect');
     if (basemapSelect) {
       basemapSelect.addEventListener('change', (e) => {
@@ -369,4 +376,5 @@ document.addEventListener('DOMContentLoaded', App.init);
 
 // Log initialization for debugging
 console.log('Tax Assessor Review Application Scripts Loaded');
+
 
