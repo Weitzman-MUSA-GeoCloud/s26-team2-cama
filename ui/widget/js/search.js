@@ -49,13 +49,18 @@ const Search = (() => {
     const properties = geoJsonData.features.map((feature) => {
       const props = feature.properties || {};
       const [lng, lat] = getFeatureCoordinate(feature.geometry);
-      const lastYearValue = props.log_price
-        ? Math.exp(Number(props.log_price))
-        : Number(props.predicted_value || 0);
-      const currentValue = Number(props.predicted_value || 0);
+      const marketValue = Number(props.market_value);
+      const predictedValue = Number(props.predicted_value);
+      const lastYearValue = Number.isFinite(marketValue)
+        ? marketValue
+        : props.log_price
+          ? Math.exp(Number(props.log_price))
+          : null;
+      const currentValue = Number.isFinite(predictedValue) ? predictedValue : null;
       const changePercent = lastYearValue
+        && Number.isFinite(currentValue)
         ? ((currentValue - lastYearValue) / lastYearValue) * 100
-        : 0;
+        : null;
 
       return {
         id: String(props.property_id || ''),
@@ -65,6 +70,7 @@ const Search = (() => {
         lng,
         last_year_value: lastYearValue,
         tax_year_value: lastYearValue,
+        market_value: lastYearValue,
         predicted_value: currentValue,
         change_percent: changePercent,
         lot_size: Number(props.gross_area || 0),

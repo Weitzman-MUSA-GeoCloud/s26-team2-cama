@@ -73,7 +73,12 @@ const PropertyDisplay = (() => {
     setElementText('propertyLastYear', `(${new Date().getFullYear() - 1})`);
 
     setElementText('propertyCurrentValue', Utils.formatCurrency(currentValue));
-    setElementText('propertyCurrentYear', `(${new Date().getFullYear()})`);
+    setElementText(
+      'propertyCurrentYear',
+      Number.isFinite(currentValue)
+        ? `(${new Date().getFullYear()})`
+        : '(No ML prediction)'
+    );
 
     // Change Information
     const dollarChange =

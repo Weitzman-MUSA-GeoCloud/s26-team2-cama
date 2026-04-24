@@ -207,9 +207,47 @@ const MapInteraction = (() => {
         highlightProperty(highlightedPropertyId);
       }
 
+      const getSearchPropertyById = (propertyId) => {
+        if (
+          typeof Search !== 'undefined' &&
+          typeof Search.getPropertyById === 'function'
+        ) {
+          return Search.getPropertyById(String(propertyId));
+        }
+        return null;
+      };
+
       const openPropertyFromFeature = (feature, lngLat = null) => {
         const props = feature.properties;
         if (typeof PropertyDisplay === 'undefined') return;
+
+        const propertyId = String(props.property_id || '');
+        const searchProperty = getSearchPropertyById(propertyId);
+        if (searchProperty) {
+          const enrichedProperty = {
+            ...searchProperty,
+            lat: lngLat?.lat ?? searchProperty.lat ?? null,
+            lng: lngLat?.lng ?? searchProperty.lng ?? null,
+          };
+
+          highlightProperty(enrichedProperty.id);
+          const center =
+            Number.isFinite(enrichedProperty.lng) &&
+            Number.isFinite(enrichedProperty.lat)
+              ? [enrichedProperty.lng, enrichedProperty.lat]
+              : lngLat
+                ? [lngLat.lng, lngLat.lat]
+                : getFeatureCenter(feature);
+          if (center) {
+            map.flyTo({
+              center,
+              zoom: 17,
+              duration: 1000,
+            });
+          }
+          PropertyDisplay.displayProperty(enrichedProperty);
+          return;
+        }
 
         const predictedValue = Number(props.predicted_value);
         const marketValue = Number(props.market_value);
@@ -221,8 +259,8 @@ const MapInteraction = (() => {
               ? predictedValue
               : null;
         const propertyData = {
-          id: String(props.property_id || ''),
-          address: props.address || `Property ${props.property_id || ''}`,
+          id: propertyId,
+          address: props.address || `Property ${propertyId}`,
           lat: lngLat?.lat ?? null,
           lng: lngLat?.lng ?? null,
           last_year_value: lastYearValue,
