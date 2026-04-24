@@ -8,9 +8,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/maplibre-gl@4.0.0/dist/maplibre-gl.css" rel="stylesheet">
     <script src="https://unpkg.com/maplibre-gl@4.0.0/dist/maplibre-gl.js"></script>
-    <link rel="stylesheet" href="styles.css?v=20260423-owner-portal-nearby-panel">
+    <link rel="stylesheet" href="styles.css?v=20260424-owner-loading-cover">
 </head>
 <body class="bg-[#121414] text-[#e2e2e2] font-inter">
+    <div id="ownerLoadingCover" class="owner-loading-cover">
+        <div class="owner-loading-media"></div>
+        <div class="owner-loading-scrim"></div>
+        <div class="owner-loading-content">
+            <div class="owner-loading-eyebrow owner-text-delay-1">Property Owner Portal</div>
+            <h1 class="owner-loading-title owner-text-delay-2">Want to understand where your property value may be heading?</h1>
+            <p class="owner-loading-copy owner-text-delay-3">
+                Loading the property owner portal. Please wait a few seconds.
+            </p>
+            <div class="owner-loading-status owner-text-delay-4">
+                <span class="owner-loading-dot"></span>
+                <span>Getting your property view ready...</span>
+            </div>
+        </div>
+    </div>
+
     <nav class="bg-[#1e2020] border-b border-[#e2e2e2]/20 px-8 py-4 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <a href="../" class="text-lg font-space-grotesk font-600 hover:text-[#a0caff] transition-colors">CAMA PHILADELPHIA</a>
@@ -137,11 +153,11 @@
 
                         <div class="grid grid-cols-2 gap-3">
                             <div class="border border-[#e2e2e2]/10 p-3">
-                                <div class="text-[11px] uppercase tracking-wider text-[#e2e2e2]/45">Nearby average</div>
+                                <div id="nearbyPrimaryLabel" class="text-[11px] uppercase tracking-wider text-[#e2e2e2]/45">Nearby average</div>
                                 <div id="nearbyAverageChange" class="text-xl font-space-grotesk font-700 mt-2">-</div>
                             </div>
                             <div class="border border-[#e2e2e2]/10 p-3">
-                                <div class="text-[11px] uppercase tracking-wider text-[#e2e2e2]/45">Your property</div>
+                                <div id="nearbySecondaryLabel" class="text-[11px] uppercase tracking-wider text-[#e2e2e2]/45">Your property</div>
                                 <div id="nearbyYourChange" class="text-xl font-space-grotesk font-700 mt-2">-</div>
                             </div>
                         </div>
@@ -155,6 +171,7 @@
                             <div class="text-[11px] uppercase tracking-wider text-[#e2e2e2]/45 mb-2">Change distribution</div>
                             <div id="nearbyHistogram" class="nearby-histogram"></div>
                             <div id="nearbyYourMarkerLabel" class="text-[11px] text-[#e2e2e2]/55 mt-2">Your home</div>
+                            <div id="nearbyCountNote" class="text-[11px] text-[#e2e2e2]/45 mt-2"></div>
                         </div>
 
                         <div class="pt-1">
@@ -164,7 +181,7 @@
                         </div>
 
                         <div id="sameTypeHomesPanel" class="hidden space-y-2">
-                            <div class="text-[11px] uppercase tracking-wider text-[#e2e2e2]/45">Same Property Type</div>
+                            <div id="sameTypeHomesLabel" class="text-[11px] uppercase tracking-wider text-[#e2e2e2]/45">Same Property Type</div>
                             <div id="sameTypeHomesList" class="space-y-2"></div>
                         </div>
                     </div>
@@ -173,11 +190,11 @@
         </section>
     </main>
 
-    <script src="js/utils.js?v=20260423-owner-portal-nearby-panel"></script>
-    <script src="js/mapInteraction.js?v=20260423-owner-portal-nearby-panel"></script>
-    <script src="js/search.js?v=20260423-owner-portal-nearby-panel"></script>
-    <script src="js/propertyDisplay.js?v=20260423-owner-portal-nearby-panel"></script>
-    <script src="js/chartRenderer.js?v=20260423-owner-portal-nearby-panel"></script>
-    <script src="js/main.js?v=20260423-owner-portal-nearby-panel"></script>
+    <script src="js/utils.js?v=20260424-owner-loading-cover"></script>
+    <script src="js/mapInteraction.js?v=20260424-owner-loading-cover"></script>
+    <script src="js/search.js?v=20260424-owner-loading-cover"></script>
+    <script src="js/propertyDisplay.js?v=20260424-owner-loading-cover"></script>
+    <script src="js/chartRenderer.js?v=20260424-owner-loading-cover"></script>
+    <script src="js/main.js?v=20260424-owner-loading-cover"></script>
 </body>
 </html>

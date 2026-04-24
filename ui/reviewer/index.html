@@ -9,9 +9,25 @@
     <link href="https://unpkg.com/maplibre-gl@4.0.0/dist/maplibre-gl.css" rel="stylesheet">
     <script src="https://unpkg.com/maplibre-gl@4.0.0/dist/maplibre-gl.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <link rel="stylesheet" href="styles.css?v=20260422-revert-residential">
+    <link rel="stylesheet" href="styles.css?v=20260424-reviewer-loading-cover">
 </head>
 <body class="bg-[#121414] text-[#e2e2e2] font-inter">
+    <div id="reviewerLoadingCover" class="app-loading-cover">
+        <div class="app-loading-media reviewer-loading-media"></div>
+        <div class="app-loading-scrim"></div>
+        <div class="app-loading-content">
+            <div class="app-loading-eyebrow loading-text-delay-1">Housing Assessor Portal</div>
+            <h1 class="app-loading-title loading-text-delay-2">Need to review value patterns across the city?</h1>
+            <p class="app-loading-copy loading-text-delay-3">
+                Loading the assessor portal. Please wait a few seconds.
+            </p>
+            <div class="app-loading-status loading-text-delay-4">
+                <span class="app-loading-dot"></span>
+                <span>Getting the review workspace ready...</span>
+            </div>
+        </div>
+    </div>
+
     <nav class="bg-[#1e2020] border-b border-[#e2e2e2]/20 px-8 py-4 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <a href="../" class="text-lg font-space-grotesk font-600 hover:text-[#a0caff] transition-colors">CAMA PHILADELPHIA</a>
@@ -247,14 +263,14 @@
         </div>
     </div>
 
-    <script src="js/utils.js?v=20260422-revert-residential"></script>
-    <script src="js/dataManager.js?v=20260422-revert-residential"></script>
-    <script src="js/mapInteraction.js?v=20260422-revert-residential"></script>
-    <script src="js/chartFiltering.js?v=20260422-revert-residential"></script>
-    <script src="js/propertyPopup.js?v=20260422-revert-residential"></script>
-    <script src="js/distributionChart.js?v=20260422-revert-residential"></script>
-    <script src="js/assessorSidebar.js?v=20260422-revert-residential"></script>
-    <script src="js/main.js?v=20260422-revert-residential"></script>
-    <script src="js/layoutControls.js?v=20260422-revert-residential"></script>
+    <script src="js/utils.js?v=20260424-reviewer-loading-cover"></script>
+    <script src="js/dataManager.js?v=20260424-reviewer-loading-cover"></script>
+    <script src="js/mapInteraction.js?v=20260424-reviewer-loading-cover"></script>
+    <script src="js/chartFiltering.js?v=20260424-reviewer-loading-cover"></script>
+    <script src="js/propertyPopup.js?v=20260424-reviewer-loading-cover"></script>
+    <script src="js/distributionChart.js?v=20260424-reviewer-loading-cover"></script>
+    <script src="js/assessorSidebar.js?v=20260424-reviewer-loading-cover"></script>
+    <script src="js/main.js?v=20260424-reviewer-loading-cover"></script>
+    <script src="js/layoutControls.js?v=20260424-reviewer-loading-cover"></script>
 </body>
 </html>

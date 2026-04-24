@@ -64,10 +64,10 @@ const HomeStats = (() => {
     setText('homeAverageIncrease', `${stats.averageChange.toFixed(1)}%`);
     setText('homeTotalAssessedValue', formatCompactCurrency(stats.totalAssessedValue));
 
-    updateMeta(0, 'Loaded from GCS GeoJSON');
-    updateMeta(1, `${stats.increasedShare.toFixed(1)}% of total`);
-    updateMeta(2, `Median: ${stats.medianChange.toFixed(1)}%`);
-    updateMeta(3, 'Sum of predicted assessed values');
+    updateMeta(0, 'Modeled properties currently available on the map');
+    updateMeta(1, `${stats.increasedShare.toFixed(1)}% of modeled parcels show a positive change`);
+    updateMeta(2, `Median change in the modeled parcel set: ${stats.medianChange.toFixed(1)}%`);
+    updateMeta(3, 'Sum of predicted values across the modeled parcel set');
   };
 
   const median = (values) => {
@@ -103,7 +103,7 @@ const HomeStats = (() => {
 
   const updateMeta = (cardIndex, text) => {
     const cards = document.querySelectorAll('.stat-card');
-    const meta = cards[cardIndex]?.querySelector('.text-xs:last-child');
+    const meta = cards[cardIndex]?.querySelector('.landing-stat-meta');
     if (meta) meta.textContent = text;
   };
 

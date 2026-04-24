@@ -6,6 +6,7 @@
 const PropertyDisplay = (() => {
   let currentProperty = null;
   let neighborhoodProperties = [];
+  let nearbyPanelMode = 'ml';
   let sameTypePanelExpanded = false;
   let nearbyPanelDismissed = false;
   let nearbyPanelDragged = false;
@@ -92,6 +93,23 @@ const PropertyDisplay = (() => {
         ? Search.getAllProperties()
         : [];
 
+    const hasPrediction = Number.isFinite(property.predicted_value);
+    nearbyPanelMode = hasPrediction ? 'ml' : 'context';
+
+    const nearbyWithPredictions = allProperties
+      .filter((candidate) => isNearbyPredictedProperty(property, candidate))
+      .map((candidate) => ({
+        ...candidate,
+        change_percent: getPropertyChangePercent(candidate),
+        distance_m: getDistanceMeters(
+          property.lat,
+          property.lng,
+          candidate.lat,
+          candidate.lng
+        ),
+      }))
+      .filter((candidate) => Number.isFinite(candidate.change_percent));
+
     const comparableNearby = allProperties
       .filter((candidate) => isComparableNearbyProperty(property, candidate))
       .map((candidate) => ({
@@ -106,27 +124,86 @@ const PropertyDisplay = (() => {
       }))
       .filter((candidate) => Number.isFinite(candidate.change_percent));
 
-    neighborhoodProperties = comparableNearby;
+    neighborhoodProperties = hasPrediction ? comparableNearby : nearbyWithPredictions;
 
-    const nearbyAverage = comparableNearby.length
-      ? comparableNearby.reduce((sum, candidate) => sum + candidate.change_percent, 0) /
-        comparableNearby.length
+    const activeNearby = neighborhoodProperties;
+
+    const nearbyAverage = activeNearby.length
+      ? activeNearby.reduce((sum, candidate) => sum + candidate.change_percent, 0) /
+        activeNearby.length
       : null;
     const yourChange = getPropertyChangePercent(property);
 
+    setNearbyPanelLabels(property, activeNearby.length);
     setElementText('nearbyAverageChange', Utils.formatPercentage(nearbyAverage));
-    setElementText('nearbyYourChange', Utils.formatPercentage(yourChange));
+    setElementText(
+      'nearbyYourChange',
+      hasPrediction ? Utils.formatPercentage(yourChange) : String(activeNearby.length)
+    );
     setElementText(
       'nearbyStatus',
-      getNearbyStatusText(yourChange, nearbyAverage, comparableNearby.length)
+      getNearbyStatusText(property, yourChange, nearbyAverage, activeNearby.length)
     );
     setElementText(
       'nearbyYourMarkerLabel',
-      Number.isFinite(yourChange) ? 'Your home' : 'No prediction for this property'
+      hasPrediction ? 'Your home' : 'Nearby homes with predictions'
     );
 
-    renderNearbyHistogram(comparableNearby, yourChange);
-    renderSameTypeHomes(comparableNearby);
+    renderNearbyHistogram(activeNearby, hasPrediction ? yourChange : null);
+    renderSameTypeHomes(property, activeNearby);
+  };
+
+  const setNearbyPanelLabels = (property, nearbyCount) => {
+    const hasPrediction = Number.isFinite(property.predicted_value);
+    setElementText('nearbyPrimaryLabel', 'Nearby average');
+    setElementText(
+      'nearbySecondaryLabel',
+      hasPrediction ? 'Your property' : 'Nearby homes with prediction'
+    );
+    setElementText(
+      'sameTypeHomesLabel',
+      hasPrediction ? 'Same Property Type' : 'Nearby examples'
+    );
+
+    const toggle = document.getElementById('toggleSameTypeHomes');
+    if (toggle) {
+      toggle.textContent = sameTypePanelExpanded
+        ? hasPrediction
+          ? 'Hide same Property Type'
+          : 'Hide nearby examples'
+        : hasPrediction
+          ? 'Show same Property Type'
+          : 'Show nearby examples';
+    }
+
+    const nearbyCountNote = document.getElementById('nearbyCountNote');
+    if (nearbyCountNote) {
+      nearbyCountNote.textContent = hasPrediction
+        ? ''
+        : nearbyCount > 0
+          ? 'Nearby context is based on homes within 250m that have predictions.'
+          : 'No nearby homes with prediction data were found within 250m.';
+    }
+  };
+
+  const isNearbyPredictedProperty = (selectedProperty, candidate) => {
+    if (!candidate || String(candidate.id) === String(selectedProperty.id)) return false;
+    if (!Number.isFinite(candidate.lat) || !Number.isFinite(candidate.lng)) return false;
+    if (!Number.isFinite(selectedProperty.lat) || !Number.isFinite(selectedProperty.lng)) {
+      return false;
+    }
+    if (!Number.isFinite(candidate.last_year_value) || !Number.isFinite(candidate.predicted_value)) {
+      return false;
+    }
+
+    return (
+      getDistanceMeters(
+        selectedProperty.lat,
+        selectedProperty.lng,
+        candidate.lat,
+        candidate.lng
+      ) <= NEARBY_RADIUS_METERS
+    );
   };
 
   const isComparableNearbyProperty = (selectedProperty, candidate) => {
@@ -170,12 +247,15 @@ const PropertyDisplay = (() => {
     return Utils.calculatePercentChange(lastValue, currentValue);
   };
 
-  const getNearbyStatusText = (yourChange, nearbyAverage, comparableCount) => {
+  const getNearbyStatusText = (property, yourChange, nearbyAverage, comparableCount) => {
+    const hasPrediction = Number.isFinite(property.predicted_value);
     if (!comparableCount) {
-      return 'No nearby homes of the same property type with enough data.';
+      return hasPrediction
+        ? 'No nearby homes of the same property type with enough data.'
+        : 'No prediction is available for this property, and no nearby predicted homes were found.';
     }
-    if (!Number.isFinite(yourChange)) {
-      return 'This property does not have a predicted value yet.';
+    if (!hasPrediction) {
+      return 'No prediction is available for this property. Showing nearby market change for local context.';
     }
     if (!Number.isFinite(nearbyAverage)) {
       return 'Nearby comparison is not available right now.';
@@ -253,15 +333,20 @@ const PropertyDisplay = (() => {
     }
   };
 
-  const renderSameTypeHomes = (comparableNearby) => {
+  const renderSameTypeHomes = (property, comparableNearby) => {
     const list = document.getElementById('sameTypeHomesList');
     if (!list) return;
 
     list.innerHTML = '';
+    const hasPrediction = Number.isFinite(property.predicted_value);
 
     if (!comparableNearby.length) {
       list.innerHTML =
-        '<div class="text-xs text-[#e2e2e2]/50 px-1 py-2">No nearby homes of the same type found.</div>';
+        `<div class="text-xs text-[#e2e2e2]/50 px-1 py-2">${
+          hasPrediction
+            ? 'No nearby homes of the same type found.'
+            : 'No nearby examples with prediction data were found.'
+        }</div>`;
       return;
     }
 
@@ -386,8 +471,12 @@ const PropertyDisplay = (() => {
           panel.classList.toggle('hidden', !sameTypePanelExpanded);
         }
         toggleSameTypeHomes.textContent = sameTypePanelExpanded
-          ? 'Hide same Property Type'
-          : 'Show same Property Type';
+          ? nearbyPanelMode === 'ml'
+            ? 'Hide same Property Type'
+            : 'Hide nearby examples'
+          : nearbyPanelMode === 'ml'
+            ? 'Show same Property Type'
+            : 'Show nearby examples';
       });
     }
 

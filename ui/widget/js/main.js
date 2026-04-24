@@ -1,38 +1,49 @@
-/**
+﻿/**
  * Main Module for Property Owner Widget
  * Initializes and connects all modules
  */
 
 const App = (() => {
+  let loadingCoverMinElapsed = false;
+  let loadingCoverReady = false;
   /**
    * Initialize the entire application
    */
   const init = async () => {
     console.log('Initializing Property Owner Widget Application...');
 
+    window.setTimeout(() => {
+      loadingCoverMinElapsed = true;
+      hideLoadingCoverIfReady();
+    }, 1200);
+
     try {
       // Step 1: Initialize property display module
       PropertyDisplay.init();
-      console.log('✓ Property Display initialized');
+      console.log('鉁?Property Display initialized');
 
       // Step 2: Initialize map
       MapInteraction.init({
         center: [-75.1652, 39.9526], // Philadelphia
         zoom: 12,
       });
-      console.log('✓ Map initialized');
+      console.log('鉁?Map initialized');
 
       // Step 3: Initialize search module
       await Search.init();
-      console.log('✓ Search module initialized');
+      console.log('鉁?Search module initialized');
 
       // Step 4: Setup event listeners
       setupEventListeners();
-      console.log('✓ Event listeners setup');
+      console.log('鉁?Event listeners setup');
 
-      console.log('✓ Application ready');
+      console.log('Application ready');
+      loadingCoverReady = true;
+      hideLoadingCoverIfReady();
     } catch (error) {
       console.error('Error initializing application:', error);
+      loadingCoverReady = true;
+      hideLoadingCoverIfReady();
     }
   };
 
@@ -79,6 +90,15 @@ const App = (() => {
   /**
    * Cleanup on page unload
    */
+  const hideLoadingCoverIfReady = () => {
+    if (!loadingCoverReady || !loadingCoverMinElapsed) return;
+
+    const cover = document.getElementById('ownerLoadingCover');
+    if (!cover || cover.classList.contains('is-hidden')) return;
+
+    cover.classList.add('is-hidden');
+  };
+
   const cleanup = () => {
     console.log('Cleaning up application...');
   };
@@ -98,3 +118,4 @@ document.addEventListener('DOMContentLoaded', App.init);
 
 // Log initialization for debugging
 console.log('Property Owner Widget Scripts Loaded');
+

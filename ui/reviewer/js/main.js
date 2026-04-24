@@ -1,47 +1,54 @@
-/**
+﻿/**
  * Main Module for Tax Assessor Review Interface
  * Initializes and connects all modules
  */
 
 const App = (() => {
+  let loadingCoverMinElapsed = false;
+  let loadingCoverReady = false;
   /**
    * Initialize the entire application
    */
   const init = async () => {
-    console.log('🚀 Initializing Tax Assessor Review Application...');
+    console.log('Initializing Tax Assessor Review Application...');
+
+    window.setTimeout(() => {
+      loadingCoverMinElapsed = true;
+      hideLoadingCoverIfReady();
+    }, 1400);
 
     try {
       // Step 1: Initialize popup module
       PropertyPopup.init();
-      console.log('✓ Property Popup initialized');
+      console.log('鉁?Property Popup initialized');
 
       // Step 2: Load real property data from GCS GeoJSON
-      console.log('📥 Loading property data from GeoJSON...');
+      console.log('馃摜 Loading property data from GeoJSON...');
       const properties = await DataManager.loadGeoJSON();
-      console.log(`✓ Loaded ${properties.length} properties`);
+      console.log(`鉁?Loaded ${properties.length} properties`);
 
       // Step 3: Initialize map AFTER data is loaded
-      console.log('🗺️ Initializing map...');
+      console.log('馃椇锔?Initializing map...');
       MapInteraction.init({
         center: [-75.1652, 39.9526], // Philadelphia
         zoom: 11,
       });
-      console.log('✓ Map initialized');
+      console.log('鉁?Map initialized');
 
       // Step 4: Wait a moment for map to fully load, then load properties
       setTimeout(() => {
         MapInteraction.loadPropertyData(properties);
-        console.log('✓ Properties loaded on map');
+        console.log('鉁?Properties loaded on map');
       }, 500);
 
       // Step 5: Initialize distribution charts (Issue #18 & #19)
       DistributionChart.init();
-      console.log('✓ Distribution charts initialized');
+      console.log('鉁?Distribution charts initialized');
 
       // Step 6: Initialize chart filtering
       ChartFiltering.init(handleFilterChange);
       ChartFiltering.configureRanges?.(DataManager.getFilterExtents());
-      console.log('✓ Chart filtering initialized');
+      console.log('鉁?Chart filtering initialized');
 
       if (typeof AssessorSidebar !== 'undefined') {
         AssessorSidebar.init();
@@ -49,31 +56,35 @@ const App = (() => {
 
       // Step 7: Setup event listeners
       setupEventListeners();
-      console.log('✓ Event listeners setup');
+      console.log('鉁?Event listeners setup');
 
       // Step 8: Display initial statistics
       displayStatistics();
       updateFilteredResultCount(DataManager.getFilteredProperties());
-      console.log('✓ Statistics displayed');
+      console.log('鉁?Statistics displayed');
 
       // Step 9: Display initial data
       displayFilteredProperties();
-      console.log('✓ Initial data loaded');
+      console.log('鉁?Initial data loaded');
 
       // Step 10: Render sidebar distribution mini-charts
       renderSidebarCharts();
       if (typeof AssessorSidebar !== 'undefined') {
         AssessorSidebar.renderDefault();
       }
-      console.log('✓ Sidebar distribution charts rendered');
+      console.log('鉁?Sidebar distribution charts rendered');
 
-      console.log('✅ Application ready!');
+      console.log('Application ready!');
+      loadingCoverReady = true;
+      hideLoadingCoverIfReady();
     } catch (error) {
-      console.error('❌ Error initializing application:', error);
+      console.error('鉂?Error initializing application:', error);
       PropertyPopup.showNotification(
         'Error loading application. Please refresh.',
         'error'
       );
+      loadingCoverReady = true;
+      hideLoadingCoverIfReady();
     }
   };
 
@@ -320,6 +331,15 @@ const App = (() => {
     // Add cleanup logic as needed
   };
 
+  const hideLoadingCoverIfReady = () => {
+    if (!loadingCoverReady || !loadingCoverMinElapsed) return;
+
+    const cover = document.getElementById('reviewerLoadingCover');
+    if (!cover || cover.classList.contains('is-hidden')) return;
+
+    cover.classList.add('is-hidden');
+  };
+
   const updateFilteredResultCount = (properties = []) => {
     const resultCount = document.getElementById('filteredResultCount');
     if (!resultCount) return;
@@ -349,3 +369,4 @@ document.addEventListener('DOMContentLoaded', App.init);
 
 // Log initialization for debugging
 console.log('Tax Assessor Review Application Scripts Loaded');
+
