@@ -165,6 +165,7 @@ const ChartFiltering = (() => {
         nextMax = min + span * 0.75;
       } else if (preset === 'high') {
         nextMin = min + span * 0.75;
+        nextMax = min + span * 0.9;
       } else if (preset === 'top10') {
         nextMin = min + span * 0.9;
       }
