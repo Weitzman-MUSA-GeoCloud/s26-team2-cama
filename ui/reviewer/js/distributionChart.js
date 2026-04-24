@@ -1024,6 +1024,15 @@ const DistributionChart = (() => {
       .nice()
       .range([chartH, 0]);
 
+    const hasActiveBin =
+      opts.activeBin &&
+      Number.isFinite(opts.activeBin.x0) &&
+      Number.isFinite(opts.activeBin.x1);
+    const matchesActiveBin = (bin) =>
+      hasActiveBin &&
+      Math.round(bin.x0) === Math.round(opts.activeBin.x0) &&
+      Math.round(bin.x1) === Math.round(opts.activeBin.x1);
+
     g.selectAll('rect')
       .data(bins)
       .enter()
@@ -1032,8 +1041,22 @@ const DistributionChart = (() => {
       .attr('y', (b) => y(b.count))
       .attr('width', (b) => Math.max(0, x(b.x1) - x(b.x0) - 2))
       .attr('height', (b) => chartH - y(b.count))
-      .attr('fill', opts.color || colors.blue)
-      .attr('opacity', 0.85);
+      .attr('fill', (b) => {
+        if (!matchesActiveBin(b)) return opts.color || colors.blue;
+        return opts.activeColor || '#ffffff';
+      })
+      .attr('opacity', (b) => (hasActiveBin ? (matchesActiveBin(b) ? 1 : 0.2) : 0.85))
+      .attr('stroke', (b) => (matchesActiveBin(b) ? opts.color || colors.blue : 'transparent'))
+      .attr('stroke-width', (b) => (matchesActiveBin(b) ? 3 : 0))
+      .style('cursor', typeof opts.onBarClick === 'function' ? 'pointer' : 'default')
+      .style('filter', (b) =>
+        matchesActiveBin(b) ? 'drop-shadow(0 0 8px rgba(160,202,255,0.45))' : 'none'
+      )
+      .on('click', (_, bin) => {
+        if (typeof opts.onBarClick === 'function') {
+          opts.onBarClick(bin);
+        }
+      });
 
     const xAxis = d3
       .axisBottom(x)
@@ -1055,14 +1078,34 @@ const DistributionChart = (() => {
   /**
    * Render sidebar price-distribution histogram from filtered properties
    */
-  const renderSidebarPrice = (properties) => {
+  const renderSidebarPrice = (properties, opts = {}) => {
     const values = properties
-      .map((p) => p.tax_year_value)
+      .map((p) => p.predicted_value)
       .filter((v) => Number.isFinite(v) && v > 0 && v < 2000000);
     const bins = histogram(values, 20, [0, 1000000]);
     renderMiniHistogram('priceDistributionChart', bins, {
       color: colors.blue,
+      activeColor: '#d7eaff',
       xFormat: (d) => `$${(d / 1000).toFixed(0)}k`,
+      onBarClick: opts.onBarClick,
+      activeBin: opts.activeBin,
+    });
+  };
+
+  /**
+   * Render sidebar market-value histogram from filtered properties
+   */
+  const renderSidebarMarket = (properties, opts = {}) => {
+    const values = properties
+      .map((p) => p.market_value)
+      .filter((v) => Number.isFinite(v) && v > 0 && v < 2000000);
+    const bins = histogram(values, 20, [0, 1000000]);
+    renderMiniHistogram('marketDistributionChart', bins, {
+      color: '#8bd7c5',
+      activeColor: '#d8fff6',
+      xFormat: (d) => `$${(d / 1000).toFixed(0)}k`,
+      onBarClick: opts.onBarClick,
+      activeBin: opts.activeBin,
     });
   };
 
@@ -1084,6 +1127,7 @@ const DistributionChart = (() => {
   return {
     init,
     renderSidebarPrice,
+    renderSidebarMarket,
     renderSidebarChange,
   };
 })();

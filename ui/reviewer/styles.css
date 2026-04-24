@@ -71,6 +71,79 @@ body {
   font-size: 12px;
 }
 
+.filter-link-action {
+  color: #a0caff;
+  font-size: 12px;
+  font-weight: 600;
+  background: transparent;
+  padding: 0;
+  border: 0;
+}
+
+.filter-link-action:hover {
+  color: #ffffff;
+}
+
+.filter-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-preset-btn {
+  border: 1px solid rgba(226, 226, 226, 0.2);
+  background: #1e2020;
+  color: rgba(226, 226, 226, 0.75);
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.filter-preset-btn:hover,
+.filter-preset-btn.active {
+  border-color: #a0caff;
+  color: #a0caff;
+}
+
+.active-filters-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 20px;
+}
+
+.active-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(160, 202, 255, 0.35);
+  background: rgba(160, 202, 255, 0.08);
+  color: #e2e2e2;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.active-filter-chip button {
+  border: 0;
+  background: transparent;
+  color: #a0caff;
+  padding: 0;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.result-count-pill {
+  border: 1px solid rgba(226, 226, 226, 0.2);
+  background: #121414;
+  color: rgba(226, 226, 226, 0.82);
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .primary-action,
 .secondary-action {
   width: 100%;

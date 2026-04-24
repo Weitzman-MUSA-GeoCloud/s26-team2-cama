@@ -15,6 +15,7 @@ const MapInteraction = (() => {
   const MARKET_SOURCE_LAYER = 'residential_market_value';
   const METADATA_URL =
     'https://storage.googleapis.com/musa5090s26-team2-public/configs/map_style_metadata.json';
+  const NEARBY_SOURCE_ID = 'owner-nearby-ring';
 
   /**
    * Initialize map with Maplibre GL JS
@@ -66,6 +67,34 @@ const MapInteraction = (() => {
    */
   const setupMapLayers = () => {
     if (!map) return;
+
+    if (!map.getSource(NEARBY_SOURCE_ID)) {
+      map.addSource(NEARBY_SOURCE_ID, {
+        type: 'geojson',
+        data: emptyFeatureCollection(),
+      });
+
+      map.addLayer({
+        id: 'owner-nearby-ring-fill',
+        type: 'fill',
+        source: NEARBY_SOURCE_ID,
+        paint: {
+          'fill-color': '#a0caff',
+          'fill-opacity': 0.12,
+        },
+      });
+
+      map.addLayer({
+        id: 'owner-nearby-ring-outline',
+        type: 'line',
+        source: NEARBY_SOURCE_ID,
+        paint: {
+          'line-color': '#a0caff',
+          'line-width': 1.5,
+          'line-opacity': 0.75,
+        },
+      });
+    }
 
     if (!map.getSource('residential-market-parcels')) {
       map.addSource('residential-market-parcels', {
@@ -483,6 +512,7 @@ const MapInteraction = (() => {
       });
     }
     clearHighlight();
+    clearNearbyRing();
   };
 
   const clearHighlight = () => {
@@ -638,6 +668,66 @@ const MapInteraction = (() => {
     return `$${Math.round(value)}`;
   };
 
+  const showNearbyRing = (lng, lat, radiusMeters = 250) => {
+    if (!map || !map.getSource(NEARBY_SOURCE_ID)) return;
+    if (!Number.isFinite(lng) || !Number.isFinite(lat)) {
+      clearNearbyRing();
+      return;
+    }
+
+    map.getSource(NEARBY_SOURCE_ID).setData({
+      type: 'FeatureCollection',
+      features: [createCircleFeature(lng, lat, radiusMeters)],
+    });
+  };
+
+  const clearNearbyRing = () => {
+    if (!map || !map.getSource(NEARBY_SOURCE_ID)) return;
+    map.getSource(NEARBY_SOURCE_ID).setData(emptyFeatureCollection());
+  };
+
+  const createCircleFeature = (lng, lat, radiusMeters, steps = 72) => {
+    const coordinates = [];
+    const earthRadius = 6371000;
+    const angularDistance = radiusMeters / earthRadius;
+    const latRad = (lat * Math.PI) / 180;
+    const lngRad = (lng * Math.PI) / 180;
+
+    for (let step = 0; step <= steps; step += 1) {
+      const bearing = (2 * Math.PI * step) / steps;
+      const pointLat = Math.asin(
+        Math.sin(latRad) * Math.cos(angularDistance) +
+          Math.cos(latRad) * Math.sin(angularDistance) * Math.cos(bearing)
+      );
+      const pointLng =
+        lngRad +
+        Math.atan2(
+          Math.sin(bearing) * Math.sin(angularDistance) * Math.cos(latRad),
+          Math.cos(angularDistance) - Math.sin(latRad) * Math.sin(pointLat)
+        );
+      coordinates.push([
+        ((pointLng * 180) / Math.PI + 540) % 360 - 180,
+        (pointLat * 180) / Math.PI,
+      ]);
+    }
+
+    return {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [coordinates],
+      },
+      properties: {
+        radius_m: radiusMeters,
+      },
+    };
+  };
+
+  const emptyFeatureCollection = () => ({
+    type: 'FeatureCollection',
+    features: [],
+  });
+
   /**
    * Toggle parcel vector layer visibility
    * @param {boolean} visible - Visibility state
@@ -684,5 +774,7 @@ const MapInteraction = (() => {
     toggleParcelLayer,
     resize,
     getMap,
+    showNearbyRing,
+    clearNearbyRing,
   };
 })();

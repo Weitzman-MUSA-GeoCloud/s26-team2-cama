@@ -9,11 +9,21 @@ const DataManager = (() => {
 
   let allProperties = [];
   let filteredProperties = [];
+  let filterExtents = {
+    predictedMin: 0,
+    predictedMax: 5000000,
+    marketMin: 0,
+    marketMax: 5000000,
+    changeMin: -50,
+    changeMax: 50,
+  };
   let currentFilters = {
     priceMin: 0,
     priceMax: 5000000,
     changeMin: -50,
     changeMax: 50,
+    marketMin: null,
+    marketMax: null,
     searchTerm: '',
   };
 
@@ -81,6 +91,14 @@ const DataManager = (() => {
    */
   const init = (properties) => {
     allProperties = properties;
+    deriveExtents();
+    currentFilters = {
+      ...currentFilters,
+      priceMin: filterExtents.predictedMin,
+      priceMax: filterExtents.predictedMax,
+      changeMin: filterExtents.changeMin,
+      changeMax: filterExtents.changeMax,
+    };
     applyFilters();
   };
 
@@ -126,8 +144,8 @@ const DataManager = (() => {
     filteredProperties = allProperties.filter((property) => {
       // Price range filter
       if (
-        property.tax_year_value < currentFilters.priceMin ||
-        property.tax_year_value > currentFilters.priceMax
+        property.predicted_value < currentFilters.priceMin ||
+        property.predicted_value > currentFilters.priceMax
       ) {
         return false;
       }
@@ -136,6 +154,20 @@ const DataManager = (() => {
       if (
         property.change_percent < currentFilters.changeMin ||
         property.change_percent > currentFilters.changeMax
+      ) {
+        return false;
+      }
+
+      if (
+        Number.isFinite(currentFilters.marketMin) &&
+        property.market_value < currentFilters.marketMin
+      ) {
+        return false;
+      }
+
+      if (
+        Number.isFinite(currentFilters.marketMax) &&
+        property.market_value > currentFilters.marketMax
       ) {
         return false;
       }
@@ -342,12 +374,42 @@ const DataManager = (() => {
    */
   const resetFilters = () => {
     currentFilters = {
-      priceMin: 0,
-      priceMax: 5000000,
-      changeMin: -50,
-      changeMax: 50,
+      priceMin: filterExtents.predictedMin,
+      priceMax: filterExtents.predictedMax,
+      changeMin: filterExtents.changeMin,
+      changeMax: filterExtents.changeMax,
+      marketMin: null,
+      marketMax: null,
       searchTerm: '',
     };
+    applyFilters();
+  };
+
+  const clearRangeDrilldown = () => {
+    currentFilters = {
+      ...currentFilters,
+      marketMin: null,
+      marketMax: null,
+    };
+    applyFilters();
+  };
+
+  const setChartRangeFilter = (field, min, max) => {
+    if (field === 'predicted') {
+      currentFilters = {
+        ...currentFilters,
+        priceMin: min,
+        priceMax: max,
+        marketMin: null,
+        marketMax: null,
+      };
+    } else if (field === 'market') {
+      currentFilters = {
+        ...currentFilters,
+        marketMin: min,
+        marketMax: max,
+      };
+    }
     applyFilters();
   };
 
@@ -373,6 +435,29 @@ const DataManager = (() => {
    */
   const getFilteredCount = () => {
     return filteredProperties.length;
+  };
+
+  const getFilterExtents = () => Utils.deepClone(filterExtents);
+
+  const deriveExtents = () => {
+    const predictedValues = allProperties
+      .map((p) => Number(p.predicted_value))
+      .filter((v) => Number.isFinite(v) && v > 0);
+    const marketValues = allProperties
+      .map((p) => Number(p.market_value))
+      .filter((v) => Number.isFinite(v) && v > 0);
+    const changeValues = allProperties
+      .map((p) => Number(p.change_percent))
+      .filter((v) => Number.isFinite(v));
+
+    filterExtents = {
+      predictedMin: predictedValues.length ? Math.floor(Math.min(...predictedValues)) : 0,
+      predictedMax: predictedValues.length ? Math.ceil(Math.max(...predictedValues)) : 5000000,
+      marketMin: marketValues.length ? Math.floor(Math.min(...marketValues)) : 0,
+      marketMax: marketValues.length ? Math.ceil(Math.max(...marketValues)) : 5000000,
+      changeMin: changeValues.length ? Math.floor(Math.min(...changeValues)) : -50,
+      changeMax: changeValues.length ? Math.ceil(Math.max(...changeValues)) : 50,
+    };
   };
 
   const normalizeSearchText = (value) => {
@@ -440,7 +525,10 @@ const DataManager = (() => {
     exportCSV,
     downloadCSV,
     resetFilters,
+    clearRangeDrilldown,
+    setChartRangeFilter,
     getFilters,
+    getFilterExtents,
     getTotalCount,
     getFilteredCount,
   };

@@ -611,8 +611,13 @@ const MapInteraction = (() => {
     const changeMax = Number.isFinite(Number(filters.changeMax))
       ? Number(filters.changeMax)
       : 50;
-
-    return [
+    const marketMin = Number.isFinite(Number(filters.marketMin))
+      ? Number(filters.marketMin)
+      : null;
+    const marketMax = Number.isFinite(Number(filters.marketMax))
+      ? Number(filters.marketMax)
+      : null;
+    const expressions = [
       'all',
       ['>=', ['to-number', ['get', 'predicted_value']], priceMin],
       ['<=', ['to-number', ['get', 'predicted_value']], priceMax],
@@ -635,6 +640,24 @@ const MapInteraction = (() => {
         Math.log(1 + changeMax / 100),
       ],
     ];
+
+    if (Number.isFinite(marketMin) && marketMin > 0) {
+      expressions.push([
+        '>=',
+        ['to-number', ['get', 'log_price']],
+        Math.log(marketMin),
+      ]);
+    }
+
+    if (Number.isFinite(marketMax) && marketMax > 0) {
+      expressions.push([
+        '<=',
+        ['to-number', ['get', 'log_price']],
+        Math.log(marketMax),
+      ]);
+    }
+
+    return expressions;
   };
 
   /**
@@ -678,6 +701,16 @@ const MapInteraction = (() => {
    */
   const fitToBounds = () => {
     if (!map) return;
+
+    const properties = DataManager.getFilteredProperties().filter(
+      (p) => Number.isFinite(p.lng) && Number.isFinite(p.lat)
+    );
+    if (properties.length === 0) return;
+
+    if (properties.length === 1) {
+      flyToProperty([properties[0].lng, properties[0].lat]);
+      return;
+    }
 
     const bounds = getBounds();
     if (!bounds) return;

@@ -1,5 +1,9 @@
 const AssessorSidebar = (() => {
   let selectedProperty = null;
+  let activeDistributionBins = {
+    predicted: null,
+    market: null,
+  };
   const TRANSACTION_TREND_URL =
     'https://storage.googleapis.com/musa5090s26-team2-public/configs/transaction_volume_trend.json';
   const CURRENT_YEAR = new Date().getFullYear();
@@ -20,14 +24,25 @@ const AssessorSidebar = (() => {
     document.getElementById('assessorSelectedPanel')?.classList.add('hidden');
 
     const properties = getProperties();
-    renderHistogram('priceDistributionChart', properties, 'predicted_value', {
-      color: '#a0caff',
-      domain: [0, 1000000],
-    });
-    renderHistogram('marketDistributionChart', properties, 'market_value', {
-      color: '#8bd7c5',
-      domain: [0, 1000000],
-    });
+    if (typeof DistributionChart !== 'undefined') {
+      DistributionChart.renderSidebarPrice?.(properties, {
+        onBarClick: (bin) => applyDistributionBinFilter('predicted', bin),
+        activeBin: activeDistributionBins.predicted,
+      });
+      DistributionChart.renderSidebarMarket?.(properties, {
+        onBarClick: (bin) => applyDistributionBinFilter('market', bin),
+        activeBin: activeDistributionBins.market,
+      });
+    } else {
+      renderHistogram('priceDistributionChart', properties, 'predicted_value', {
+        color: '#a0caff',
+        domain: [0, 1000000],
+      });
+      renderHistogram('marketDistributionChart', properties, 'market_value', {
+        color: '#8bd7c5',
+        domain: [0, 1000000],
+      });
+    }
     renderTransactionTrend(properties);
   };
 
@@ -69,13 +84,15 @@ const AssessorSidebar = (() => {
       setText('selectedPercentChange', '-');
     }
 
-    renderHistogram('selectedAssessmentDistribution', getProperties(), 'predicted_value', {
-      color: '#a0caff',
-      domain: [0, 1000000],
-      markerValue: hasPredictedValue ? property.predicted_value : null,
+    requestAnimationFrame(() => {
+      renderHistogram('selectedAssessmentDistribution', getProperties(), 'predicted_value', {
+        color: '#a0caff',
+        domain: [0, 1000000],
+        markerValue: hasPredictedValue ? property.predicted_value : null,
+      });
+      renderMarketDistribution();
+      renderTrend(property);
     });
-    renderMarketDistribution();
-    renderTrend(property);
   };
 
   const clearSelection = () => {
@@ -93,6 +110,72 @@ const AssessorSidebar = (() => {
       renderDefault();
     }
   };
+
+  const applyDistributionBinFilter = (field, bin) => {
+    if (!bin) return;
+    const current = activeDistributionBins[field];
+    const isSameBin =
+      current &&
+      Math.round(current.x0) === Math.round(bin.x0) &&
+      Math.round(current.x1) === Math.round(bin.x1);
+
+    if (isSameBin) {
+      if (field === 'predicted') {
+        const extents = DataManager.getFilterExtents?.();
+        DataManager.setFilters({
+          priceMin: extents?.predictedMin ?? 0,
+          priceMax: extents?.predictedMax ?? 5000000,
+          marketMin: null,
+          marketMax: null,
+        });
+        ChartFiltering?.updateSliderDisplay?.({
+          priceMin: extents?.predictedMin ?? 0,
+          priceMax: extents?.predictedMax ?? 5000000,
+        });
+      } else {
+        DataManager.clearRangeDrilldown?.();
+      }
+
+      activeDistributionBins[field] = null;
+      if (typeof App !== 'undefined' && typeof App.handleExternalFilterRefresh === 'function') {
+        App.handleExternalFilterRefresh();
+      }
+      PropertyPopup.showNotification(
+        `${field === 'predicted' ? 'Predicted' : 'Market'} distribution filter cleared`,
+        'info'
+      );
+      return;
+    }
+
+    if (typeof DataManager !== 'undefined') {
+      DataManager.setChartRangeFilter(field, bin.x0, bin.x1);
+    }
+    activeDistributionBins[field] = { x0: bin.x0, x1: bin.x1 };
+    if (typeof ChartFiltering !== 'undefined') {
+      if (field === 'predicted') {
+        ChartFiltering.updateSliderDisplay({
+          priceMin: Math.round(bin.x0),
+          priceMax: Math.round(bin.x1),
+        });
+      }
+    }
+    if (typeof App !== 'undefined' && typeof App.handleExternalFilterRefresh === 'function') {
+      App.handleExternalFilterRefresh();
+    }
+    PropertyPopup.showNotification(
+      `${field === 'predicted' ? 'Predicted' : 'Market'} distribution bin applied to map`,
+      'info'
+    );
+  };
+
+  const clearDistributionBinFilters = () => {
+    activeDistributionBins = {
+      predicted: null,
+      market: null,
+    };
+  };
+
+  const getActiveDistributionBin = (field) => activeDistributionBins[field] || null;
 
   const renderMarketDistribution = () => {
     if (!selectedProperty) return;
@@ -365,5 +448,8 @@ const AssessorSidebar = (() => {
     showProperty,
     clearSelection,
     refresh,
+    applyDistributionBinFilter,
+    clearDistributionBinFilters,
+    getActiveDistributionBin,
   };
 })();

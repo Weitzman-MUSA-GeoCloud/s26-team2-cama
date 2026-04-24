@@ -1,0 +1,55 @@
+{
+  "generated_at": "2026-04-22T20:06:59.081059+00:00",
+  "generated_from": "BigQuery",
+  "breakpoint_method": "APPROX_QUANTILES using p01, p20, p40, p60, p80, p99 on values greater than 0",
+  "fields": {
+    "market_value": {
+      "source": "musa5090s26-team2.source.opa_assessments.market_value",
+      "count": 6901674,
+      "min": 100,
+      "max": 690706200,
+      "display_min": 4900,
+      "display_max": 1805700,
+      "breakpoints": [
+        4900,
+        64700,
+        114700,
+        174700,
+        268100,
+        1805700
+      ]
+    },
+    "predicted_value": {
+      "source": "musa5090s26-team2.derived.current_assessments.predicted_value",
+      "count": 79547,
+      "min": 13600.833918113442,
+      "max": 2390595.7668496133,
+      "display_min": 37229.55672063338,
+      "display_max": 883105.6114705076,
+      "breakpoints": [
+        37229.55672063338,
+        121603.83499617365,
+        188588.44487260227,
+        257765.80652840366,
+        346442.57960791275,
+        883105.6114705076
+      ]
+    },
+    "sales_price": {
+      "source": "musa5090s26-team2.source.opa_properties.sale_price",
+      "count": 578984,
+      "min": 1,
+      "max": 948729100,
+      "display_min": 1,
+      "display_max": 2000000,
+      "breakpoints": [
+        1,
+        1,
+        27400,
+        100000,
+        232000,
+        2000000
+      ]
+    }
+  }
+}

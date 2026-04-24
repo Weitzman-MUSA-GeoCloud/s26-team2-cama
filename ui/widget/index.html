@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/maplibre-gl@4.0.0/dist/maplibre-gl.css" rel="stylesheet">
     <script src="https://unpkg.com/maplibre-gl@4.0.0/dist/maplibre-gl.js"></script>
-    <link rel="stylesheet" href="styles.css?v=20260422-owner-portal-layout">
+    <link rel="stylesheet" href="styles.css?v=20260423-owner-portal-nearby-panel">
 </head>
 <body class="bg-[#121414] text-[#e2e2e2] font-inter">
     <nav class="bg-[#1e2020] border-b border-[#e2e2e2]/20 px-8 py-4 flex items-center justify-between">
@@ -96,6 +96,7 @@
                     <div class="owner-detail-row"><span>Lot Size</span><strong id="propertyLotSize">-</strong></div>
                     <div class="owner-detail-row"><span>Latest Sale</span><strong id="propertyLatestSale">Not available in current dataset</strong></div>
                 </div>
+
             </section>
 
             <div id="sidebarSection" class="hidden"></div>
@@ -123,15 +124,63 @@
                     <div class="text-[#e2e2e2]/40 text-sm">Map loading...</div>
                     <div class="text-xs text-[#e2e2e2]/30 mt-1">Search or click a parcel to inspect your property</div>
                 </div>
+                <aside id="nearbyMapPanel" class="nearby-map-panel nearby-map-panel-hidden">
+                    <div class="nearby-map-card">
+                        <div id="nearbyMapHeader" class="nearby-map-header flex items-start justify-between gap-3">
+                            <div class="text-xs text-[#e2e2e2]/60 uppercase tracking-wider">Nearby Change (250m)</div>
+                            <button
+                                id="closeNearbyMapPanel"
+                                type="button"
+                                class="nearby-close-button"
+                                aria-label="Close nearby change panel"
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="border border-[#e2e2e2]/10 p-3">
+                                <div class="text-[11px] uppercase tracking-wider text-[#e2e2e2]/45">Nearby average</div>
+                                <div id="nearbyAverageChange" class="text-xl font-space-grotesk font-700 mt-2">-</div>
+                            </div>
+                            <div class="border border-[#e2e2e2]/10 p-3">
+                                <div class="text-[11px] uppercase tracking-wider text-[#e2e2e2]/45">Your property</div>
+                                <div id="nearbyYourChange" class="text-xl font-space-grotesk font-700 mt-2">-</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="text-[11px] uppercase tracking-wider text-[#e2e2e2]/45">Status</div>
+                            <div id="nearbyStatus" class="text-sm text-[#e2e2e2] mt-2">-</div>
+                        </div>
+
+                        <div>
+                            <div class="text-[11px] uppercase tracking-wider text-[#e2e2e2]/45 mb-2">Change distribution</div>
+                            <div id="nearbyHistogram" class="nearby-histogram"></div>
+                            <div id="nearbyYourMarkerLabel" class="text-[11px] text-[#e2e2e2]/55 mt-2">Your home</div>
+                        </div>
+
+                        <div class="pt-1">
+                            <button id="toggleSameTypeHomes" type="button" class="text-sm text-[#a0caff] hover:text-white transition-colors">
+                                Show same Property Type
+                            </button>
+                        </div>
+
+                        <div id="sameTypeHomesPanel" class="hidden space-y-2">
+                            <div class="text-[11px] uppercase tracking-wider text-[#e2e2e2]/45">Same Property Type</div>
+                            <div id="sameTypeHomesList" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </aside>
             </div>
         </section>
     </main>
 
-    <script src="js/utils.js?v=20260422-owner-portal-layout"></script>
-    <script src="js/mapInteraction.js?v=20260422-owner-portal-layout"></script>
-    <script src="js/search.js?v=20260422-owner-portal-layout"></script>
-    <script src="js/propertyDisplay.js?v=20260422-owner-portal-layout"></script>
-    <script src="js/chartRenderer.js?v=20260422-owner-portal-layout"></script>
-    <script src="js/main.js?v=20260422-owner-portal-layout"></script>
+    <script src="js/utils.js?v=20260423-owner-portal-nearby-panel"></script>
+    <script src="js/mapInteraction.js?v=20260423-owner-portal-nearby-panel"></script>
+    <script src="js/search.js?v=20260423-owner-portal-nearby-panel"></script>
+    <script src="js/propertyDisplay.js?v=20260423-owner-portal-nearby-panel"></script>
+    <script src="js/chartRenderer.js?v=20260423-owner-portal-nearby-panel"></script>
+    <script src="js/main.js?v=20260423-owner-portal-nearby-panel"></script>
 </body>
 </html>

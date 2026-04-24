@@ -52,12 +52,25 @@
                     <h2 class="panel-title">Filters</h2>
                     <div class="space-y-4">
                         <div class="filter-box">
+                            <label class="filter-label">Active Filters</label>
+                            <div id="activeFiltersSummary" class="active-filters-summary">
+                                <span class="text-[#e2e2e2]/40 text-xs">No active filters</span>
+                            </div>
+                        </div>
+
+                        <div class="filter-box">
                             <label class="filter-label">Predicted Value Range</label>
                             <div class="grid grid-cols-2 gap-2">
                                 <input type="number" min="0" max="10000000" step="50000" value="0" id="priceMinInput" aria-label="Minimum assessed value">
                                 <input type="number" min="0" max="10000000" step="50000" value="5000000" id="priceMaxInput" aria-label="Maximum assessed value">
                             </div>
                             <div class="filter-value" id="priceRangeValue">$0 - $5,000,000</div>
+                            <div class="filter-presets mt-3">
+                                <button type="button" class="filter-preset-btn" data-preset-type="predicted" data-preset="low">Low</button>
+                                <button type="button" class="filter-preset-btn" data-preset-type="predicted" data-preset="mid">Mid</button>
+                                <button type="button" class="filter-preset-btn" data-preset-type="predicted" data-preset="high">High</button>
+                                <button type="button" class="filter-preset-btn" data-preset-type="predicted" data-preset="top10">Top 10%</button>
+                            </div>
                         </div>
 
                         <div class="filter-box">
@@ -67,6 +80,12 @@
                                 <input type="number" min="-100" max="500" step="1" value="50" id="changeMaxInput" aria-label="Maximum change percentage">
                             </div>
                             <div class="filter-value" id="changeRangeValue">-50% to +50%</div>
+                            <div class="filter-presets mt-3">
+                                <button id="changeDropPresetBtn" type="button" class="filter-preset-btn" data-preset-type="change" data-preset="drop">Big drop</button>
+                                <button type="button" class="filter-preset-btn" data-preset-type="change" data-preset="flat">Flat</button>
+                                <button type="button" class="filter-preset-btn" data-preset-type="change" data-preset="increase">Big increase</button>
+                            </div>
+                            <button id="changeFullRangeBtn" type="button" class="filter-link-action mt-3">Use full data range</button>
                         </div>
 
                         <button id="confirmFiltersBtn" class="primary-action">Confirm Filters</button>
@@ -156,6 +175,8 @@
                 </div>
 
                 <div class="flex items-center gap-4">
+                    <div id="filteredResultCount" class="result-count-pill">Showing all ML parcels</div>
+
                     <div class="w-64">
                         <div id="mapLegendGradient" class="h-3 border border-[#e2e2e2]/20 reviewer-gradient-legend"></div>
                         <div id="mapLegendLabels" class="flex justify-between text-[10px] text-[#e2e2e2]/50 mt-1">

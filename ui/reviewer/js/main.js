@@ -40,6 +40,7 @@ const App = (() => {
 
       // Step 6: Initialize chart filtering
       ChartFiltering.init(handleFilterChange);
+      ChartFiltering.configureRanges?.(DataManager.getFilterExtents());
       console.log('✓ Chart filtering initialized');
 
       if (typeof AssessorSidebar !== 'undefined') {
@@ -52,6 +53,7 @@ const App = (() => {
 
       // Step 8: Display initial statistics
       displayStatistics();
+      updateFilteredResultCount(DataManager.getFilteredProperties());
       console.log('✓ Statistics displayed');
 
       // Step 9: Display initial data
@@ -89,6 +91,7 @@ const App = (() => {
 
     // Update statistics
     displayStatistics();
+    updateFilteredResultCount(filteredProperties);
 
     // Update table/display
     displayFilteredProperties();
@@ -98,6 +101,7 @@ const App = (() => {
 
     // Refresh sidebar mini-charts for the filtered set
     renderSidebarCharts();
+    ChartFiltering?.syncUiFromFilters?.();
     if (typeof AssessorSidebar !== 'undefined') {
       AssessorSidebar.refresh();
     }
@@ -109,11 +113,23 @@ const App = (() => {
   const renderSidebarCharts = () => {
     if (typeof DistributionChart === 'undefined') return;
     const properties = DataManager.getFilteredProperties();
+    const activePredictedBin =
+      AssessorSidebar?.getActiveDistributionBin?.('predicted') || null;
+    const activeMarketBin =
+      AssessorSidebar?.getActiveDistributionBin?.('market') || null;
     if (typeof DistributionChart.renderSidebarPrice === 'function') {
-      DistributionChart.renderSidebarPrice(properties);
+      DistributionChart.renderSidebarPrice(properties, {
+        onBarClick: (bin) =>
+          AssessorSidebar?.applyDistributionBinFilter?.('predicted', bin),
+        activeBin: activePredictedBin,
+      });
     }
-    if (typeof DistributionChart.renderSidebarChange === 'function') {
-      DistributionChart.renderSidebarChange(properties);
+    if (typeof DistributionChart.renderSidebarMarket === 'function') {
+      DistributionChart.renderSidebarMarket(properties, {
+        onBarClick: (bin) =>
+          AssessorSidebar?.applyDistributionBinFilter?.('market', bin),
+        activeBin: activeMarketBin,
+      });
     }
   };
 
@@ -304,12 +320,27 @@ const App = (() => {
     // Add cleanup logic as needed
   };
 
+  const updateFilteredResultCount = (properties = []) => {
+    const resultCount = document.getElementById('filteredResultCount');
+    if (!resultCount) return;
+
+    const count = properties.length;
+    if (count === 0) {
+      resultCount.textContent = 'Showing 0 filtered ML parcels';
+      return;
+    }
+
+    resultCount.textContent = `Showing ${count.toLocaleString()} filtered ML parcel${count === 1 ? '' : 's'}`;
+  };
+
   // Listen for page unload
   window.addEventListener('beforeunload', cleanup);
 
   // Public API
   return {
     init,
+    handleExternalFilterRefresh: () =>
+      handleFilterChange(DataManager.getFilteredProperties()),
   };
 })();
 

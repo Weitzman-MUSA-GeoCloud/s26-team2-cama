@@ -371,6 +371,56 @@ svg:hover {
   background: linear-gradient(135deg, #1e2020 0%, #121414 100%);
 }
 
+.nearby-map-panel {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: min(360px, calc(100% - 36px));
+  z-index: 30;
+  pointer-events: none;
+}
+
+.nearby-map-panel-hidden {
+  display: none;
+}
+
+.nearby-map-card {
+  pointer-events: auto;
+  background: rgba(18, 20, 20, 0.92);
+  border: 1px solid rgba(226, 226, 226, 0.18);
+  backdrop-filter: blur(10px);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+}
+
+.nearby-map-header {
+  cursor: move;
+  user-select: none;
+}
+
+.nearby-close-button {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(226, 226, 226, 0.14);
+  background: rgba(226, 226, 226, 0.04);
+  color: rgba(226, 226, 226, 0.78);
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.nearby-close-button:hover {
+  border-color: rgba(226, 226, 226, 0.3);
+  color: #ffffff;
+  background: rgba(226, 226, 226, 0.08);
+}
+
 .sample-chip {
   padding: 8px 10px;
   border: 1px solid rgba(226, 226, 226, 0.2);
@@ -464,6 +514,109 @@ svg:hover {
 
 .maplibregl-ctrl button:hover {
   background-color: #121414 !important;
+}
+
+.nearby-histogram {
+  position: relative;
+  height: 96px;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  align-items: end;
+  gap: 6px;
+  padding: 8px 6px 10px;
+  border: 1px solid rgba(226, 226, 226, 0.1);
+  background:
+    linear-gradient(to top, rgba(226, 226, 226, 0.06) 1px, transparent 1px) 0 100% / 100% 24px,
+    #161818;
+}
+
+.nearby-histogram.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(226, 226, 226, 0.5);
+  font-size: 12px;
+}
+
+.nearby-bar {
+  position: relative;
+  background: linear-gradient(180deg, rgba(160, 202, 255, 0.95), rgba(160, 202, 255, 0.55));
+  min-height: 6px;
+}
+
+.nearby-bar.your-bin {
+  background: linear-gradient(180deg, rgba(255, 178, 182, 0.95), rgba(255, 178, 182, 0.65));
+}
+
+.nearby-histogram-marker {
+  position: absolute;
+  top: 8px;
+  bottom: 10px;
+  width: 2px;
+  background: #ffb2b6;
+  box-shadow: 0 0 0 1px rgba(18, 20, 20, 0.65);
+  pointer-events: none;
+}
+
+.nearby-home-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid rgba(226, 226, 226, 0.12);
+  background: #161818;
+  color: #e2e2e2;
+  text-align: left;
+}
+
+.nearby-home-button:hover {
+  border-color: rgba(160, 202, 255, 0.45);
+  color: #ffffff;
+}
+
+.nearby-home-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.nearby-home-address {
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nearby-home-direction {
+  font-size: 11px;
+  color: rgba(226, 226, 226, 0.5);
+  margin-top: 2px;
+}
+
+.nearby-home-change.up {
+  color: #ffb2b6;
+}
+
+.nearby-home-change.down {
+  color: #a0caff;
+}
+
+@media (max-width: 1024px) {
+  .nearby-map-panel {
+    left: 12px;
+    right: 12px;
+    top: auto;
+    bottom: 12px;
+    width: auto;
+  }
+
+  .nearby-map-card {
+    max-height: 42vh;
+    overflow-y: auto;
+  }
 }
 
 /* Empty State Styling */
