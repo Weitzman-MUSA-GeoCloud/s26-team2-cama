@@ -182,6 +182,37 @@ body {
   font-weight: 600;
 }
 
+.chart-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.chart-section-header .panel-title {
+  margin-bottom: 0;
+}
+
+.mini-chart-expand-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(226, 226, 226, 0.18);
+  background: #121414;
+  color: rgba(226, 226, 226, 0.72);
+  font-size: 15px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease-in;
+}
+
+.mini-chart-expand-btn:hover {
+  border-color: rgba(160, 202, 255, 0.65);
+  color: #ffffff;
+}
+
 .chart-box {
   display: flex;
   align-items: center;

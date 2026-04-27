@@ -20,35 +20,35 @@ const App = (() => {
     try {
       // Step 1: Initialize popup module
       PropertyPopup.init();
-      console.log('âœ?Property Popup initialized');
+      console.log('ï¿½?Property Popup initialized');
 
       // Step 2: Load real property data from GCS GeoJSON
       console.log('ðŸ“¥ Loading property data from GeoJSON...');
       const properties = await DataManager.loadGeoJSON();
-      console.log(`âœ?Loaded ${properties.length} properties`);
+      console.log(`ï¿½?Loaded ${properties.length} properties`);
 
       // Step 3: Initialize map AFTER data is loaded
-      console.log('ðŸ—ºï¸?Initializing map...');
+      console.log('ðŸ—ºï¿½?Initializing map...');
       MapInteraction.init({
         center: [-75.16379, 39.95233], // Philadelphia City Hall
         zoom: 14.6,
       });
-      console.log('âœ?Map initialized');
+      console.log('ï¿½?Map initialized');
 
       // Step 4: Wait a moment for map to fully load, then load properties
       setTimeout(() => {
         MapInteraction.loadPropertyData(properties);
-        console.log('âœ?Properties loaded on map');
+        console.log('ï¿½?Properties loaded on map');
       }, 500);
 
       // Step 5: Initialize distribution charts (Issue #18 & #19)
       DistributionChart.init();
-      console.log('âœ?Distribution charts initialized');
+      console.log('ï¿½?Distribution charts initialized');
 
       // Step 6: Initialize chart filtering
       ChartFiltering.init(handleFilterChange);
       ChartFiltering.configureRanges?.(DataManager.getFilterExtents());
-      console.log('âœ?Chart filtering initialized');
+      console.log('ï¿½?Chart filtering initialized');
 
       if (typeof AssessorSidebar !== 'undefined') {
         AssessorSidebar.init();
@@ -56,29 +56,29 @@ const App = (() => {
 
       // Step 7: Setup event listeners
       setupEventListeners();
-      console.log('âœ?Event listeners setup');
+      console.log('ï¿½?Event listeners setup');
 
       // Step 8: Display initial statistics
       displayStatistics();
       updateFilteredResultCount(DataManager.getFilteredProperties());
-      console.log('âœ?Statistics displayed');
+      console.log('ï¿½?Statistics displayed');
 
       // Step 9: Display initial data
       displayFilteredProperties();
-      console.log('âœ?Initial data loaded');
+      console.log('ï¿½?Initial data loaded');
 
       // Step 10: Render sidebar distribution mini-charts
       renderSidebarCharts();
       if (typeof AssessorSidebar !== 'undefined') {
         AssessorSidebar.renderDefault();
       }
-      console.log('âœ?Sidebar distribution charts rendered');
+      console.log('ï¿½?Sidebar distribution charts rendered');
 
       console.log('Application ready!');
       loadingCoverReady = true;
       hideLoadingCoverIfReady();
     } catch (error) {
-      console.error('â?Error initializing application:', error);
+      console.error('ï¿½?Error initializing application:', error);
       PropertyPopup.showNotification(
         'Error loading application. Please refresh.',
         'error'
@@ -351,13 +351,7 @@ const App = (() => {
     const resultCount = document.getElementById('filteredResultCount');
     if (!resultCount) return;
 
-    const count = properties.length;
-    if (count === 0) {
-      resultCount.textContent = 'Showing 0 filtered ML parcels';
-      return;
-    }
-
-    resultCount.textContent = `Showing ${count.toLocaleString()} filtered ML parcel${count === 1 ? '' : 's'}`;
+    resultCount.textContent = `Filtered parcels: ${properties.length.toLocaleString()}`;
   };
 
   // Listen for page unload

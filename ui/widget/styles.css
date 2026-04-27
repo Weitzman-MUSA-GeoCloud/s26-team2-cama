@@ -704,6 +704,19 @@ svg:hover {
   pointer-events: none;
 }
 
+.nearby-histogram-marker-arrow {
+  position: absolute;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 0;
+  border-bottom: 8px solid #ffb2b6;
+  filter: drop-shadow(0 0 1px rgba(18, 20, 20, 0.8));
+  pointer-events: none;
+}
+
 .nearby-home-button {
   width: 100%;
   display: flex;

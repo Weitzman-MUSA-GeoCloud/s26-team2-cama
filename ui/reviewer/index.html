@@ -50,18 +50,19 @@
                 </div>
 
                 <div>
-                    <h2 class="panel-title">Predicted Value Distribution</h2>
+                    <div class="chart-section-header">
+                        <h2 class="panel-title">Predicted Value Distribution</h2>
+                        <button type="button" class="mini-chart-expand-btn" data-chart-expand="sidebar-predicted" aria-label="Expand predicted value distribution">&nearr;</button>
+                    </div>
                     <div id="priceDistributionChart" class="chart-box h-44">Chart loading...</div>
                 </div>
 
                 <div>
-                    <h2 class="panel-title">Market Value Distribution</h2>
+                    <div class="chart-section-header">
+                        <h2 class="panel-title">Market Value Distribution</h2>
+                        <button type="button" class="mini-chart-expand-btn" data-chart-expand="sidebar-market" aria-label="Expand market value distribution">&nearr;</button>
+                    </div>
                     <div id="marketDistributionChart" class="chart-box h-44">Chart loading...</div>
-                </div>
-
-                <div>
-                    <h2 class="panel-title">Transaction Volume Trend</h2>
-                    <div id="transactionTrendChart" class="chart-box h-40">Trend loading...</div>
                 </div>
 
                 <div>
@@ -191,7 +192,7 @@
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <div id="filteredResultCount" class="result-count-pill">Showing all ML parcels</div>
+                    <div id="filteredResultCount" class="result-count-pill">Filtered parcels: 0</div>
 
                     <div class="w-64">
                         <div id="mapLegendGradient" class="h-3 border border-[#e2e2e2]/20 reviewer-gradient-legend"></div>
@@ -247,8 +248,8 @@
                         <h3 class="text-xs font-space-grotesk font-600 uppercase tracking-wider text-[#e2e2e2]/60 mb-4">Market Value Distribution</h3>
                         <div id="bottomLeftChart" class="w-full h-full flex items-center justify-center text-xs text-[#e2e2e2]/40">Chart placeholder</div>
                     </button>
-                    <button type="button" class="chart-expand-card bg-[#121414] border border-[#e2e2e2]/20 p-4 text-left" data-chart="current">
-                        <h3 class="text-xs font-space-grotesk font-600 uppercase tracking-wider text-[#e2e2e2]/60 mb-4">Predicted Value Distribution</h3>
+                    <button type="button" class="chart-expand-card bg-[#121414] border border-[#e2e2e2]/20 p-4 text-left" data-chart="trend">
+                        <h3 class="text-xs font-space-grotesk font-600 uppercase tracking-wider text-[#e2e2e2]/60 mb-4">Transaction Trend</h3>
                         <div id="bottomRightChart" class="w-full h-full flex items-center justify-center text-xs text-[#e2e2e2]/40">Chart placeholder</div>
                     </button>
                 </div>
@@ -263,7 +264,7 @@
             <div class="px-5 py-4 border-b border-[#e2e2e2]/20 flex items-center justify-between">
                 <div>
                     <h2 id="chartModalTitle" class="text-lg font-space-grotesk font-600">Chart</h2>
-                    <p class="text-xs text-[#e2e2e2]/45 mt-1">Use mouse wheel to zoom. Double-click to reset.</p>
+                    <p id="chartModalNote" class="text-xs text-[#e2e2e2]/45 mt-1">Use mouse wheel to zoom. Double-click to reset.</p>
                 </div>
                 <button id="closeChartModalBtn" type="button" class="text-[#e2e2e2]/60 hover:text-[#e2e2e2] text-2xl leading-none">&times;</button>
             </div>

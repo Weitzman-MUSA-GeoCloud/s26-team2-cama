@@ -1,20 +1,15 @@
-/**
- * Search Module for Property Owner Widget
- * Handles address search and autocomplete functionality.
- */
-
 const Search = (() => {
   let allProperties = [];
   let isDataLoaded = false;
   let isDataLoading = false;
   let listenersBound = false;
 
-  const geoJsonUrl =
+  const ML_GEOJSON_URL =
     'https://storage.googleapis.com/musa5090s26-team2-temp_data/property_tile_info.geojson';
+  const FULL_GEOJSON_URL =
+    'https://storage.googleapis.com/musa5090s26-team2-public/residential_market_value.geojson';
 
   const init = async () => {
-    console.log('Initializing Search Module...');
-
     setupEventListeners();
     setSearchStatus('Loading property data...');
 
@@ -23,8 +18,6 @@ const Search = (() => {
       allProperties = await loadGeoJSONData();
       isDataLoaded = allProperties.length > 0;
       isDataLoading = false;
-
-      console.log(`Loaded ${allProperties.length} properties for search`);
       setSearchStatus('Properties are ready to explore.', 'success');
     } catch (error) {
       isDataLoading = false;
@@ -37,56 +30,135 @@ const Search = (() => {
   };
 
   const loadGeoJSONData = async () => {
-    const response = await fetch(geoJsonUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to load GeoJSON: ${response.status}`);
+    const [fullResponse, mlResponse] = await Promise.all([
+      fetch(FULL_GEOJSON_URL),
+      fetch(ML_GEOJSON_URL),
+    ]);
+
+    if (!fullResponse.ok) {
+      throw new Error(`Failed to load full parcel GeoJSON: ${fullResponse.status}`);
+    }
+    if (!mlResponse.ok) {
+      throw new Error(`Failed to load ML parcel GeoJSON: ${mlResponse.status}`);
     }
 
-    const geoJsonData = await response.json();
-    const properties = geoJsonData.features.map((feature) => {
-      const props = feature.properties || {};
-      const [lng, lat] = getFeatureCoordinate(feature.geometry);
-      const marketValue = Number(props.market_value);
-      const predictedValue = Number(props.predicted_value);
-      const lastYearValue = Number.isFinite(marketValue)
-        ? marketValue
-        : props.log_price
-          ? Math.exp(Number(props.log_price))
-          : null;
-      const currentValue = Number.isFinite(predictedValue) ? predictedValue : null;
-      const changePercent = lastYearValue
-        && Number.isFinite(currentValue)
-        ? ((currentValue - lastYearValue) / lastYearValue) * 100
-        : null;
+    const [fullGeoJsonData, mlGeoJsonData] = await Promise.all([
+      fullResponse.json(),
+      mlResponse.json(),
+    ]);
 
-      return {
-        id: String(props.property_id || ''),
-        address: props.address || 'Address not available',
-        property_type: props.bldg_desc || 'Unknown',
-        lat,
-        lng,
-        last_year_value: lastYearValue,
-        tax_year_value: lastYearValue,
-        market_value: lastYearValue,
-        predicted_value: currentValue,
-        change_percent: changePercent,
-        lot_size: Number(props.gross_area || 0),
-        year_built: null,
-        tax_status: 'Current',
-        neighborhood: null,
-      };
+    const mlMap = new Map(
+      (mlGeoJsonData.features || []).map((feature) => {
+        const property = transformMlFeature(feature);
+        return [String(property.id), property];
+      })
+    );
+
+    const merged = (fullGeoJsonData.features || []).map((feature) => {
+      const fullProperty = transformFullFeature(feature);
+      const mlProperty = mlMap.get(String(fullProperty.id));
+      return mergePropertyRecords(fullProperty, mlProperty);
     });
 
-    console.log(`Successfully loaded ${properties.length} properties from GeoJSON`);
-    return properties;
+    return merged.filter((property) => property.id && property.address);
+  };
+
+  const transformFullFeature = (feature) => {
+    const props = feature.properties || {};
+    const [lng, lat] = getFeatureCoordinate(feature.geometry);
+
+    return {
+      id: String(props.property_id || ''),
+      address: props.location || 'Address not available',
+      property_type: 'Residential',
+      lat,
+      lng,
+      market_value: toNumber(props.market_value),
+      last_year_value: toNumber(props.market_value),
+      tax_year_value: toNumber(props.market_value),
+      predicted_value: null,
+      change_percent: null,
+      lot_size: null,
+      sale_date: props.sale_date || null,
+      sale_price: toNumber(props.sale_price),
+      location: props.location || null,
+      shape: props.shape || null,
+      has_prediction: false,
+    };
+  };
+
+  const transformMlFeature = (feature) => {
+    const props = feature.properties || {};
+    const [lng, lat] = getFeatureCoordinate(feature.geometry);
+    const predictedValue = toNumber(props.predicted_value);
+    const marketValue = props.log_price
+      ? Math.exp(Number(props.log_price))
+      : toNumber(props.market_value);
+
+    return {
+      id: String(props.property_id || ''),
+      address: props.address || props.location || 'Address not available',
+      property_type: props.bldg_desc || 'Residential',
+      lat,
+      lng,
+      market_value: marketValue,
+      last_year_value: marketValue,
+      tax_year_value: marketValue,
+      predicted_value: predictedValue,
+      change_percent:
+        Number.isFinite(marketValue) && Number.isFinite(predictedValue) && marketValue > 0
+          ? ((predictedValue - marketValue) / marketValue) * 100
+          : null,
+      lot_size: toNumber(props.gross_area),
+      bldg_desc: props.bldg_desc || null,
+      zip_code: props.zip_code || null,
+      has_prediction: Number.isFinite(predictedValue),
+    };
+  };
+
+  const mergePropertyRecords = (fullProperty, mlProperty) => {
+    if (!mlProperty) {
+      return fullProperty;
+    }
+
+    return {
+      ...fullProperty,
+      ...mlProperty,
+      address: fullProperty.address || mlProperty.address,
+      lat: Number.isFinite(fullProperty.lat) ? fullProperty.lat : mlProperty.lat,
+      lng: Number.isFinite(fullProperty.lng) ? fullProperty.lng : mlProperty.lng,
+      market_value: Number.isFinite(fullProperty.market_value)
+        ? fullProperty.market_value
+        : mlProperty.market_value,
+      last_year_value: Number.isFinite(fullProperty.market_value)
+        ? fullProperty.market_value
+        : mlProperty.last_year_value,
+      tax_year_value: Number.isFinite(fullProperty.market_value)
+        ? fullProperty.market_value
+        : mlProperty.tax_year_value,
+      predicted_value: Number.isFinite(mlProperty.predicted_value)
+        ? mlProperty.predicted_value
+        : null,
+      change_percent:
+        Number.isFinite(fullProperty.market_value) &&
+        Number.isFinite(mlProperty.predicted_value) &&
+        fullProperty.market_value > 0
+          ? ((mlProperty.predicted_value - fullProperty.market_value) /
+              fullProperty.market_value) *
+            100
+          : mlProperty.change_percent,
+      property_type: mlProperty.property_type || fullProperty.property_type,
+      lot_size: Number.isFinite(mlProperty.lot_size) ? mlProperty.lot_size : fullProperty.lot_size,
+      sale_date: fullProperty.sale_date || null,
+      sale_price: Number.isFinite(fullProperty.sale_price) ? fullProperty.sale_price : null,
+      has_prediction: Number.isFinite(mlProperty.predicted_value),
+    };
   };
 
   const getFeatureCoordinate = (geometry) => {
     if (!geometry || !geometry.coordinates) return [null, null];
 
-    if (geometry.type === 'Point') {
-      return geometry.coordinates;
-    }
+    if (geometry.type === 'Point') return geometry.coordinates;
 
     const ring =
       geometry.type === 'Polygon'
@@ -95,7 +167,7 @@ const Search = (() => {
           ? geometry.coordinates[0]?.[0]
           : null;
 
-    if (!ring || ring.length === 0) return [null, null];
+    if (!ring?.length) return [null, null];
 
     const totals = ring.reduce(
       (acc, coord) => {
@@ -117,53 +189,43 @@ const Search = (() => {
     const autocompleteDropdown = document.getElementById('autocompleteDropdown');
     const opaIdInput = document.getElementById('opaIdSearch');
     const searchByIdBtn = document.getElementById('searchByIdBtn');
-    const addressSearchContainer = document.getElementById(
-      'addressSearchContainer'
-    );
+    const addressSearchContainer = document.getElementById('addressSearchContainer');
     const idSearchContainer = document.getElementById('idSearchContainer');
     const addressTab = document.getElementById('searchByAddressTab');
     const idTab = document.getElementById('searchByIdTab');
     const sampleAddressButtons = document.querySelectorAll('.sample-address');
 
-    if (!addressInput || !searchBtn || !autocompleteDropdown) {
-      console.warn('Search elements not found in DOM');
-      return;
-    }
+    if (!addressInput || !searchBtn || !autocompleteDropdown) return;
 
     listenersBound = true;
-    console.log('Search event listeners setup');
 
-    if (addressTab && idTab) {
-      addressTab.addEventListener('click', () => {
-        addressSearchContainer.classList.remove('hidden');
-        idSearchContainer.classList.add('hidden');
-        addressTab.classList.add('text-[#a0caff]', 'border-[#a0caff]');
-        addressTab.classList.remove('text-[#e2e2e2]/60', 'border-transparent');
-        idTab.classList.remove('text-[#a0caff]', 'border-[#a0caff]');
-        idTab.classList.add('text-[#e2e2e2]/60', 'border-transparent');
-        addressInput.focus();
-      });
+    addressTab?.addEventListener('click', () => {
+      addressSearchContainer.classList.remove('hidden');
+      idSearchContainer.classList.add('hidden');
+      addressTab.classList.add('text-[#a0caff]', 'border-[#a0caff]');
+      addressTab.classList.remove('text-[#e2e2e2]/60', 'border-transparent');
+      idTab?.classList.remove('text-[#a0caff]', 'border-[#a0caff]');
+      idTab?.classList.add('text-[#e2e2e2]/60', 'border-transparent');
+      addressInput.focus();
+    });
 
-      idTab.addEventListener('click', () => {
-        addressSearchContainer.classList.add('hidden');
-        idSearchContainer.classList.remove('hidden');
-        idTab.classList.add('text-[#a0caff]', 'border-[#a0caff]');
-        idTab.classList.remove('text-[#e2e2e2]/60', 'border-transparent');
-        addressTab.classList.remove('text-[#a0caff]', 'border-[#a0caff]');
-        addressTab.classList.add('text-[#e2e2e2]/60', 'border-transparent');
-        opaIdInput.focus();
-      });
-    }
+    idTab?.addEventListener('click', () => {
+      addressSearchContainer.classList.add('hidden');
+      idSearchContainer.classList.remove('hidden');
+      idTab.classList.add('text-[#a0caff]', 'border-[#a0caff]');
+      idTab.classList.remove('text-[#e2e2e2]/60', 'border-transparent');
+      addressTab?.classList.remove('text-[#a0caff]', 'border-[#a0caff]');
+      addressTab?.classList.add('text-[#e2e2e2]/60', 'border-transparent');
+      opaIdInput?.focus();
+    });
 
-    addressInput.addEventListener('input', (e) => {
-      const term = e.target.value.trim();
+    addressInput.addEventListener('input', (event) => {
+      const term = event.target.value.trim();
 
       if (term.length < 2) {
         autocompleteDropdown.classList.add('hidden');
         setSearchStatus(
-          isDataLoaded
-            ? 'Properties are ready to explore.'
-            : 'Loading property data...'
+          isDataLoaded ? 'Properties are ready to explore.' : 'Loading property data...'
         );
         return;
       }
@@ -176,10 +238,10 @@ const Search = (() => {
       displayAutocomplete(getSuggestions(term));
     });
 
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', (event) => {
       if (
-        !addressInput.contains(e.target) &&
-        !autocompleteDropdown.contains(e.target)
+        !addressInput.contains(event.target) &&
+        !autocompleteDropdown.contains(event.target)
       ) {
         autocompleteDropdown.classList.add('hidden');
       }
@@ -190,26 +252,22 @@ const Search = (() => {
       if (address) performSearch(address);
     });
 
-    addressInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
+    addressInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
         performSearch(addressInput.value.trim());
       }
     });
 
-    if (searchByIdBtn) {
-      searchByIdBtn.addEventListener('click', () => {
-        const id = opaIdInput.value.trim();
-        if (id) searchById(id);
-      });
-    }
+    searchByIdBtn?.addEventListener('click', () => {
+      const id = opaIdInput.value.trim();
+      if (id) searchById(id);
+    });
 
-    if (opaIdInput) {
-      opaIdInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          searchById(opaIdInput.value.trim());
-        }
-      });
-    }
+    opaIdInput?.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        searchById(opaIdInput.value.trim());
+      }
+    });
 
     sampleAddressButtons.forEach((button) => {
       button.addEventListener('click', () => {
@@ -219,11 +277,10 @@ const Search = (() => {
         if (address) {
           addressSearchContainer.classList.remove('hidden');
           idSearchContainer.classList.add('hidden');
-          addressTab.classList.add('text-[#a0caff]', 'border-[#a0caff]');
-          addressTab.classList.remove('text-[#e2e2e2]/60', 'border-transparent');
-          idTab.classList.remove('text-[#a0caff]', 'border-[#a0caff]');
-          idTab.classList.add('text-[#e2e2e2]/60', 'border-transparent');
-
+          addressTab?.classList.add('text-[#a0caff]', 'border-[#a0caff]');
+          addressTab?.classList.remove('text-[#e2e2e2]/60', 'border-transparent');
+          idTab?.classList.remove('text-[#a0caff]', 'border-[#a0caff]');
+          idTab?.classList.add('text-[#e2e2e2]/60', 'border-transparent');
           addressInput.value = address;
           performSearch(address);
           return;
@@ -232,11 +289,10 @@ const Search = (() => {
         if (propertyId) {
           addressSearchContainer.classList.add('hidden');
           idSearchContainer.classList.remove('hidden');
-          idTab.classList.add('text-[#a0caff]', 'border-[#a0caff]');
-          idTab.classList.remove('text-[#e2e2e2]/60', 'border-transparent');
-          addressTab.classList.remove('text-[#a0caff]', 'border-[#a0caff]');
-          addressTab.classList.add('text-[#e2e2e2]/60', 'border-transparent');
-
+          idTab?.classList.add('text-[#a0caff]', 'border-[#a0caff]');
+          idTab?.classList.remove('text-[#e2e2e2]/60', 'border-transparent');
+          addressTab?.classList.remove('text-[#a0caff]', 'border-[#a0caff]');
+          addressTab?.classList.add('text-[#e2e2e2]/60', 'border-transparent');
           if (opaIdInput) opaIdInput.value = propertyId;
           searchById(propertyId);
         }
@@ -249,32 +305,31 @@ const Search = (() => {
     const fallbackTerm = getStreetFallbackTerm(term);
 
     const exactish = allProperties.filter(
-      (prop) =>
-        normalizeSearchText(prop.address).includes(normalizedTerm) ||
-        String(prop.id).includes(term)
+      (property) =>
+        normalizeSearchText(property.address).includes(normalizedTerm) ||
+        String(property.id).includes(term)
     );
 
     const fallback =
       exactish.length > 0 || !fallbackTerm
         ? []
-        : allProperties.filter((prop) =>
-            normalizeSearchText(prop.address).includes(fallbackTerm)
+        : allProperties.filter((property) =>
+            normalizeSearchText(property.address).includes(fallbackTerm)
           );
 
-    return [...exactish, ...fallback].slice(0, 8).map((prop) => ({
-      id: prop.id,
-      address: prop.address,
-      type: prop.property_type,
+    return [...exactish, ...fallback].slice(0, 8).map((property) => ({
+      id: property.id,
+      address: property.address,
+      type: property.property_type,
     }));
   };
 
   const displayAutocomplete = (suggestions) => {
     const dropdown = document.getElementById('autocompleteDropdown');
     const suggestionList = document.getElementById('autocompleteList');
-
     if (!dropdown || !suggestionList) return;
 
-    if (suggestions.length === 0) {
+    if (!suggestions.length) {
       dropdown.classList.add('hidden');
       return;
     }
@@ -292,18 +347,13 @@ const Search = (() => {
       .join('');
 
     dropdown.classList.remove('hidden');
-
-    suggestionList.querySelectorAll('[data-property-id]').forEach((el) => {
-      el.addEventListener('click', () => {
-        selectProperty(el.dataset.propertyId);
-      });
+    suggestionList.querySelectorAll('[data-property-id]').forEach((element) => {
+      element.addEventListener('click', () => selectProperty(element.dataset.propertyId));
     });
   };
 
   const performSearch = (searchTerm) => {
-    const dropdown = document.getElementById('autocompleteDropdown');
-    if (dropdown) dropdown.classList.add('hidden');
-
+    document.getElementById('autocompleteDropdown')?.classList.add('hidden');
     if (!searchTerm) return;
 
     if (!isDataLoaded) {
@@ -317,16 +367,16 @@ const Search = (() => {
 
     const normalizedTerm = normalizeSearchText(searchTerm);
     const results = allProperties.filter(
-      (prop) =>
-        normalizeSearchText(prop.address).includes(normalizedTerm) ||
-        String(prop.id).includes(searchTerm)
+      (property) =>
+        normalizeSearchText(property.address).includes(normalizedTerm) ||
+        String(property.id).includes(searchTerm)
     );
 
-    if (results.length === 0) {
-      const suggestions = getClosestProperties(searchTerm, 5).map((prop) => ({
-        id: prop.id,
-        address: prop.address,
-        type: prop.property_type,
+    if (!results.length) {
+      const suggestions = getClosestProperties(searchTerm, 5).map((property) => ({
+        id: property.id,
+        address: property.address,
+        type: property.property_type,
       }));
       displayAutocomplete(suggestions);
       setSearchStatus('No exact match. Showing the 5 closest real addresses.');
@@ -347,55 +397,37 @@ const Search = (() => {
     }
 
     const property = getPropertyById(id);
-
     if (!property) {
       showNotification(`No property found with ID: ${id}`, 'info');
-      console.log('Property not found:', id);
       return;
     }
 
-    console.log('Found property by ID:', property.address);
     selectProperty(id);
   };
 
   const selectProperty = (propertyId) => {
     const property = getPropertyById(propertyId);
-
     if (!property) {
-      console.error('Property not found:', propertyId);
       setSearchStatus('Property not found. Try another address or OPA ID.');
       return;
     }
-
-    console.log('Selected property:', property.address);
 
     const addressInput = document.getElementById('addressSearch');
     const opaIdInput = document.getElementById('opaIdSearch');
     if (addressInput) addressInput.value = property.address;
     if (opaIdInput) opaIdInput.value = property.id;
 
-    const dropdown = document.getElementById('autocompleteDropdown');
-    if (dropdown) dropdown.classList.add('hidden');
-
+    document.getElementById('autocompleteDropdown')?.classList.add('hidden');
     setSearchStatus(`Selected ${property.address} (OPA ${property.id}).`);
-
-    if (typeof PropertyDisplay !== 'undefined') {
-      PropertyDisplay.displayProperty(property);
-    } else {
-      console.error('PropertyDisplay module not found');
-    }
+    PropertyDisplay?.displayProperty?.(property);
   };
 
-  const getPropertyById = (id) => {
-    return allProperties.find((p) => String(p.id) === String(id)) || null;
-  };
+  const getPropertyById = (id) =>
+    allProperties.find((property) => String(property.id) === String(id)) || null;
 
-  const getAllProperties = () => {
-    return allProperties;
-  };
+  const getAllProperties = () => allProperties;
 
   const showNotification = (message, type = 'info') => {
-    console.log(`[${type.toUpperCase()}] ${message}`);
     setSearchStatus(message, type);
   };
 
@@ -404,11 +436,7 @@ const Search = (() => {
     if (!status) return;
 
     status.textContent = message || '';
-    status.classList.remove(
-      'text-[#ffb2b6]',
-      'text-[#a0caff]',
-      'text-[#e2e2e2]/60'
-    );
+    status.classList.remove('text-[#ffb2b6]', 'text-[#a0caff]', 'text-[#e2e2e2]/60');
     status.classList.add(
       type === 'error'
         ? 'text-[#ffb2b6]'
@@ -418,8 +446,8 @@ const Search = (() => {
     );
   };
 
-  const normalizeSearchText = (value) => {
-    return String(value || '')
+  const normalizeSearchText = (value) =>
+    String(value || '')
       .toLowerCase()
       .replace(/[.,#]/g, ' ')
       .replace(/\bphiladelphia\b/g, ' ')
@@ -440,7 +468,6 @@ const Search = (() => {
       .replace(/\b\d{5}(?:-\d{4})?\b/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
-  };
 
   const getStreetFallbackTerm = (value) => {
     const normalized = normalizeSearchText(value);
@@ -471,23 +498,24 @@ const Search = (() => {
     if (!b) return a.length;
 
     const shortB = b.slice(0, Math.max(a.length + 8, 24));
-    const previous = Array.from({ length: shortB.length + 1 }, (_, i) => i);
+    const previous = Array.from({ length: shortB.length + 1 }, (_, index) => index);
     const current = Array(shortB.length + 1).fill(0);
 
-    for (let i = 1; i <= a.length; i++) {
+    for (let i = 1; i <= a.length; i += 1) {
       current[0] = i;
-      for (let j = 1; j <= shortB.length; j++) {
+      for (let j = 1; j <= shortB.length; j += 1) {
         const cost = a[i - 1] === shortB[j - 1] ? 0 : 1;
-        current[j] = Math.min(
-          previous[j] + 1,
-          current[j - 1] + 1,
-          previous[j - 1] + cost
-        );
+        current[j] = Math.min(previous[j] + 1, current[j - 1] + 1, previous[j - 1] + cost);
       }
-      for (let j = 0; j <= shortB.length; j++) previous[j] = current[j];
+      for (let j = 0; j <= shortB.length; j += 1) previous[j] = current[j];
     }
 
     return previous[shortB.length];
+  };
+
+  const toNumber = (value) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
   };
 
   return {

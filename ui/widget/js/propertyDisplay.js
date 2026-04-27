@@ -73,6 +73,8 @@ const PropertyDisplay = (() => {
 
     setElementText('changeAmount', Utils.formatCurrency(dollarChange));
     setElementText('changePercent', Utils.formatPercentage(percentChange));
+    setElementText('propertyLatestSale', Utils.formatCurrency(property.sale_price));
+    setElementText('propertySaleDate', formatSaleDate(property.sale_date));
 
     const changeBar = document.getElementById('changeBar');
     if (changeBar) {
@@ -330,6 +332,11 @@ const PropertyDisplay = (() => {
       const markerRatio = (yourChange - min) / range;
       marker.style.left = `calc(${Math.max(0, Math.min(1, markerRatio)) * 100}% - 1px)`;
       histogram.appendChild(marker);
+
+      const markerArrow = document.createElement('div');
+      markerArrow.className = 'nearby-histogram-marker-arrow';
+      markerArrow.style.left = `calc(${Math.max(0, Math.min(1, markerRatio)) * 100}% - 6px)`;
+      histogram.appendChild(markerArrow);
     }
   };
 
@@ -401,6 +408,9 @@ const PropertyDisplay = (() => {
   };
 
   const showSections = () => {
+    document.getElementById('ownerIntroBlock')?.classList.add('hidden');
+    document.getElementById('ownerExamplesBlock')?.classList.add('hidden');
+
     const emptyState = document.getElementById('emptyState');
     if (emptyState) {
       emptyState.classList.add('hidden');
@@ -424,6 +434,9 @@ const PropertyDisplay = (() => {
   };
 
   const hideSections = () => {
+    document.getElementById('ownerIntroBlock')?.classList.remove('hidden');
+    document.getElementById('ownerExamplesBlock')?.classList.remove('hidden');
+
     const propertySection = document.getElementById('propertySection');
     if (propertySection) {
       propertySection.classList.add('hidden');
@@ -444,8 +457,19 @@ const PropertyDisplay = (() => {
   const setElementText = (elementId, text) => {
     const element = document.getElementById(elementId);
     if (element) {
-      element.textContent = text;
+      element.textContent = text ?? '-';
     }
+  };
+
+  const formatSaleDate = (value) => {
+    if (!value) return '-';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return '-';
+    return parsed.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
   };
 
   const getCurrentProperty = () => currentProperty;

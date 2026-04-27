@@ -6,7 +6,7 @@
     <title>CAMA Philadelphia - Residential Value Review</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=20260424-landing-loading-motion">
+    <link rel="stylesheet" href="styles.css?v=20260424-landing-hero-scroll">
 </head>
 <body class="bg-[#121414] text-[#e2e2e2] font-inter">
     <nav class="bg-[#1e2020]/95 border-b border-[#e2e2e2]/15 px-6 lg:px-8 py-4 sticky top-0 z-40">
@@ -20,7 +20,6 @@
             </a>
             <div class="hidden md:flex items-center gap-6 text-sm text-[#e2e2e2]/70">
                 <a href="#portals" class="hover:text-[#a0caff] transition-colors duration-200">Choose Portal</a>
-                <a href="#overview" class="hover:text-[#a0caff] transition-colors duration-200">Overview</a>
                 <a href="./reviewer/" class="hover:text-[#a0caff] transition-colors duration-200">Housing Assessor</a>
                 <a href="./widget/" class="hover:text-[#a0caff] transition-colors duration-200">Property Owner</a>
             </div>
@@ -36,7 +35,7 @@
                     </div>
                     <div class="landing-title-row landing-animate-up landing-delay-2">
                         <img src="./assets/team-mark.svg" alt="Yanyang Isabelle Sihan Zicheng team mark" class="landing-team-mark">
-                        <h1 class="text-4xl md:text-5xl lg:text-6xl font-space-grotesk font-bold leading-tight max-w-4xl">
+                        <h1 class="text-5xl md:text-7xl lg:text-[7rem] font-space-grotesk font-bold leading-[0.92] max-w-5xl">
                             One citywide system, two clear entry points.
                         </h1>
                     </div>
@@ -46,22 +45,15 @@
                 </div>
                 <div class="landing-scroll-hint landing-animate-up landing-delay-5">
                     <span>Scroll to choose a portal</span>
-                    <span class="landing-scroll-arrow">↓</span>
+                    <span class="landing-scroll-arrow">&#8595;</span>
                 </div>
             </div>
         </section>
 
         <section id="portals" class="px-6 lg:px-8 pb-16 pt-10 lg:pt-14">
             <div class="max-w-7xl mx-auto">
-                <div class="mb-8">
-                    <div class="text-xs uppercase tracking-[0.22em] text-[#e2e2e2]/45 mb-3">Choose Portal</div>
-                    <h2 class="text-3xl font-space-grotesk font-bold mb-2">Open the workflow that matches the user.</h2>
-                    <p class="text-[#e2e2e2]/65 max-w-3xl">
-                        Both interfaces use the same parcel data, but the interaction model changes depending on whether the goal is citywide review or one-property context.
-                    </p>
-                </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <a href="./reviewer/" class="portal-entry-card portal-entry-card--assessor group">
+                    <a href="./reviewer/" class="portal-entry-card portal-entry-card--assessor group landing-scroll-reveal">
                         <div class="portal-entry-header">
                             <div class="portal-entry-icon bg-[#a0caff]/18 text-[#a0caff]">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,19 +62,18 @@
                             </div>
                             <div>
                                 <div class="text-xs uppercase tracking-[0.24em] text-[#a0caff]/75 mb-2">Housing Assessor Portal</div>
-                                <h3 class="text-2xl font-space-grotesk font-semibold">Review values across the city.</h3>
+                                <h3 class="portal-entry-title">Review values across the city.</h3>
                             </div>
                         </div>
-                        <p class="text-[#e2e2e2]/68 leading-7 mb-6">
-                            Built for parcel-by-parcel review with filters, linked charts, map drilldowns, and citywide comparison tools for finding clusters, outliers, and review candidates.
+                        <p class="portal-entry-copy">
+                            Built for parcel review, value filtering, and citywide comparison on the map.
                         </p>
                         <div class="portal-entry-grid">
                             <div>
                                 <div class="portal-entry-subtitle">Best for</div>
                                 <ul class="portal-entry-list">
                                     <li>Citywide filtering and parcel triage</li>
-                                    <li>Comparing price ranges and change bands</li>
-                                    <li>Moving from chart patterns to map evidence</li>
+                                    <li>Comparing price bands and change patterns</li>
                                 </ul>
                             </div>
                             <div>
@@ -90,7 +81,7 @@
                                 <ul class="portal-entry-list">
                                     <li>Vector tiles with predicted value styling</li>
                                     <li>Histogram-driven map filtering</li>
-                                    <li>Sidebar + chart + parcel detail workflow</li>
+                                    <li>Parcel detail and chart drilldown</li>
                                 </ul>
                             </div>
                         </div>
@@ -102,7 +93,7 @@
                         </div>
                     </a>
 
-                    <a href="./widget/" class="portal-entry-card portal-entry-card--owner group">
+                    <a href="./widget/" class="portal-entry-card portal-entry-card--owner group landing-scroll-reveal">
                         <div class="portal-entry-header">
                             <div class="portal-entry-icon bg-[#ffb2b6]/16 text-[#ffb2b6]">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,11 +102,11 @@
                             </div>
                             <div>
                                 <div class="text-xs uppercase tracking-[0.24em] text-[#ffb2b6]/75 mb-2">Property Owner Portal</div>
-                                <h3 class="text-2xl font-space-grotesk font-semibold">Understand one property in neighborhood context.</h3>
+                                <h3 class="portal-entry-title">Understand one property in neighborhood context.</h3>
                             </div>
                         </div>
-                        <p class="text-[#e2e2e2]/68 leading-7 mb-6">
-                            Built for direct lookup, map focus, nearby comparisons, and plain-language value summaries that help a homeowner understand how one property relates to nearby parcels.
+                        <p class="portal-entry-copy">
+                            Built for direct lookup, nearby context, and a clearer explanation of one address.
                         </p>
                         <div class="portal-entry-grid">
                             <div>
@@ -123,7 +114,6 @@
                                 <ul class="portal-entry-list">
                                     <li>Address or OPA search for a single parcel</li>
                                     <li>Comparing market and predicted values</li>
-                                    <li>Seeing nearby change within a 250m radius</li>
                                 </ul>
                             </div>
                             <div>
@@ -131,7 +121,7 @@
                                 <ul class="portal-entry-list">
                                     <li>Property detail card with value change</li>
                                     <li>Nearby change panel and radius overlay</li>
-                                    <li>Navigation between same-type nearby homes</li>
+                                    <li>Nearby examples and map jump links</li>
                                 </ul>
                             </div>
                         </div>
@@ -143,48 +133,6 @@
                         </div>
                     </a>
                 </div>
-                <div class="landing-capability-strip mt-8">
-                    <div class="landing-capability-chip">Parcel-level map interaction</div>
-                    <div class="landing-capability-chip">Market and predicted values</div>
-                    <div class="landing-capability-chip">Nearby comparison context</div>
-                </div>
-            </div>
-        </section>
-
-        <section id="overview" class="px-6 lg:px-8 py-16 bg-[#1e2020]/35 border-y border-[#e2e2e2]/10">
-            <div class="max-w-7xl mx-auto">
-                <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
-                    <div>
-                        <div class="text-xs uppercase tracking-[0.22em] text-[#e2e2e2]/45 mb-3">Coverage Snapshot</div>
-                        <h2 class="text-3xl font-space-grotesk font-bold mb-2">A quick read on the current modeled dataset.</h2>
-                        <p class="text-[#e2e2e2]/65 max-w-3xl">
-                            These summary cards give the homepage just enough context to feel grounded, without turning the landing page into another dashboard.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-                    <div class="landing-stat-card stat-card">
-                        <div class="landing-stat-label">ML-covered parcels</div>
-                        <div id="homeTotalProperties" class="landing-stat-value">Loading...</div>
-                        <div class="landing-stat-meta">Modeled properties currently available on the map</div>
-                    </div>
-                    <div class="landing-stat-card stat-card">
-                        <div class="landing-stat-label">Parcels with positive change</div>
-                        <div id="homePropertiesIncreased" class="landing-stat-value text-[#ffb2b6]">Loading...</div>
-                        <div class="landing-stat-meta">Share of modeled parcels with predicted increases</div>
-                    </div>
-                    <div class="landing-stat-card stat-card">
-                        <div class="landing-stat-label">Average predicted change</div>
-                        <div id="homeAverageIncrease" class="landing-stat-value">Loading...</div>
-                        <div class="landing-stat-meta">Average percent difference from prior market reference</div>
-                    </div>
-                    <div class="landing-stat-card stat-card">
-                        <div class="landing-stat-label">Total predicted value</div>
-                        <div id="homeTotalAssessedValue" class="landing-stat-value">Loading...</div>
-                        <div class="landing-stat-meta">Sum of predicted values across the modeled parcel set</div>
-                    </div>
-                </div>
             </div>
         </section>
 
@@ -194,7 +142,7 @@
                     <div class="text-xs uppercase tracking-[0.22em] text-[#e2e2e2]/45 mb-3">Workflow</div>
                     <h2 class="text-3xl font-space-grotesk font-bold mb-2">What happens after entry.</h2>
                     <p class="text-[#e2e2e2]/65 max-w-3xl mx-auto">
-                        The homepage should hand users off cleanly. These three steps explain the shared structure without recreating the portals themselves.
+                        A short view of what both portals are built to support.
                     </p>
                 </div>
 
@@ -202,17 +150,17 @@
                     <div class="workflow-card">
                         <div class="workflow-step">01</div>
                         <h3 class="workflow-title">Find the parcel</h3>
-                        <p class="workflow-copy">Start from an address, OPA ID, or the map itself. Both portals are designed around parcel-first interaction.</p>
+                        <p class="workflow-copy">Start from an address, OPA ID, or the map itself.</p>
                     </div>
                     <div class="workflow-card">
                         <div class="workflow-step">02</div>
                         <h3 class="workflow-title">Read the values</h3>
-                        <p class="workflow-copy">See market context, predicted values, and chart-supported distributions without breaking the map workflow.</p>
+                        <p class="workflow-copy">See market context, predicted values, and linked chart views.</p>
                     </div>
                     <div class="workflow-card">
                         <div class="workflow-step">03</div>
                         <h3 class="workflow-title">Compare in context</h3>
-                        <p class="workflow-copy">Assessors drill down through filters and charts. Owners compare one property against nearby homes and local change patterns.</p>
+                        <p class="workflow-copy">Move between one parcel and the broader city or nearby context.</p>
                     </div>
                 </div>
             </div>
@@ -228,7 +176,5 @@
             </div>
         </div>
     </footer>
-
-    <script src="homeStats.js?v=20260424-landing-refresh"></script>
 </body>
 </html>

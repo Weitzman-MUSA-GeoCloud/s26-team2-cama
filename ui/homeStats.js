@@ -3,6 +3,7 @@ const HomeStats = (() => {
     'https://storage.googleapis.com/musa5090s26-team2-temp_data/property_tile_info.geojson';
 
   const init = async () => {
+    setupScrollReveal();
     try {
       const response = await fetch(GEOJSON_URL);
       if (!response.ok) {
@@ -99,6 +100,36 @@ const HomeStats = (() => {
   const setText = (id, value) => {
     const element = document.getElementById(id);
     if (element) element.textContent = value;
+  };
+
+  const setupScrollReveal = () => {
+    const revealTargets = document.querySelectorAll('.landing-scroll-reveal');
+    if (!revealTargets.length) return;
+
+    if (!('IntersectionObserver' in window)) {
+      revealTargets.forEach((target) => target.classList.add('is-visible'));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.18,
+        rootMargin: '0px 0px -8% 0px',
+      }
+    );
+
+    revealTargets.forEach((target, index) => {
+      target.style.transitionDelay = `${Math.min(index * 120, 240)}ms`;
+      observer.observe(target);
+    });
   };
 
   const updateMeta = (cardIndex, text) => {

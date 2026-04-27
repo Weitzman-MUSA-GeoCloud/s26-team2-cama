@@ -42,12 +42,12 @@
 
     <main class="grid grid-cols-1 lg:grid-cols-[380px_1fr] h-[calc(100vh-65px)] overflow-hidden">
         <aside class="bg-[#1e2020] border-r border-[#e2e2e2]/20 p-6 overflow-y-auto">
-            <div class="mb-6">
+            <div id="ownerIntroBlock" class="mb-6">
                 <h1 class="text-2xl font-space-grotesk font-700">Find Your Property</h1>
                 <p class="text-sm text-[#e2e2e2]/55 mt-2">Search your address or OPA ID to view the latest predicted value.</p>
             </div>
 
-            <div class="mb-6">
+            <div id="ownerExamplesBlock" class="mb-6">
                 <label class="text-xs text-[#e2e2e2]/60 uppercase tracking-wider block mb-3">For example</label>
                 <div id="sampleAddressList" class="flex flex-wrap gap-2">
                     <button type="button" class="sample-address sample-chip" data-address="1210 PINE ST">1210 PINE ST</button>
@@ -108,6 +108,7 @@
                     <div class="owner-detail-row"><span>Property Type</span><strong id="propertyType">-</strong></div>
                     <div class="owner-detail-row"><span>Lot Size</span><strong id="propertyLotSize">-</strong></div>
                     <div class="owner-detail-row"><span>Latest Sale</span><strong id="propertyLatestSale">Not available in current dataset</strong></div>
+                    <div class="owner-detail-row"><span>Sale Date</span><strong id="propertySaleDate">-</strong></div>
                 </div>
 
             </section>
@@ -146,9 +147,7 @@
                                 type="button"
                                 class="nearby-close-button"
                                 aria-label="Close nearby change panel"
-                            >
-                                ×
-                            </button>
+                            >&times;</button>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
