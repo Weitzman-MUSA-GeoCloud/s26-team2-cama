@@ -24,7 +24,7 @@ const Search = (() => {
       console.error('Error initializing search:', error);
       setSearchStatus(
         'Property data could not be loaded. Please refresh the page.',
-        'error'
+        'error',
       );
     }
   };
@@ -51,7 +51,7 @@ const Search = (() => {
       (mlGeoJsonData.features || []).map((feature) => {
         const property = transformMlFeature(feature);
         return [String(property.id), property];
-      })
+      }),
     );
 
     const merged = (fullGeoJsonData.features || []).map((feature) => {
@@ -175,7 +175,7 @@ const Search = (() => {
         acc.lat += Number(coord[1] || 0);
         return acc;
       },
-      { lng: 0, lat: 0 }
+      { lng: 0, lat: 0 },
     );
 
     return [totals.lng / ring.length, totals.lat / ring.length];
@@ -225,7 +225,7 @@ const Search = (() => {
       if (term.length < 2) {
         autocompleteDropdown.classList.add('hidden');
         setSearchStatus(
-          isDataLoaded ? 'Properties are ready to explore.' : 'Loading property data...'
+          isDataLoaded ? 'Properties are ready to explore.' : 'Loading property data...',
         );
         return;
       }
@@ -307,15 +307,15 @@ const Search = (() => {
     const exactish = allProperties.filter(
       (property) =>
         normalizeSearchText(property.address).includes(normalizedTerm) ||
-        String(property.id).includes(term)
+        String(property.id).includes(term),
     );
 
     const fallback =
       exactish.length > 0 || !fallbackTerm
         ? []
         : allProperties.filter((property) =>
-            normalizeSearchText(property.address).includes(fallbackTerm)
-          );
+          normalizeSearchText(property.address).includes(fallbackTerm),
+        );
 
     return [...exactish, ...fallback].slice(0, 8).map((property) => ({
       id: property.id,
@@ -342,7 +342,7 @@ const Search = (() => {
         <div class="font-600 text-sm">${suggestion.address}</div>
         <div class="text-xs text-[#e2e2e2]/40 mt-1">${suggestion.type} - ID: ${suggestion.id}</div>
       </div>
-    `
+    `,
       )
       .join('');
 
@@ -360,7 +360,7 @@ const Search = (() => {
       setSearchStatus(
         isDataLoading
           ? 'Still loading property data. Please wait a moment...'
-          : 'Property data is not ready. Please refresh the page.'
+          : 'Property data is not ready. Please refresh the page.',
       );
       return;
     }
@@ -369,7 +369,7 @@ const Search = (() => {
     const results = allProperties.filter(
       (property) =>
         normalizeSearchText(property.address).includes(normalizedTerm) ||
-        String(property.id).includes(searchTerm)
+        String(property.id).includes(searchTerm),
     );
 
     if (!results.length) {
@@ -391,7 +391,7 @@ const Search = (() => {
       setSearchStatus(
         isDataLoading
           ? 'Still loading property data. Please wait a moment...'
-          : 'Property data is not ready. Please refresh the page.'
+          : 'Property data is not ready. Please refresh the page.',
       );
       return;
     }
@@ -442,7 +442,7 @@ const Search = (() => {
         ? 'text-[#ffb2b6]'
         : type === 'success'
           ? 'text-[#a0caff]'
-          : 'text-[#e2e2e2]/60'
+          : 'text-[#e2e2e2]/60',
     );
   };
 

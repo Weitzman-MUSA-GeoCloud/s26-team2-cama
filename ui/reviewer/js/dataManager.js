@@ -272,7 +272,7 @@ const DataManager = (() => {
    */
   const getNeighborhoodStats = (neighborhood) => {
     const neighborhoodProps = filteredProperties.filter(
-      (p) => p.neighborhood === neighborhood
+      (p) => p.neighborhood === neighborhood,
     );
     return {
       count: neighborhoodProps.length,
@@ -308,7 +308,7 @@ const DataManager = (() => {
     data.forEach((value) => {
       const binIndex = Math.min(
         Math.floor((value - stats.min) / binSize),
-        bins - 1
+        bins - 1,
       );
       distribution[binIndex]++;
     });
@@ -499,7 +499,7 @@ const DataManager = (() => {
         current[j] = Math.min(
           previous[j] + 1,
           current[j - 1] + 1,
-          previous[j - 1] + cost
+          previous[j - 1] + cost,
         );
       }
       for (let j = 0; j <= shortB.length; j++) previous[j] = current[j];

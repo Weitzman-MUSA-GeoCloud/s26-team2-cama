@@ -59,7 +59,7 @@ const PropertyDisplay = (() => {
       'propertyCurrentYear',
       Number.isFinite(currentValue)
         ? `(${new Date().getFullYear()})`
-        : '(No ML prediction)'
+        : '(No ML prediction)',
     );
 
     const dollarChange =
@@ -107,7 +107,7 @@ const PropertyDisplay = (() => {
           property.lat,
           property.lng,
           candidate.lat,
-          candidate.lng
+          candidate.lng,
         ),
       }))
       .filter((candidate) => Number.isFinite(candidate.change_percent));
@@ -121,7 +121,7 @@ const PropertyDisplay = (() => {
           property.lat,
           property.lng,
           candidate.lat,
-          candidate.lng
+          candidate.lng,
         ),
       }))
       .filter((candidate) => Number.isFinite(candidate.change_percent));
@@ -140,15 +140,15 @@ const PropertyDisplay = (() => {
     setElementText('nearbyAverageChange', Utils.formatPercentage(nearbyAverage));
     setElementText(
       'nearbyYourChange',
-      hasPrediction ? Utils.formatPercentage(yourChange) : String(activeNearby.length)
+      hasPrediction ? Utils.formatPercentage(yourChange) : String(activeNearby.length),
     );
     setElementText(
       'nearbyStatus',
-      getNearbyStatusText(property, yourChange, nearbyAverage, activeNearby.length)
+      getNearbyStatusText(property, yourChange, nearbyAverage, activeNearby.length),
     );
     setElementText(
       'nearbyYourMarkerLabel',
-      hasPrediction ? 'Your home' : 'Nearby homes with predictions'
+      hasPrediction ? 'Your home' : 'Nearby homes with predictions',
     );
 
     renderNearbyHistogram(activeNearby, hasPrediction ? yourChange : null);
@@ -160,11 +160,11 @@ const PropertyDisplay = (() => {
     setElementText('nearbyPrimaryLabel', 'Nearby average');
     setElementText(
       'nearbySecondaryLabel',
-      hasPrediction ? 'Your property' : 'Nearby homes with prediction'
+      hasPrediction ? 'Your property' : 'Nearby homes with prediction',
     );
     setElementText(
       'sameTypeHomesLabel',
-      hasPrediction ? 'Same Property Type' : 'Nearby examples'
+      hasPrediction ? 'Same Property Type' : 'Nearby examples',
     );
 
     const toggle = document.getElementById('toggleSameTypeHomes');
@@ -203,7 +203,7 @@ const PropertyDisplay = (() => {
         selectedProperty.lat,
         selectedProperty.lng,
         candidate.lat,
-        candidate.lng
+        candidate.lng,
       ) <= NEARBY_RADIUS_METERS
     );
   };
@@ -227,7 +227,7 @@ const PropertyDisplay = (() => {
         selectedProperty.lat,
         selectedProperty.lng,
         candidate.lat,
-        candidate.lng
+        candidate.lng,
       ) <= NEARBY_RADIUS_METERS
     );
   };
@@ -263,7 +263,7 @@ const PropertyDisplay = (() => {
       return 'Nearby comparison is not available right now.';
     }
     const betterThanCount = neighborhoodProperties.filter(
-      (candidate) => Number.isFinite(candidate.change_percent) && yourChange > candidate.change_percent
+      (candidate) => Number.isFinite(candidate.change_percent) && yourChange > candidate.change_percent,
     ).length;
     const percentile = Math.round((betterThanCount / comparableCount) * 100);
 
@@ -557,11 +557,11 @@ const PropertyDisplay = (() => {
 
       const nextLeft = Math.min(
         maxLeft,
-        Math.max(0, startLeft + (event.clientX - startX))
+        Math.max(0, startLeft + (event.clientX - startX)),
       );
       const nextTop = Math.min(
         maxTop,
-        Math.max(0, startTop + (event.clientY - startY))
+        Math.max(0, startTop + (event.clientY - startY)),
       );
 
       panel.style.left = `${nextLeft}px`;

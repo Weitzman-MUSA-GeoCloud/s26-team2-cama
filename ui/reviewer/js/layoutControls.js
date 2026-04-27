@@ -11,7 +11,7 @@ const LayoutControls = (() => {
       document.body.classList.toggle('left-panel-hidden');
       toggleLeftBtn.classList.toggle(
         'active',
-        !document.body.classList.contains('left-panel-hidden')
+        !document.body.classList.contains('left-panel-hidden'),
       );
       refreshLayout();
     });
@@ -20,7 +20,7 @@ const LayoutControls = (() => {
       document.body.classList.toggle('bottom-panel-hidden');
       toggleBottomBtn.classList.toggle(
         'active',
-        !document.body.classList.contains('bottom-panel-hidden')
+        !document.body.classList.contains('bottom-panel-hidden'),
       );
       refreshLayout();
     });

@@ -111,7 +111,7 @@ const DistributionChart = (() => {
       renderExpandedSidebarHistogram(
         body,
         buildPropertyHistogram('predicted'),
-        colors.predicted
+        colors.predicted,
       );
       return;
     }
@@ -122,7 +122,7 @@ const DistributionChart = (() => {
       renderExpandedSidebarHistogram(
         body,
         buildPropertyHistogram('market'),
-        colors.market
+        colors.market,
       );
     }
   };
@@ -143,7 +143,7 @@ const DistributionChart = (() => {
     container.innerHTML = '';
 
     const filtered = cachedTaxYearData.filter((item) =>
-      latestTaxYears.includes(Number(item.tax_year))
+      latestTaxYears.includes(Number(item.tax_year)),
     );
     renderTaxYearLineChart(container, filtered, {
       interactiveLegend: false,
@@ -173,7 +173,7 @@ const DistributionChart = (() => {
 
   const renderZoomableTaxYearChart = (container) => {
     renderTaxYearLineChart(container, cachedTaxYearData.filter((item) =>
-      latestTaxYears.includes(Number(item.tax_year))
+      latestTaxYears.includes(Number(item.tax_year)),
     ), {
       interactiveLegend: true,
       compact: false,
@@ -215,7 +215,7 @@ const DistributionChart = (() => {
     const chartHeight = height - margin.top - margin.bottom;
 
     const grouped = d3.groups(data, (d) => String(d.tax_year)).sort(
-      (a, b) => Number(a[0]) - Number(b[0])
+      (a, b) => Number(a[0]) - Number(b[0]),
     );
     const yearSeries = grouped.map(([year, values]) => ({
       year,
@@ -266,7 +266,7 @@ const DistributionChart = (() => {
         .call(
           d3.axisBottom(xScale)
             .ticks(opts.compact ? 5 : 7)
-            .tickFormat((value) => `$${Math.round(value / 1000)}k`)
+            .tickFormat((value) => `$${Math.round(value / 1000)}k`),
         )
         .style('color', colors.textMuted)
         .style('font-size', opts.compact ? '10px' : '12px');
@@ -437,7 +437,7 @@ const DistributionChart = (() => {
         .call(
           d3.axisBottom(xScale)
             .ticks(data.length)
-            .tickFormat(opts.xTickFormatter || ((value) => String(value)))
+            .tickFormat(opts.xTickFormatter || ((value) => String(value))),
         )
         .style('color', colors.textMuted)
         .style('font-size', opts.compact ? '10px' : '12px');
@@ -445,14 +445,14 @@ const DistributionChart = (() => {
         .call(
           d3.axisLeft(y)
             .ticks(opts.yTicks || 4)
-            .tickFormat(opts.yTickFormatter || d3.format('~s'))
+            .tickFormat(opts.yTickFormatter || d3.format('~s')),
         )
         .style('color', colors.textMuted)
         .style('font-size', opts.compact ? '10px' : '12px');
 
       path.datum(data).attr(
         'd',
-        d3.line().x((d) => xScale(Number(d[opts.xField]))).y((d) => y(Number(d[opts.yField])))
+        d3.line().x((d) => xScale(Number(d[opts.xField]))).y((d) => y(Number(d[opts.yField]))),
       );
 
       const pointSel = points.selectAll('circle').data(data);
@@ -506,7 +506,7 @@ const DistributionChart = (() => {
         : [];
     const values = properties
       .map((property) =>
-        field === 'predicted' ? property.predicted_value : property.market_value
+        field === 'predicted' ? property.predicted_value : property.market_value,
       )
       .filter((value) => Number.isFinite(value) && value > 0 && value < 2000000);
     return histogram(values, 20, [0, 1000000]);
@@ -735,7 +735,7 @@ const DistributionChart = (() => {
     g.append('g')
       .attr('transform', `translate(0,${chartH})`)
       .call(
-        d3.axisBottom(x).ticks(5).tickFormat(opts.xFormat || ((value) => `$${Math.round(value / 1000)}k`))
+        d3.axisBottom(x).ticks(5).tickFormat(opts.xFormat || ((value) => `$${Math.round(value / 1000)}k`)),
       )
       .style('color', colors.textMuted)
       .style('font-size', '10px');

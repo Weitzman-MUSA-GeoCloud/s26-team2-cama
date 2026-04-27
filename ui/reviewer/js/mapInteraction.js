@@ -48,16 +48,16 @@ const MapInteraction = (() => {
     mapContainer = document.getElementById('map');
 
     if (!mapContainer) {
-      console.error('â?Map container not found');
+      console.error('ï¿½?Map container not found');
       return;
     }
 
     if (typeof maplibregl === 'undefined') {
-      console.error('â?Maplibre GL JS not loaded');
+      console.error('ï¿½?Maplibre GL JS not loaded');
       return;
     }
 
-    console.log('âœ?Starting map initialization...');
+    console.log('ï¿½?Starting map initialization...');
 
     // Default map options
     const defaultOptions = {
@@ -345,7 +345,7 @@ const MapInteraction = (() => {
           [point.x - radius, point.y - radius],
           [point.x + radius, point.y + radius],
         ],
-        { layers }
+        { layers },
       );
 
       if (!features.length) continue;
@@ -395,7 +395,7 @@ const MapInteraction = (() => {
         acc.lat += Number(coord[1] || 0);
         return acc;
       },
-      { lng: 0, lat: 0 }
+      { lng: 0, lat: 0 },
     );
 
     return [totals.lng / pickRing.length, totals.lat / pickRing.length];
@@ -410,7 +410,7 @@ const MapInteraction = (() => {
         acc.lat += property.lat;
         return acc;
       },
-      { lng: 0, lat: 0 }
+      { lng: 0, lat: 0 },
     );
 
     const targetLng = centroid.lng / properties.length;
@@ -540,7 +540,7 @@ const MapInteraction = (() => {
     ].forEach(
       (layerId) => {
         if (map.getLayer(layerId)) map.setFilter(layerId, filter);
-      }
+      },
     );
   };
 
@@ -583,11 +583,11 @@ const MapInteraction = (() => {
     ].forEach(
       (layerId) => {
         if (map?.getLayer(layerId)) map.setFilter(layerId, emptyFilter);
-      }
+      },
     );
   };
 
-  // Kept for API compatibility â€?selection is now expressed only via the
+  // Kept for API compatibility ï¿½?selection is now expressed only via the
   // parcel highlight layers (no point marker), matching the Atlas look.
   const showMarker = () => {
     selectedMarker?.remove();
@@ -608,11 +608,11 @@ const MapInteraction = (() => {
       typeof DataManager !== 'undefined'
         ? DataManager.getFilters()
         : {
-            priceMin: 0,
-            priceMax: 5000000,
-            changeMin: -50,
-            changeMax: 50,
-          };
+          priceMin: 0,
+          priceMax: 5000000,
+          changeMin: -50,
+          changeMax: 50,
+        };
 
     currentTileFilter = buildTileFilter(filters);
 
@@ -701,7 +701,7 @@ const MapInteraction = (() => {
     if (!map) return null;
 
     const properties = DataManager.getFilteredProperties().filter(
-      (p) => Number.isFinite(p.lng) && Number.isFinite(p.lat)
+      (p) => Number.isFinite(p.lng) && Number.isFinite(p.lat),
     );
     if (properties.length === 0) return null;
 
@@ -728,7 +728,7 @@ const MapInteraction = (() => {
     if (!map) return;
 
     const properties = DataManager.getFilteredProperties().filter(
-      (p) => Number.isFinite(p.lng) && Number.isFinite(p.lat)
+      (p) => Number.isFinite(p.lng) && Number.isFinite(p.lat),
     );
     if (properties.length === 0) return;
 
@@ -769,7 +769,7 @@ const MapInteraction = (() => {
         map.setLayoutProperty(
           layerId,
           'visibility',
-          visible ? 'visible' : 'none'
+          visible ? 'visible' : 'none',
         );
       }
     });
@@ -784,7 +784,7 @@ const MapInteraction = (() => {
         map.setLayoutProperty(
           layerId,
           'visibility',
-          visible ? 'visible' : 'none'
+          visible ? 'visible' : 'none',
         );
       }
     });
@@ -816,7 +816,7 @@ const MapInteraction = (() => {
     map.setPaintProperty(
       'property-parcels-fill',
       'fill-opacity',
-      choroplethEnabled ? 0.74 : 0.04
+      choroplethEnabled ? 0.74 : 0.04,
     );
 
     if (!choroplethEnabled) {
@@ -919,7 +919,7 @@ const MapInteraction = (() => {
     };
     map.on('styledata', styleDataHandler);
 
-    // Fallback poll â€?guarantees layers come back even if the above events
+    // Fallback poll ï¿½?guarantees layers come back even if the above events
     // never fire as expected.
     const pollStart = Date.now();
     const poll = () => {
@@ -935,7 +935,7 @@ const MapInteraction = (() => {
     setTimeout(poll, 80);
 
     // `diff: false` forces MapLibre to completely reset the style rather than
-    // attempting a minimal diff â€?otherwise our custom source/layers can be
+    // attempting a minimal diff ï¿½?otherwise our custom source/layers can be
     // left in an inconsistent "half-migrated" state.
     map.setStyle(styleToApply, { diff: false });
   };

@@ -427,7 +427,7 @@ const MapInteraction = (() => {
     }
 
     const validProperties = properties.filter(
-      (prop) => Number.isFinite(prop.lng) && Number.isFinite(prop.lat)
+      (prop) => Number.isFinite(prop.lng) && Number.isFinite(prop.lat),
     );
 
     const features = validProperties.map((prop) => ({
@@ -542,7 +542,7 @@ const MapInteraction = (() => {
           [point.x - radius, point.y - radius],
           [point.x + radius, point.y + radius],
         ],
-        { layers }
+        { layers },
       );
 
       if (!features.length) continue;
@@ -592,7 +592,7 @@ const MapInteraction = (() => {
         acc.lat += Number(coord[1] || 0);
         return acc;
       },
-      { lng: 0, lat: 0 }
+      { lng: 0, lat: 0 },
     );
 
     return [totals.lng / ring.length, totals.lat / ring.length];
@@ -643,15 +643,15 @@ const MapInteraction = (() => {
     const labelValues =
       breakpoints.length >= 4
         ? [
-            field.display_min ?? breakpoints[0],
-            breakpoints[Math.floor(breakpoints.length / 3)],
-            breakpoints[Math.floor((breakpoints.length * 2) / 3)],
-            field.display_max ?? breakpoints[breakpoints.length - 1],
-          ]
+          field.display_min ?? breakpoints[0],
+          breakpoints[Math.floor(breakpoints.length / 3)],
+          breakpoints[Math.floor((breakpoints.length * 2) / 3)],
+          field.display_max ?? breakpoints[breakpoints.length - 1],
+        ]
         : [
-            field.display_min ?? field.min ?? 0,
-            field.display_max ?? field.max ?? 1000000,
-          ];
+          field.display_min ?? field.min ?? 0,
+          field.display_max ?? field.max ?? 1000000,
+        ];
 
     labels.innerHTML = labelValues
       .map((value) => `<span>${formatCompactCurrency(Number(value))}</span>`)
@@ -697,13 +697,13 @@ const MapInteraction = (() => {
       const bearing = (2 * Math.PI * step) / steps;
       const pointLat = Math.asin(
         Math.sin(latRad) * Math.cos(angularDistance) +
-          Math.cos(latRad) * Math.sin(angularDistance) * Math.cos(bearing)
+          Math.cos(latRad) * Math.sin(angularDistance) * Math.cos(bearing),
       );
       const pointLng =
         lngRad +
         Math.atan2(
           Math.sin(bearing) * Math.sin(angularDistance) * Math.cos(latRad),
-          Math.cos(angularDistance) - Math.sin(latRad) * Math.sin(pointLat)
+          Math.cos(angularDistance) - Math.sin(latRad) * Math.sin(pointLat),
         );
       coordinates.push([
         ((pointLng * 180) / Math.PI + 540) % 360 - 180,
@@ -750,7 +750,7 @@ const MapInteraction = (() => {
         map.setLayoutProperty(
           layerId,
           'visibility',
-          visible ? 'visible' : 'none'
+          visible ? 'visible' : 'none',
         );
       }
     });

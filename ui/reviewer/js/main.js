@@ -81,7 +81,7 @@ const App = (() => {
       console.error('�?Error initializing application:', error);
       PropertyPopup.showNotification(
         'Error loading application. Please refresh.',
-        'error'
+        'error',
       );
       loadingCoverReady = true;
       hideLoadingCoverIfReady();
@@ -94,7 +94,7 @@ const App = (() => {
    */
   const handleFilterChange = (filteredProperties) => {
     console.log(
-      `Filters applied: ${filteredProperties.length} properties displayed`
+      `Filters applied: ${filteredProperties.length} properties displayed`,
     );
 
     // Update map
