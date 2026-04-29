@@ -5,17 +5,28 @@ const AssessorSidebar = (() => {
     market: null,
   };
   const TRANSACTION_TREND_URL =
-    'https://storage.googleapis.com/musa5090s26-team2-public/configs/transaction_volume_trend.json';
+    'https://storage.googleapis.com/musa5090s26-team2-public/configs/transaction_volume_trend.json?v=20260429-recent';
+  const TAX_YEAR_DATA_URL =
+    'https://storage.googleapis.com/musa5090s26-team2-public/configs/tax_year_assessment_bins.json';
   const CURRENT_YEAR = new Date().getFullYear();
   const REFERENCE_YEAR = CURRENT_YEAR - 1;
+  let marketFallbackBins = [];
+  let marketFallbackPromise = null;
 
   const init = () => {
     document
       .getElementById('clearSelectedPropertyBtn')
       ?.addEventListener('click', clearSelection);
     document
+      .getElementById('closeSelectedSheetBtn')
+      ?.addEventListener('click', clearSelection);
+    document
       .getElementById('streetViewToggle')
       ?.addEventListener('click', toggleStreetView);
+    document.querySelectorAll('[data-mobile-selected-tab]').forEach((button) => {
+      button.addEventListener('click', () => setMobileSelectedTab(button.dataset.mobileSelectedTab));
+    });
+    loadMarketFallbackBins();
   };
 
   const renderDefault = () => {
@@ -49,6 +60,8 @@ const AssessorSidebar = (() => {
   const showProperty = (property) => {
     if (!property) return;
     selectedProperty = property;
+    document.body.classList.add('mobile-property-selected');
+    setMobileSelectedTab('details');
     const hasPredictedValue = Number.isFinite(property.predicted_value);
     const baselineValue = property.market_value || property.tax_year_value || null;
     document.getElementById('assessorDefaultPanel')?.classList.add('hidden');
@@ -62,11 +75,13 @@ const AssessorSidebar = (() => {
     setText('detailPredictedValueLabel', `Predicted Value (${CURRENT_YEAR})`);
     setText('detailAssessedValue', Utils.formatCurrency(baselineValue));
     setText('detailPredictedValue', Utils.formatCurrency(hasPredictedValue ? property.predicted_value : null));
+    setText('detailLatestSale', Utils.formatCurrency(property.sale_price));
+    setText('detailSaleDate', formatSaleDate(property.sale_date));
     setText(
       'detailMetadata',
       [property.bldg_desc, property.zip_code ? `ZIP ${property.zip_code}` : null]
         .filter(Boolean)
-        .join(' | ') || '-',
+        .join(' | ') || '-'
     );
 
     if (hasPredictedValue && Number.isFinite(property.tax_year_value)) {
@@ -77,7 +92,7 @@ const AssessorSidebar = (() => {
         'selectedPercentChange',
         Number.isFinite(property.change_percent)
           ? `${sign}${Utils.formatPercentage(property.change_percent)}`
-          : '-',
+          : '-'
       );
     } else {
       setText('selectedAbsoluteChange', '-');
@@ -85,7 +100,8 @@ const AssessorSidebar = (() => {
     }
 
     requestAnimationFrame(() => {
-      renderHistogram('selectedAssessmentDistribution', getProperties(), 'predicted_value', {
+      const selectedDistributionProperties = [property];
+      renderHistogram('selectedAssessmentDistribution', selectedDistributionProperties, 'predicted_value', {
         color: '#a0caff',
         domain: [0, 1000000],
         markerValue: hasPredictedValue ? property.predicted_value : null,
@@ -97,6 +113,7 @@ const AssessorSidebar = (() => {
 
   const clearSelection = () => {
     selectedProperty = null;
+    document.body.classList.remove('mobile-property-selected', 'mobile-chart-tab');
     if (typeof MapInteraction !== 'undefined') {
       MapInteraction.clearSelection?.();
     }
@@ -142,7 +159,7 @@ const AssessorSidebar = (() => {
       }
       PropertyPopup.showNotification(
         `${field === 'predicted' ? 'Predicted' : 'Market'} distribution filter cleared`,
-        'info',
+        'info'
       );
       return;
     }
@@ -164,7 +181,7 @@ const AssessorSidebar = (() => {
     }
     PropertyPopup.showNotification(
       `${field === 'predicted' ? 'Predicted' : 'Market'} distribution bin applied to map`,
-      'info',
+      'info'
     );
   };
 
@@ -180,7 +197,7 @@ const AssessorSidebar = (() => {
   const renderMarketDistribution = () => {
     if (!selectedProperty) return;
     const markerValue = selectedProperty.market_value || selectedProperty.tax_year_value;
-    renderHistogram('selectedToggleDistribution', getProperties(), 'market_value', {
+    renderHistogram('selectedToggleDistribution', [selectedProperty], 'market_value', {
       color: '#8bd7c5',
       domain: [0, 1000000],
       markerValue,
@@ -246,6 +263,9 @@ const AssessorSidebar = (() => {
       .map((p) => Number(p[field]))
       .filter((v) => Number.isFinite(v) && v > 0);
     if (!values.length) {
+      if (field === 'market_value' && renderMarketFallbackHistogram(container, opts)) {
+        return;
+      }
       container.textContent = 'No data';
       return;
     }
@@ -360,7 +380,7 @@ const AssessorSidebar = (() => {
         d3
           .line()
           .x((d) => x(Number(d[xField])))
-          .y((d) => y(Number(d[yField]))),
+          .y((d) => y(Number(d[yField])))
       );
 
     g.append('g')
@@ -374,7 +394,104 @@ const AssessorSidebar = (() => {
       .style('font-size', '10px');
   };
 
+  const loadMarketFallbackBins = () => {
+    if (marketFallbackPromise) return marketFallbackPromise;
+    marketFallbackPromise = fetch(TAX_YEAR_DATA_URL)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Tax-year bins ${response.status}`);
+        return response.json();
+      })
+      .then((rows) => {
+        const data = Array.isArray(rows) ? rows : [];
+        const years = [...new Set(data.map((row) => Number(row.tax_year)).filter(Number.isFinite))]
+          .sort((a, b) => a - b);
+        const latestYear = years.at(-1);
+        marketFallbackBins = data
+          .filter((row) => Number(row.tax_year) === Number(latestYear))
+          .map((row) => ({
+            x0: Number(row.lower_bound),
+            x1: Number(row.upper_bound),
+            count: Number(row.property_count || 0),
+          }))
+          .filter((bin) =>
+            Number.isFinite(bin.x0) &&
+            Number.isFinite(bin.x1) &&
+            Number.isFinite(bin.count) &&
+            bin.x1 > bin.x0
+          );
+        return marketFallbackBins;
+      })
+      .catch((error) => {
+        console.warn('Market fallback bins unavailable:', error);
+        marketFallbackBins = [];
+        return [];
+      });
+    return marketFallbackPromise;
+  };
+
+  const renderMarketFallbackHistogram = (container, opts = {}) => {
+    if (!marketFallbackBins.length) {
+      loadMarketFallbackBins().then(() => {
+        if (selectedProperty) renderMarketDistribution();
+      });
+      return false;
+    }
+
+    renderBins(container, marketFallbackBins, opts);
+    return true;
+  };
+
+  const renderBins = (container, bins, opts = {}) => {
+    const { width, height } = getSize(container);
+    const margin = { top: 12, right: 10, bottom: 24, left: 38 };
+    const chartW = width - margin.left - margin.right;
+    const chartH = height - margin.top - margin.bottom;
+    const domain = opts.domain || [bins[0].x0, bins[bins.length - 1].x1];
+    const svg = d3.select(container).append('svg').attr('width', width).attr('height', height);
+    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+    const x = d3.scaleLinear().domain(domain).range([0, chartW]);
+    const y = d3.scaleLinear().domain([0, d3.max(bins, (b) => b.count) || 1]).nice().range([chartH, 0]);
+
+    g.selectAll('rect')
+      .data(bins)
+      .enter()
+      .append('rect')
+      .attr('x', (b) => x(b.x0) + 1)
+      .attr('y', (b) => y(b.count))
+      .attr('width', (b) => Math.max(1, x(b.x1) - x(b.x0) - 2))
+      .attr('height', (b) => chartH - y(b.count))
+      .attr('fill', opts.color || '#8bd7c5')
+      .attr('opacity', 0.85);
+
+    if (Number.isFinite(opts.markerValue)) {
+      const markerX = x(Math.min(Math.max(opts.markerValue, domain[0]), domain[1]));
+      g.append('line')
+        .attr('x1', markerX)
+        .attr('x2', markerX)
+        .attr('y1', 0)
+        .attr('y2', chartH)
+        .attr('stroke', '#e20546')
+        .attr('stroke-width', 2);
+    }
+
+    g.append('g')
+      .attr('transform', `translate(0,${chartH})`)
+      .call(d3.axisBottom(x).ticks(4).tickFormat((d) => `$${d / 1000}k`))
+      .style('color', 'rgba(226,226,226,0.55)')
+      .style('font-size', '10px');
+    g.append('g')
+      .call(d3.axisLeft(y).ticks(3).tickFormat(d3.format('~s')))
+      .style('color', 'rgba(226,226,226,0.55)')
+      .style('font-size', '10px');
+  };
+
   const getProperties = () => DataManager.getFilteredProperties();
+
+  const getDistributionProperties = () => {
+    const filtered = DataManager.getFilteredProperties?.() || [];
+    if (filtered.length) return filtered;
+    return DataManager.getAllProperties?.() || filtered;
+  };
 
   const getSize = (container) => ({
     width: Math.max(container.clientWidth || 260, 220),
@@ -384,6 +501,25 @@ const AssessorSidebar = (() => {
   const setText = (id, value) => {
     const el = document.getElementById(id);
     if (el) el.textContent = value || '-';
+  };
+
+  const formatSaleDate = (value) => {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const setMobileSelectedTab = (tab) => {
+    const activeTab = tab === 'charts' ? 'charts' : 'details';
+    document.body.classList.toggle('mobile-chart-tab', activeTab === 'charts');
+    document.querySelectorAll('[data-mobile-selected-tab]').forEach((button) => {
+      button.classList.toggle('active', button.dataset.mobileSelectedTab === activeTab);
+    });
   };
 
   const buildStreetViewSrc = (lat, lng) =>

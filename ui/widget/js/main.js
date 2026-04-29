@@ -29,8 +29,8 @@ const App = (() => {
       });
       console.log('鉁?Map initialized');
 
-      // Step 3: Initialize search module
-      await Search.init();
+      // Step 3: Initialize search data in the background
+      Search.init();
       console.log('鉁?Search module initialized');
 
       // Step 4: Setup event listeners

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Main Module for Tax Assessor Review Interface
  * Initializes and connects all modules
  */
@@ -20,35 +20,23 @@ const App = (() => {
     try {
       // Step 1: Initialize popup module
       PropertyPopup.init();
-      console.log('�?Property Popup initialized');
-
-      // Step 2: Load real property data from GCS GeoJSON
-      console.log('📥 Loading property data from GeoJSON...');
-      const properties = await DataManager.loadGeoJSON();
-      console.log(`�?Loaded ${properties.length} properties`);
-
-      // Step 3: Initialize map AFTER data is loaded
-      console.log('🗺�?Initializing map...');
+      console.log('锟?Property Popup initialized');
+      // Step 2: Initialize map first. Parcel data loads in the background.
+      console.log('Initializing map...');
       MapInteraction.init({
         center: [-75.16379, 39.95233], // Philadelphia City Hall
         zoom: 14.6,
       });
-      console.log('�?Map initialized');
-
-      // Step 4: Wait a moment for map to fully load, then load properties
-      setTimeout(() => {
-        MapInteraction.loadPropertyData(properties);
-        console.log('�?Properties loaded on map');
-      }, 500);
+      console.log('Map initialized');
 
       // Step 5: Initialize distribution charts (Issue #18 & #19)
-      DistributionChart.init();
-      console.log('�?Distribution charts initialized');
+      await DistributionChart.init();
+      console.log('锟?Distribution charts initialized');
 
       // Step 6: Initialize chart filtering
       ChartFiltering.init(handleFilterChange);
       ChartFiltering.configureRanges?.(DataManager.getFilterExtents());
-      console.log('�?Chart filtering initialized');
+      console.log('锟?Chart filtering initialized');
 
       if (typeof AssessorSidebar !== 'undefined') {
         AssessorSidebar.init();
@@ -56,45 +44,65 @@ const App = (() => {
 
       // Step 7: Setup event listeners
       setupEventListeners();
-      console.log('�?Event listeners setup');
+      console.log('锟?Event listeners setup');
 
       // Step 8: Display initial statistics
       displayStatistics();
       updateFilteredResultCount(DataManager.getFilteredProperties());
-      console.log('�?Statistics displayed');
+      console.log('锟?Statistics displayed');
 
       // Step 9: Display initial data
       displayFilteredProperties();
-      console.log('�?Initial data loaded');
+      console.log('锟?Initial data loaded');
 
       // Step 10: Render sidebar distribution mini-charts
       renderSidebarCharts();
       if (typeof AssessorSidebar !== 'undefined') {
         AssessorSidebar.renderDefault();
       }
-      console.log('�?Sidebar distribution charts rendered');
+      console.log('锟?Sidebar distribution charts rendered');
 
       console.log('Application ready!');
       loadingCoverReady = true;
       hideLoadingCoverIfReady();
+      loadPropertyDataInBackground();
     } catch (error) {
-      console.error('�?Error initializing application:', error);
+      console.error('锟?Error initializing application:', error);
       PropertyPopup.showNotification(
         'Error loading application. Please refresh.',
-        'error',
+        'error'
       );
       loadingCoverReady = true;
       hideLoadingCoverIfReady();
     }
   };
 
+
+  const loadPropertyDataInBackground = async () => {
+    try {
+      console.log('Loading property data in background...');
+      const properties = await DataManager.loadGeoJSON();
+      console.log(`Loaded ${properties.length} properties`);
+      ChartFiltering.configureRanges?.(DataManager.getFilterExtents());
+      MapInteraction.loadPropertyData(properties);
+      displayStatistics();
+      updateFilteredResultCount(DataManager.getFilteredProperties());
+      displayFilteredProperties();
+      renderSidebarCharts();
+      if (typeof AssessorSidebar !== 'undefined') {
+        AssessorSidebar.refresh();
+      }
+    } catch (error) {
+      console.warn('Property data unavailable:', error);
+    }
+  };
   /**
    * Handle filter change from chart filtering module
    * @param {array} filteredProperties - Filtered properties array
    */
   const handleFilterChange = (filteredProperties) => {
     console.log(
-      `Filters applied: ${filteredProperties.length} properties displayed`,
+      `Filters applied: ${filteredProperties.length} properties displayed`
     );
 
     // Update map
@@ -370,5 +378,6 @@ document.addEventListener('DOMContentLoaded', App.init);
 
 // Log initialization for debugging
 console.log('Tax Assessor Review Application Scripts Loaded');
+
 
 

@@ -4,11 +4,15 @@
  */
 
 const DataManager = (() => {
-  const GEOJSON_URL =
-    'https://storage.googleapis.com/musa5090s26-team2-temp_data/property_tile_info.geojson';
+  const SEARCH_INDEX_URL =
+    'https://storage.googleapis.com/musa5090s26-team2-public/configs/property_search_index.json?v=20260429-full-search';
+  const SALE_INDEX_URL =
+    'https://storage.googleapis.com/musa5090s26-team2-public/configs/property_sale_index.json?v=20260429';
 
   let allProperties = [];
   let filteredProperties = [];
+  let saleIndex = new Map();
+  let saleIndexPromise = null;
   let filterExtents = {
     predictedMin: 0,
     predictedMax: 5000000,
@@ -46,8 +50,7 @@ const DataManager = (() => {
     return [x / ring.length, y / ring.length];
   };
 
-  const transformFeature = (feature) => {
-    const p = feature.properties || {};
+  const getGeometryCenter = (feature) => {
     let lng = null;
     let lat = null;
     if (feature.geometry && feature.geometry.coordinates) {
@@ -55,11 +58,22 @@ const DataManager = (() => {
         [lng, lat] = polygonCentroid(feature.geometry.coordinates);
       } else if (feature.geometry.type === 'Point') {
         [lng, lat] = feature.geometry.coordinates;
+      } else if (feature.geometry.type === 'MultiPolygon') {
+        const firstPolygon = feature.geometry.coordinates?.[0];
+        if (firstPolygon) {
+          [lng, lat] = polygonCentroid(firstPolygon);
+        }
       }
     }
+    return [lng, lat];
+  };
+
+  const transformMlFeature = (feature) => {
+    const p = feature.properties || {};
+    const [lng, lat] = getGeometryCenter(feature);
 
     const lastYearValue = p.log_price ? Math.exp(p.log_price) : null;
-    const predicted = p.predicted_value || 0;
+    const predicted = Number(p.predicted_value || 0) || 0;
     const changePercent =
       lastYearValue && lastYearValue > 0
         ? ((predicted - lastYearValue) / lastYearValue) * 100
@@ -67,7 +81,7 @@ const DataManager = (() => {
 
     return {
       id: String(p.property_id || ''),
-      address: p.address || 'Address not available',
+      address: p.address || p.location || 'Address not available',
       property_type: classifyPropertyType(p.bldg_desc),
       bldg_desc: p.bldg_desc || 'Unknown',
       lat,
@@ -82,6 +96,97 @@ const DataManager = (() => {
       lot_size: p.gross_area || 0,
       zip_code: p.zip_code || null,
       neighborhood: p.zip_code || null,
+      sale_date: p.sale_date || null,
+      sale_price: Number(p.sale_price || 0) || null,
+      has_prediction: true,
+    };
+  };
+
+  const transformFullFeature = (feature) => {
+    const p = feature.properties || {};
+    const [lng, lat] = getGeometryCenter(feature);
+    const marketValue = Number(p.market_value || 0) || null;
+
+    return {
+      id: String(p.property_id || ''),
+      address: p.location || p.address || 'Address not available',
+      property_type: 'residential',
+      bldg_desc: 'Residential',
+      lat,
+      lng,
+      tax_year_value: marketValue,
+      last_year_value: marketValue,
+      predicted_value: null,
+      market_value: marketValue,
+      sale_price: Number(p.sale_price || 0) || null,
+      sale_date: p.sale_date || null,
+      sale_year: p.sale_date ? Number(String(p.sale_date).slice(0, 4)) || null : null,
+      change_percent: null,
+      lot_size: 0,
+      zip_code: null,
+      neighborhood: null,
+      has_prediction: false,
+    };
+  };
+
+  const mergePropertyRecords = (fullProperty, mlProperty) => {
+    if (!mlProperty) return fullProperty;
+
+    return {
+      ...fullProperty,
+      ...mlProperty,
+      address: fullProperty.address || mlProperty.address,
+      market_value: Number.isFinite(fullProperty.market_value)
+        ? fullProperty.market_value
+        : mlProperty.market_value,
+      last_year_value: Number.isFinite(fullProperty.market_value)
+        ? fullProperty.market_value
+        : mlProperty.last_year_value,
+      tax_year_value: Number.isFinite(fullProperty.market_value)
+        ? fullProperty.market_value
+        : mlProperty.tax_year_value,
+      sale_price: Number.isFinite(fullProperty.sale_price) ? fullProperty.sale_price : null,
+      sale_date: fullProperty.sale_date || null,
+      has_prediction: Number.isFinite(mlProperty.predicted_value),
+      change_percent:
+        Number.isFinite(fullProperty.market_value) &&
+        Number.isFinite(mlProperty.predicted_value) &&
+        fullProperty.market_value > 0
+          ? ((mlProperty.predicted_value - fullProperty.market_value) /
+              fullProperty.market_value) *
+            100
+          : mlProperty.change_percent,
+    };
+  };
+
+  const transformSearchRecord = (record) => {
+    const rawPredicted = toFiniteNumber(record.predicted_value);
+    const predicted = Number.isFinite(rawPredicted) && rawPredicted > 0 ? rawPredicted : null;
+    const market = toFiniteNumber(record.market_value ?? record.last_year_value);
+    const changePercent = Number.isFinite(predicted) ? toFiniteNumber(record.change_percent) : null;
+
+    return {
+      id: String(record.id || record.property_id || ''),
+      address: record.address || record.location || 'Address not available',
+      property_type: classifyPropertyType(record.bldg_desc || record.property_type),
+      bldg_desc: record.bldg_desc || record.property_type || 'Unknown',
+      lat: toFiniteNumber(record.lat),
+      lng: toFiniteNumber(record.lng),
+      tax_year_value: market ?? predicted,
+      last_year_value: market,
+      predicted_value: predicted,
+      market_value: market ?? predicted,
+      sale_price: toFiniteNumber(record.sale_price),
+      sale_year: toFiniteNumber(record.sale_year),
+      sale_month: toFiniteNumber(record.sale_month),
+      change_percent:
+        changePercent ??
+        (market && predicted ? ((predicted - market) / market) * 100 : null),
+      lot_size: toFiniteNumber(record.lot_size),
+      zip_code: record.zip_code || null,
+      neighborhood: record.neighborhood || record.zip_code || null,
+      sale_date: record.sale_date || null,
+      has_prediction: Number.isFinite(predicted),
     };
   };
 
@@ -108,18 +213,85 @@ const DataManager = (() => {
    */
   const loadGeoJSON = async () => {
     try {
-      const response = await fetch(GEOJSON_URL);
+      const response = await fetch(SEARCH_INDEX_URL);
       if (!response.ok) {
-        throw new Error(`Failed to load GeoJSON: ${response.status}`);
+        throw new Error(`Failed to load property search index: ${response.status}`);
       }
-      const geo = await response.json();
-      const properties = (geo.features || []).map(transformFeature);
+      const records = normalizeSearchRecords(await response.json());
+      const properties = records
+        .map(transformSearchRecord)
+        .filter((property) => property.id && property.address);
       init(properties);
+      loadSaleIndex();
       return properties;
     } catch (error) {
-      console.error('Error loading GeoJSON:', error);
+      console.error('Error loading property search index:', error);
       return [];
     }
+  };
+
+  const normalizeSearchRecords = (payload) => {
+    if (Array.isArray(payload)) return payload;
+    if (!payload?.columns || !payload?.rows) return [];
+
+    return payload.rows.map((row) =>
+      payload.columns.reduce((record, column, index) => {
+        record[column] = row[index];
+        return record;
+      }, {})
+    );
+  };
+
+  const loadSaleIndex = () => {
+    if (saleIndexPromise) return saleIndexPromise;
+    saleIndexPromise = fetch(SALE_INDEX_URL)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Failed to load sale index: ${response.status}`);
+        return response.json();
+      })
+      .then((payload) => {
+        const rows = normalizeSearchRecords(payload);
+        saleIndex = new Map(
+          rows
+            .filter((record) => record.id)
+            .map((record) => [
+              String(record.id),
+              {
+                sale_price: toFiniteNumber(record.sale_price),
+                sale_date: record.sale_date || null,
+              },
+            ])
+        );
+        allProperties = allProperties.map(enrichWithSale);
+        applyFilters();
+        return saleIndex;
+      })
+      .catch((error) => {
+        console.warn('Sale index unavailable:', error);
+        saleIndex = new Map();
+        return saleIndex;
+      });
+    return saleIndexPromise;
+  };
+
+  const getSaleById = (id) => saleIndex.get(String(id)) || null;
+
+  const getSaleByIdAsync = async (id) => {
+    await loadSaleIndex();
+    return getSaleById(id);
+  };
+
+  const enrichWithSale = (property) => {
+    if (!property?.id) return property;
+    const sale = getSaleById(property.id);
+    if (!sale) return property;
+    return {
+      ...property,
+      sale_price: Number.isFinite(property.sale_price) && property.sale_price > 0
+        ? property.sale_price
+        : sale.sale_price,
+      sale_date: property.sale_date || sale.sale_date,
+    };
   };
 
   /**
@@ -191,6 +363,10 @@ const DataManager = (() => {
    */
   const getFilteredProperties = () => {
     return filteredProperties;
+  };
+
+  const getAllProperties = () => {
+    return allProperties;
   };
 
   /**
@@ -272,7 +448,7 @@ const DataManager = (() => {
    */
   const getNeighborhoodStats = (neighborhood) => {
     const neighborhoodProps = filteredProperties.filter(
-      (p) => p.neighborhood === neighborhood,
+      (p) => p.neighborhood === neighborhood
     );
     return {
       count: neighborhoodProps.length,
@@ -308,7 +484,7 @@ const DataManager = (() => {
     data.forEach((value) => {
       const binIndex = Math.min(
         Math.floor((value - stats.min) / binSize),
-        bins - 1,
+        bins - 1
       );
       distribution[binIndex]++;
     });
@@ -440,24 +616,39 @@ const DataManager = (() => {
   const getFilterExtents = () => Utils.deepClone(filterExtents);
 
   const deriveExtents = () => {
-    const predictedValues = allProperties
-      .map((p) => Number(p.predicted_value))
-      .filter((v) => Number.isFinite(v) && v > 0);
-    const marketValues = allProperties
-      .map((p) => Number(p.market_value))
-      .filter((v) => Number.isFinite(v) && v > 0);
-    const changeValues = allProperties
-      .map((p) => Number(p.change_percent))
-      .filter((v) => Number.isFinite(v));
+    const predictedRange = getNumericRange('predicted_value', (value) => value > 0);
+    const marketRange = getNumericRange('market_value', (value) => value > 0);
+    const changeRange = getNumericRange('change_percent');
 
     filterExtents = {
-      predictedMin: predictedValues.length ? Math.floor(Math.min(...predictedValues)) : 0,
-      predictedMax: predictedValues.length ? Math.ceil(Math.max(...predictedValues)) : 5000000,
-      marketMin: marketValues.length ? Math.floor(Math.min(...marketValues)) : 0,
-      marketMax: marketValues.length ? Math.ceil(Math.max(...marketValues)) : 5000000,
-      changeMin: changeValues.length ? Math.floor(Math.min(...changeValues)) : -50,
-      changeMax: changeValues.length ? Math.ceil(Math.max(...changeValues)) : 50,
+      predictedMin: predictedRange.count ? Math.floor(predictedRange.min) : 0,
+      predictedMax: predictedRange.count ? Math.ceil(predictedRange.max) : 5000000,
+      marketMin: marketRange.count ? Math.floor(marketRange.min) : 0,
+      marketMax: marketRange.count ? Math.ceil(marketRange.max) : 5000000,
+      changeMin: changeRange.count ? Math.floor(changeRange.min) : -50,
+      changeMax: changeRange.count ? Math.ceil(changeRange.max) : 50,
     };
+  };
+
+  const getNumericRange = (field, predicate = () => true) => {
+    let min = Number.POSITIVE_INFINITY;
+    let max = Number.NEGATIVE_INFINITY;
+    let count = 0;
+
+    allProperties.forEach((property) => {
+      const value = Number(property[field]);
+      if (!Number.isFinite(value) || !predicate(value)) return;
+      min = Math.min(min, value);
+      max = Math.max(max, value);
+      count += 1;
+    });
+
+    return { min, max, count };
+  };
+
+  const toFiniteNumber = (value) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
   };
 
   const normalizeSearchText = (value) => {
@@ -499,7 +690,7 @@ const DataManager = (() => {
         current[j] = Math.min(
           previous[j] + 1,
           current[j - 1] + 1,
-          previous[j - 1] + cost,
+          previous[j - 1] + cost
         );
       }
       for (let j = 0; j <= shortB.length; j++) previous[j] = current[j];
@@ -513,9 +704,14 @@ const DataManager = (() => {
     init,
     loadData,
     loadGeoJSON,
+    loadSaleIndex,
     setFilters,
+    getAllProperties,
     getFilteredProperties,
     getPropertyById,
+    getSaleById,
+    getSaleByIdAsync,
+    enrichWithSale,
     search,
     searchCandidates,
     sort,

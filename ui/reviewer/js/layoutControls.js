@@ -11,7 +11,7 @@ const LayoutControls = (() => {
       document.body.classList.toggle('left-panel-hidden');
       toggleLeftBtn.classList.toggle(
         'active',
-        !document.body.classList.contains('left-panel-hidden'),
+        !document.body.classList.contains('left-panel-hidden')
       );
       refreshLayout();
     });
@@ -20,7 +20,7 @@ const LayoutControls = (() => {
       document.body.classList.toggle('bottom-panel-hidden');
       toggleBottomBtn.classList.toggle(
         'active',
-        !document.body.classList.contains('bottom-panel-hidden'),
+        !document.body.classList.contains('bottom-panel-hidden')
       );
       refreshLayout();
     });
@@ -74,7 +74,7 @@ const LayoutControls = (() => {
 
     handle.addEventListener('pointermove', (event) => {
       if (!handle.classList.contains('dragging')) return;
-      const nextHeight = clamp(startHeight - (event.clientY - startY), 120, 420);
+      const nextHeight = clamp(startHeight - (event.clientY - startY), 260, 420);
       panel.style.height = `${nextHeight}px`;
       refreshLayout();
     });

@@ -6,51 +6,23 @@
     <title>CAMA Philadelphia - Residential Value Review</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=20260424-landing-hero-scroll">
+    <link rel="stylesheet" href="styles.css?v=20260429-mobile-app">
 </head>
 <body class="bg-[#121414] text-[#e2e2e2] font-inter">
     <nav class="bg-[#1e2020]/95 border-b border-[#e2e2e2]/15 px-6 lg:px-8 py-4 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-6">
             <a href="./" class="flex items-center gap-3">
-                <div class="w-9 h-9 bg-[#a0caff] text-[#121414] font-space-grotesk font-bold flex items-center justify-center">C</div>
+                <img src="./assets/team-mark.svg" alt="Yanyang Isabelle Sihan Zicheng team mark" class="w-10 h-10 opacity-95">
                 <div>
                     <div class="text-lg font-space-grotesk font-semibold tracking-wide">CAMA PHILADELPHIA</div>
                     <div class="text-xs text-[#e2e2e2]/50 uppercase tracking-[0.2em]">Residential Value Review</div>
                 </div>
             </a>
-            <div class="hidden md:flex items-center gap-6 text-sm text-[#e2e2e2]/70">
-                <a href="#portals" class="hover:text-[#a0caff] transition-colors duration-200">Choose Portal</a>
-                <a href="./reviewer/" class="hover:text-[#a0caff] transition-colors duration-200">Housing Assessor</a>
-                <a href="./widget/" class="hover:text-[#a0caff] transition-colors duration-200">Property Owner</a>
-            </div>
         </div>
     </nav>
 
     <main>
-        <section class="landing-hero landing-hero-screen px-6 lg:px-8">
-            <div class="max-w-7xl mx-auto">
-                <div class="landing-hero-head landing-animate-left">
-                    <div class="inline-flex items-center gap-2 border border-[#a0caff]/30 bg-[#a0caff]/8 px-3 py-2 text-xs uppercase tracking-[0.24em] text-[#a0caff] landing-animate-up landing-delay-1">
-                        Philadelphia residential value review
-                    </div>
-                    <div class="landing-title-row landing-animate-up landing-delay-2">
-                        <img src="./assets/team-mark.svg" alt="Yanyang Isabelle Sihan Zicheng team mark" class="landing-team-mark">
-                        <h1 class="text-5xl md:text-7xl lg:text-[7rem] font-space-grotesk font-bold leading-[0.92] max-w-5xl">
-                            One citywide system, two clear entry points.
-                        </h1>
-                    </div>
-                    <p class="text-lg lg:text-xl text-[#e2e2e2]/70 max-w-2xl leading-8 landing-animate-up landing-delay-3">
-                        Choose the assessor workflow for citywide review, or the owner workflow for one property and its nearby context.
-                    </p>
-                </div>
-                <div class="landing-scroll-hint landing-animate-up landing-delay-5">
-                    <span>Scroll to choose a portal</span>
-                    <span class="landing-scroll-arrow">&#8595;</span>
-                </div>
-            </div>
-        </section>
-
-        <section id="portals" class="px-6 lg:px-8 pb-16 pt-10 lg:pt-14">
+        <section id="portals" class="landing-hero px-6 lg:px-8 pb-16 pt-12 lg:pt-16">
             <div class="max-w-7xl mx-auto">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <a href="./reviewer/" class="portal-entry-card portal-entry-card--assessor group landing-scroll-reveal">

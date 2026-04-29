@@ -17,6 +17,8 @@ const PropertyDisplay = (() => {
     console.log('Initializing Property Display Module...');
     setupEventListeners();
     enableNearbyPanelDragging();
+    document.getElementById('closeOwnerPropertySheet')?.addEventListener('click', clear);
+    document.getElementById('closeOwnerFloatPanel')?.addEventListener('click', clear);
   };
 
   const displayProperty = (property) => {
@@ -27,6 +29,7 @@ const PropertyDisplay = (() => {
 
     currentProperty = property;
     nearbyPanelDismissed = false;
+    document.body.classList.add('owner-property-selected');
 
     updatePropertyInfo(property);
     updateNearbyChange(property);
@@ -59,7 +62,7 @@ const PropertyDisplay = (() => {
       'propertyCurrentYear',
       Number.isFinite(currentValue)
         ? `(${new Date().getFullYear()})`
-        : '(No ML prediction)',
+        : '(No ML prediction)'
     );
 
     const dollarChange =
@@ -79,9 +82,13 @@ const PropertyDisplay = (() => {
     const changeBar = document.getElementById('changeBar');
     if (changeBar) {
       const barWidth = Number.isFinite(percentChange)
-        ? Math.min(Math.abs(percentChange), 100)
+        ? Math.min(Math.abs(percentChange), 100) / 2
         : 0;
       changeBar.style.width = `${barWidth}%`;
+      changeBar.style.left =
+        Number.isFinite(percentChange) && percentChange < 0
+          ? `${50 - barWidth}%`
+          : '50%';
       changeBar.style.backgroundColor =
         Number.isFinite(percentChange) && percentChange > 0
           ? '#ffb2b6'
@@ -107,7 +114,7 @@ const PropertyDisplay = (() => {
           property.lat,
           property.lng,
           candidate.lat,
-          candidate.lng,
+          candidate.lng
         ),
       }))
       .filter((candidate) => Number.isFinite(candidate.change_percent));
@@ -121,7 +128,7 @@ const PropertyDisplay = (() => {
           property.lat,
           property.lng,
           candidate.lat,
-          candidate.lng,
+          candidate.lng
         ),
       }))
       .filter((candidate) => Number.isFinite(candidate.change_percent));
@@ -140,15 +147,15 @@ const PropertyDisplay = (() => {
     setElementText('nearbyAverageChange', Utils.formatPercentage(nearbyAverage));
     setElementText(
       'nearbyYourChange',
-      hasPrediction ? Utils.formatPercentage(yourChange) : String(activeNearby.length),
+      hasPrediction ? Utils.formatPercentage(yourChange) : String(activeNearby.length)
     );
     setElementText(
       'nearbyStatus',
-      getNearbyStatusText(property, yourChange, nearbyAverage, activeNearby.length),
+      getNearbyStatusText(property, yourChange, nearbyAverage, activeNearby.length)
     );
     setElementText(
       'nearbyYourMarkerLabel',
-      hasPrediction ? 'Your home' : 'Nearby homes with predictions',
+      hasPrediction ? 'Your home' : 'Nearby homes with predictions'
     );
 
     renderNearbyHistogram(activeNearby, hasPrediction ? yourChange : null);
@@ -160,11 +167,11 @@ const PropertyDisplay = (() => {
     setElementText('nearbyPrimaryLabel', 'Nearby average');
     setElementText(
       'nearbySecondaryLabel',
-      hasPrediction ? 'Your property' : 'Nearby homes with prediction',
+      hasPrediction ? 'Your property' : 'Nearby homes with prediction'
     );
     setElementText(
       'sameTypeHomesLabel',
-      hasPrediction ? 'Same Property Type' : 'Nearby examples',
+      hasPrediction ? 'Same Property Type' : 'Nearby examples'
     );
 
     const toggle = document.getElementById('toggleSameTypeHomes');
@@ -203,7 +210,7 @@ const PropertyDisplay = (() => {
         selectedProperty.lat,
         selectedProperty.lng,
         candidate.lat,
-        candidate.lng,
+        candidate.lng
       ) <= NEARBY_RADIUS_METERS
     );
   };
@@ -227,7 +234,7 @@ const PropertyDisplay = (() => {
         selectedProperty.lat,
         selectedProperty.lng,
         candidate.lat,
-        candidate.lng,
+        candidate.lng
       ) <= NEARBY_RADIUS_METERS
     );
   };
@@ -263,7 +270,7 @@ const PropertyDisplay = (() => {
       return 'Nearby comparison is not available right now.';
     }
     const betterThanCount = neighborhoodProperties.filter(
-      (candidate) => Number.isFinite(candidate.change_percent) && yourChange > candidate.change_percent,
+      (candidate) => Number.isFinite(candidate.change_percent) && yourChange > candidate.change_percent
     ).length;
     const percentile = Math.round((betterThanCount / comparableCount) * 100);
 
@@ -301,8 +308,8 @@ const PropertyDisplay = (() => {
       return;
     }
 
-    const min = Math.min(...values);
-    const max = Math.max(...values);
+    const min = Math.min(...values, 0);
+    const max = Math.max(...values, 0);
     const binCount = 8;
     const range = max - min || 1;
     const binWidth = range / binCount;
@@ -318,6 +325,18 @@ const PropertyDisplay = (() => {
     const yourBinIndex = Number.isFinite(yourChange)
       ? Math.max(0, Math.min(binCount - 1, Math.floor((yourChange - min) / binWidth)))
       : -1;
+
+    const zeroRatio = (0 - min) / range;
+    const zeroMarker = document.createElement('div');
+    zeroMarker.className = 'nearby-histogram-zero';
+    zeroMarker.style.left = `calc(${Math.max(0, Math.min(1, zeroRatio)) * 100}% - 1px)`;
+    histogram.appendChild(zeroMarker);
+
+    const zeroLabel = document.createElement('div');
+    zeroLabel.className = 'nearby-histogram-zero-label';
+    zeroLabel.style.left = `calc(${Math.max(0, Math.min(1, zeroRatio)) * 100}% - 10px)`;
+    zeroLabel.textContent = '0%';
+    histogram.appendChild(zeroLabel);
 
     bins.forEach((count, index) => {
       const bar = document.createElement('div');
@@ -423,9 +442,10 @@ const PropertyDisplay = (() => {
 
     const nearbyMapPanel = document.getElementById('nearbyMapPanel');
     if (nearbyMapPanel && !nearbyPanelDismissed) {
+      moveNearbyPanelForViewport();
       nearbyMapPanel.classList.remove('nearby-map-panel-hidden');
       nearbyMapPanel.style.display = 'block';
-      if (!nearbyPanelDragged) {
+      if (!isMobileViewport() && !nearbyPanelDragged) {
         nearbyMapPanel.style.top = '18px';
         nearbyMapPanel.style.right = '18px';
         nearbyMapPanel.style.left = 'auto';
@@ -434,6 +454,7 @@ const PropertyDisplay = (() => {
   };
 
   const hideSections = () => {
+    document.body.classList.remove('owner-property-selected');
     document.getElementById('ownerIntroBlock')?.classList.remove('hidden');
     document.getElementById('ownerExamplesBlock')?.classList.remove('hidden');
 
@@ -449,8 +470,33 @@ const PropertyDisplay = (() => {
 
     const nearbyMapPanel = document.getElementById('nearbyMapPanel');
     if (nearbyMapPanel) {
+      restoreNearbyPanelToMap();
       nearbyMapPanel.classList.add('nearby-map-panel-hidden');
       nearbyMapPanel.style.display = 'none';
+    }
+  };
+
+  const isMobileViewport = () =>
+    window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
+
+  const moveNearbyPanelForViewport = () => {
+    const panel = document.getElementById('nearbyMapPanel');
+    if (!panel || !isMobileViewport()) return;
+    const ownerSidebar = document.getElementById('ownerSidebar');
+    if (ownerSidebar && panel.parentElement !== ownerSidebar) {
+      ownerSidebar.appendChild(panel);
+    }
+    panel.style.top = '';
+    panel.style.right = '';
+    panel.style.left = '';
+    panel.style.bottom = '';
+  };
+
+  const restoreNearbyPanelToMap = () => {
+    const panel = document.getElementById('nearbyMapPanel');
+    const map = document.getElementById('map');
+    if (panel && map && panel.parentElement !== map) {
+      map.appendChild(panel);
     }
   };
 
@@ -557,11 +603,11 @@ const PropertyDisplay = (() => {
 
       const nextLeft = Math.min(
         maxLeft,
-        Math.max(0, startLeft + (event.clientX - startX)),
+        Math.max(0, startLeft + (event.clientX - startX))
       );
       const nextTop = Math.min(
         maxTop,
-        Math.max(0, startTop + (event.clientY - startY)),
+        Math.max(0, startTop + (event.clientY - startY))
       );
 
       panel.style.left = `${nextLeft}px`;

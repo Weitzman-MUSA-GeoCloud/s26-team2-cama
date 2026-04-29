@@ -4,7 +4,7 @@ const DistributionChart = (() => {
   const CURRENT_DATA_URL =
     'https://storage.googleapis.com/musa5090s26-team2-public/configs/current_assessment_bins.json';
   const TRANSACTION_TREND_URL =
-    'https://storage.googleapis.com/musa5090s26-team2-public/configs/transaction_volume_trend.json';
+    'https://storage.googleapis.com/musa5090s26-team2-public/configs/transaction_volume_trend.json?v=20260429-recent';
 
   const colors = {
     bg: '#121414',
@@ -39,8 +39,8 @@ const DistributionChart = (() => {
       cachedTaxYearData = Array.isArray(taxYearData) ? taxYearData : [];
       cachedCurrentData = Array.isArray(currentData) ? currentData : [];
       cachedTrendData = Array.isArray(trendData) ? trendData : [];
-      latestTaxYears = getLatestYears(cachedTaxYearData, 2);
-      visibleTaxYears = new Set(latestTaxYears.slice(-1).map(String));
+      latestTaxYears = getMarketComparisonYears(cachedTaxYearData);
+      visibleTaxYears = new Set(latestTaxYears.map(String));
 
       renderTaxYearChart();
       renderTrendChart();
@@ -112,6 +112,7 @@ const DistributionChart = (() => {
         body,
         buildPropertyHistogram('predicted'),
         colors.predicted,
+        'Predicted distribution unavailable'
       );
       return;
     }
@@ -122,7 +123,7 @@ const DistributionChart = (() => {
       renderExpandedSidebarHistogram(
         body,
         buildPropertyHistogram('market'),
-        colors.market,
+        colors.market
       );
     }
   };
@@ -137,13 +138,22 @@ const DistributionChart = (() => {
     return years.slice(-count);
   };
 
+  const getMarketComparisonYears = (data) => {
+    const years = [...new Set(data.map((d) => Number(d.tax_year)).filter(Number.isFinite))]
+      .sort((a, b) => a - b);
+    const preferredYears = [2024, 2025];
+    return preferredYears.every((year) => years.includes(year))
+      ? preferredYears
+      : years.filter((year) => year <= 2025).slice(-2);
+  };
+
   const renderTaxYearChart = () => {
     const container = document.getElementById('bottomLeftChart');
     if (!container) return;
     container.innerHTML = '';
 
     const filtered = cachedTaxYearData.filter((item) =>
-      latestTaxYears.includes(Number(item.tax_year)),
+      latestTaxYears.includes(Number(item.tax_year))
     );
     renderTaxYearLineChart(container, filtered, {
       interactiveLegend: false,
@@ -156,11 +166,7 @@ const DistributionChart = (() => {
     const container = document.getElementById('bottomRightChart');
     if (!container) return;
     container.innerHTML = '';
-    const latestFive = [...cachedTrendData]
-      .filter((item) => Number.isFinite(Number(item.sale_year)))
-      .sort((a, b) => Number(a.sale_year) - Number(b.sale_year))
-      .slice(-5);
-    renderSimpleLineChart(container, latestFive, {
+    renderSimpleLineChart(container, getRecentTransactionYears(cachedTrendData), {
       xField: 'sale_year',
       yField: 'transaction_count',
       color: colors.trend,
@@ -173,7 +179,7 @@ const DistributionChart = (() => {
 
   const renderZoomableTaxYearChart = (container) => {
     renderTaxYearLineChart(container, cachedTaxYearData.filter((item) =>
-      latestTaxYears.includes(Number(item.tax_year)),
+      latestTaxYears.includes(Number(item.tax_year))
     ), {
       interactiveLegend: true,
       compact: false,
@@ -182,12 +188,9 @@ const DistributionChart = (() => {
   };
 
   const renderZoomableTrendChart = (container) => {
-    const latestFive = [...cachedTrendData]
-      .filter((item) => Number.isFinite(Number(item.sale_year)))
-      .sort((a, b) => Number(a.sale_year) - Number(b.sale_year))
-      .slice(-5);
+    const recentYears = getRecentTransactionYears(cachedTrendData);
 
-    renderSimpleLineChart(container, latestFive, {
+    renderSimpleLineChart(container, recentYears, {
       xField: 'sale_year',
       yField: 'transaction_count',
       color: colors.trend,
@@ -197,6 +200,19 @@ const DistributionChart = (() => {
       compact: false,
       zoomable: true,
     });
+  };
+
+  const getRecentTransactionYears = (data) => {
+    const sorted = [...data]
+      .filter((item) => Number.isFinite(Number(item.sale_year)))
+      .sort((a, b) => Number(a.sale_year) - Number(b.sale_year));
+
+    const years2020To2025 = sorted.filter((item) => {
+      const year = Number(item.sale_year);
+      return year >= 2020 && year <= 2025;
+    });
+
+    return years2020To2025.length ? years2020To2025 : sorted.slice(-5);
   };
 
   const renderTaxYearLineChart = (container, data, opts = {}) => {
@@ -215,7 +231,7 @@ const DistributionChart = (() => {
     const chartHeight = height - margin.top - margin.bottom;
 
     const grouped = d3.groups(data, (d) => String(d.tax_year)).sort(
-      (a, b) => Number(a[0]) - Number(b[0]),
+      (a, b) => Number(a[0]) - Number(b[0])
     );
     const yearSeries = grouped.map(([year, values]) => ({
       year,
@@ -266,7 +282,7 @@ const DistributionChart = (() => {
         .call(
           d3.axisBottom(xScale)
             .ticks(opts.compact ? 5 : 7)
-            .tickFormat((value) => `$${Math.round(value / 1000)}k`),
+            .tickFormat((value) => `$${Math.round(value / 1000)}k`)
         )
         .style('color', colors.textMuted)
         .style('font-size', opts.compact ? '10px' : '12px');
@@ -437,7 +453,7 @@ const DistributionChart = (() => {
         .call(
           d3.axisBottom(xScale)
             .ticks(data.length)
-            .tickFormat(opts.xTickFormatter || ((value) => String(value))),
+            .tickFormat(opts.xTickFormatter || ((value) => String(value)))
         )
         .style('color', colors.textMuted)
         .style('font-size', opts.compact ? '10px' : '12px');
@@ -445,14 +461,14 @@ const DistributionChart = (() => {
         .call(
           d3.axisLeft(y)
             .ticks(opts.yTicks || 4)
-            .tickFormat(opts.yTickFormatter || d3.format('~s')),
+            .tickFormat(opts.yTickFormatter || d3.format('~s'))
         )
         .style('color', colors.textMuted)
         .style('font-size', opts.compact ? '10px' : '12px');
 
       path.datum(data).attr(
         'd',
-        d3.line().x((d) => xScale(Number(d[opts.xField]))).y((d) => y(Number(d[opts.yField]))),
+        d3.line().x((d) => xScale(Number(d[opts.xField]))).y((d) => y(Number(d[opts.yField])))
       );
 
       const pointSel = points.selectAll('circle').data(data);
@@ -500,22 +516,60 @@ const DistributionChart = (() => {
   };
 
   const buildPropertyHistogram = (field) => {
+    if (field === 'predicted') {
+      return buildHistogramFromBinConfig(cachedCurrentData, 'property_count');
+    }
+
+    if (field === 'market') {
+      const latestYear = latestTaxYears.at(-1);
+      const latestMarketBins = cachedTaxYearData.filter(
+        (item) => Number(item.tax_year) === Number(latestYear)
+      );
+      return buildHistogramFromBinConfig(latestMarketBins, 'property_count');
+    }
+
     const properties =
       typeof DataManager !== 'undefined' && typeof DataManager.getFilteredProperties === 'function'
         ? DataManager.getFilteredProperties()
         : [];
     const values = properties
-      .map((property) =>
-        field === 'predicted' ? property.predicted_value : property.market_value,
-      )
-      .filter((value) => Number.isFinite(value) && value > 0 && value < 2000000);
+        .map((property) =>
+          field === 'predicted' ? property.predicted_value : property.market_value
+        )
+        .filter((value) => Number.isFinite(value) && value > 0 && value < 2000000);
+    if (!values.length) {
+      if (field === 'predicted') return [];
+
+      const latestYear = latestTaxYears.at(-1);
+      const latestMarketBins = cachedTaxYearData.filter(
+        (item) => Number(item.tax_year) === Number(latestYear)
+      );
+      return buildHistogramFromBinConfig(latestMarketBins, 'property_count');
+    }
     return histogram(values, 20, [0, 1000000]);
   };
 
-  const renderExpandedSidebarHistogram = (container, bins, color) => {
+  const buildHistogramFromBinConfig = (rows, countField) => {
+    if (!Array.isArray(rows) || !rows.length) return [];
+    return rows
+      .map((row) => ({
+        x0: Number(row.lower_bound),
+        x1: Number(row.upper_bound),
+        count: Number(row[countField] ?? row.count ?? 0),
+      }))
+      .filter(
+        (bin) =>
+          Number.isFinite(bin.x0) &&
+          Number.isFinite(bin.x1) &&
+          Number.isFinite(bin.count) &&
+          bin.x1 > bin.x0
+      );
+  };
+
+  const renderExpandedSidebarHistogram = (container, bins, color, emptyMessage = 'No data') => {
     if (!bins.length) {
       container.innerHTML =
-        '<div class="flex h-full items-center justify-center text-xs text-[#e2e2e2]/45">No data</div>';
+        `<div class="flex h-full items-center justify-center text-xs text-[#e2e2e2]/45">${emptyMessage}</div>`;
       return;
     }
 
@@ -594,7 +648,7 @@ const DistributionChart = (() => {
 
     if (!bins.length) {
       container.innerHTML =
-        '<div class="flex items-center justify-center h-full text-xs text-[#e2e2e2]/40">No data</div>';
+        `<div class="flex items-center justify-center h-full text-xs text-[#e2e2e2]/40">${opts.emptyMessage || 'No data'}</div>`;
       return;
     }
 
@@ -735,7 +789,7 @@ const DistributionChart = (() => {
     g.append('g')
       .attr('transform', `translate(0,${chartH})`)
       .call(
-        d3.axisBottom(x).ticks(5).tickFormat(opts.xFormat || ((value) => `$${Math.round(value / 1000)}k`)),
+        d3.axisBottom(x).ticks(5).tickFormat(opts.xFormat || ((value) => `$${Math.round(value / 1000)}k`))
       )
       .style('color', colors.textMuted)
       .style('font-size', '10px');
@@ -746,24 +800,25 @@ const DistributionChart = (() => {
   };
 
   const renderSidebarPrice = (properties, opts = {}) => {
-    const values = properties
-      .map((property) => property.predicted_value)
-      .filter((value) => Number.isFinite(value) && value > 0 && value < 2000000);
-    renderMiniHistogram('priceDistributionChart', histogram(values, 20, [0, 1000000]), {
+    const bins = buildHistogramFromBinConfig(cachedCurrentData, 'property_count');
+    renderMiniHistogram('priceDistributionChart', bins, {
       color: colors.predicted,
       hoverColor: colors.predictedHover,
       activeColor: colors.predictedActive,
       xFormat: (value) => `$${Math.round(value / 1000)}k`,
       onBarClick: opts.onBarClick,
       activeBin: opts.activeBin,
+      emptyMessage: 'Predicted distribution unavailable',
     });
   };
 
   const renderSidebarMarket = (properties, opts = {}) => {
-    const values = properties
-      .map((property) => property.market_value)
-      .filter((value) => Number.isFinite(value) && value > 0 && value < 2000000);
-    renderMiniHistogram('marketDistributionChart', histogram(values, 20, [0, 1000000]), {
+    const latestYear = latestTaxYears.at(-1);
+    const bins = buildHistogramFromBinConfig(
+      cachedTaxYearData.filter((item) => Number(item.tax_year) === Number(latestYear)),
+      'property_count'
+    );
+    renderMiniHistogram('marketDistributionChart', bins, {
       color: colors.market,
       hoverColor: colors.marketHover,
       activeColor: colors.marketActive,

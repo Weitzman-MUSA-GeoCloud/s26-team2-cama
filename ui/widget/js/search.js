@@ -3,11 +3,14 @@ const Search = (() => {
   let isDataLoaded = false;
   let isDataLoading = false;
   let listenersBound = false;
+  let readyCallbacks = [];
+  let saleIndex = new Map();
+  let saleIndexPromise = null;
 
-  const ML_GEOJSON_URL =
-    'https://storage.googleapis.com/musa5090s26-team2-temp_data/property_tile_info.geojson';
-  const FULL_GEOJSON_URL =
-    'https://storage.googleapis.com/musa5090s26-team2-public/residential_market_value.geojson';
+  const SEARCH_INDEX_URL =
+    'https://storage.googleapis.com/musa5090s26-team2-public/configs/property_search_index.json?v=20260429-full-search';
+  const SALE_INDEX_URL =
+    'https://storage.googleapis.com/musa5090s26-team2-public/configs/property_sale_index.json?v=20260429';
 
   const init = async () => {
     setupEventListeners();
@@ -18,49 +21,125 @@ const Search = (() => {
       allProperties = await loadGeoJSONData();
       isDataLoaded = allProperties.length > 0;
       isDataLoading = false;
+      loadSaleIndex();
       setSearchStatus('Properties are ready to explore.', 'success');
+      readyCallbacks.splice(0).forEach((callback) => callback(allProperties));
     } catch (error) {
       isDataLoading = false;
       console.error('Error initializing search:', error);
       setSearchStatus(
         'Property data could not be loaded. Please refresh the page.',
-        'error',
+        'error'
       );
     }
   };
 
   const loadGeoJSONData = async () => {
-    const [fullResponse, mlResponse] = await Promise.all([
-      fetch(FULL_GEOJSON_URL),
-      fetch(ML_GEOJSON_URL),
-    ]);
-
-    if (!fullResponse.ok) {
-      throw new Error(`Failed to load full parcel GeoJSON: ${fullResponse.status}`);
+    const response = await fetch(SEARCH_INDEX_URL);
+    if (!response.ok) {
+      throw new Error(`Failed to load property search index: ${response.status}`);
     }
-    if (!mlResponse.ok) {
-      throw new Error(`Failed to load ML parcel GeoJSON: ${mlResponse.status}`);
-    }
+    const records = normalizeSearchRecords(await response.json());
+    return records
+      .map(transformSearchRecord)
+      .filter((property) => property.id && property.address);
+  };
 
-    const [fullGeoJsonData, mlGeoJsonData] = await Promise.all([
-      fullResponse.json(),
-      mlResponse.json(),
-    ]);
+  const normalizeSearchRecords = (payload) => {
+    if (Array.isArray(payload)) return payload;
+    if (!payload?.columns || !payload?.rows) return [];
 
-    const mlMap = new Map(
-      (mlGeoJsonData.features || []).map((feature) => {
-        const property = transformMlFeature(feature);
-        return [String(property.id), property];
-      }),
+    return payload.rows.map((row) =>
+      payload.columns.reduce((record, column, index) => {
+        record[column] = row[index];
+        return record;
+      }, {})
     );
+  };
 
-    const merged = (fullGeoJsonData.features || []).map((feature) => {
-      const fullProperty = transformFullFeature(feature);
-      const mlProperty = mlMap.get(String(fullProperty.id));
-      return mergePropertyRecords(fullProperty, mlProperty);
-    });
+  const loadSaleIndex = () => {
+    if (saleIndexPromise) return saleIndexPromise;
+    saleIndexPromise = fetch(SALE_INDEX_URL)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Failed to load sale index: ${response.status}`);
+        return response.json();
+      })
+      .then((payload) => {
+        const rows = normalizeSearchRecords(payload);
+        saleIndex = new Map(
+          rows
+            .filter((record) => record.id)
+            .map((record) => [
+              String(record.id),
+              {
+                sale_price: toNumber(record.sale_price),
+                sale_date: record.sale_date || null,
+              },
+            ])
+        );
+        allProperties = allProperties.map(enrichWithSale);
+        return saleIndex;
+      })
+      .catch((error) => {
+        console.warn('Sale index unavailable:', error);
+        saleIndex = new Map();
+        return saleIndex;
+      });
+    return saleIndexPromise;
+  };
 
-    return merged.filter((property) => property.id && property.address);
+  const getSaleById = (id) => saleIndex.get(String(id)) || null;
+
+  const getSaleByIdAsync = async (id) => {
+    await loadSaleIndex();
+    return getSaleById(id);
+  };
+
+  const enrichWithSale = (property) => {
+    if (!property?.id) return property;
+    const sale = getSaleById(property.id);
+    if (!sale) return property;
+    return {
+      ...property,
+      sale_price: Number.isFinite(property.sale_price) && property.sale_price > 0
+        ? property.sale_price
+        : sale.sale_price,
+      sale_date: property.sale_date || sale.sale_date,
+    };
+  };
+
+  const transformSearchRecord = (record) => {
+    const rawPredictedValue = toNumber(record.predicted_value);
+    const predictedValue =
+      Number.isFinite(rawPredictedValue) && rawPredictedValue > 0 ? rawPredictedValue : null;
+    const marketValue = toNumber(record.market_value ?? record.last_year_value);
+    const changePercent = Number.isFinite(predictedValue) ? toNumber(record.change_percent) : null;
+
+    return {
+      id: String(record.id || record.property_id || ''),
+      address: record.address || record.location || 'Address not available',
+      property_type: record.property_type || record.bldg_desc || 'Residential',
+      lat: toNumber(record.lat),
+      lng: toNumber(record.lng),
+      market_value: marketValue ?? predictedValue,
+      last_year_value: marketValue,
+      tax_year_value: marketValue ?? predictedValue,
+      predicted_value: predictedValue,
+      change_percent:
+        changePercent ??
+        (Number.isFinite(marketValue) && Number.isFinite(predictedValue) && marketValue > 0
+          ? ((predictedValue - marketValue) / marketValue) * 100
+          : null),
+      lot_size: toNumber(record.lot_size),
+      sale_date: record.sale_date || null,
+      sale_price: toNumber(record.sale_price),
+      sale_year: toNumber(record.sale_year),
+      sale_month: toNumber(record.sale_month),
+      location: record.location || record.address || null,
+      bldg_desc: record.bldg_desc || null,
+      zip_code: record.zip_code || null,
+      has_prediction: Number.isFinite(predictedValue),
+    };
   };
 
   const transformFullFeature = (feature) => {
@@ -175,7 +254,7 @@ const Search = (() => {
         acc.lat += Number(coord[1] || 0);
         return acc;
       },
-      { lng: 0, lat: 0 },
+      { lng: 0, lat: 0 }
     );
 
     return [totals.lng / ring.length, totals.lat / ring.length];
@@ -225,7 +304,7 @@ const Search = (() => {
       if (term.length < 2) {
         autocompleteDropdown.classList.add('hidden');
         setSearchStatus(
-          isDataLoaded ? 'Properties are ready to explore.' : 'Loading property data...',
+          isDataLoaded ? 'Properties are ready to explore.' : 'Loading property data...'
         );
         return;
       }
@@ -307,15 +386,15 @@ const Search = (() => {
     const exactish = allProperties.filter(
       (property) =>
         normalizeSearchText(property.address).includes(normalizedTerm) ||
-        String(property.id).includes(term),
+        String(property.id).includes(term)
     );
 
     const fallback =
       exactish.length > 0 || !fallbackTerm
         ? []
         : allProperties.filter((property) =>
-          normalizeSearchText(property.address).includes(fallbackTerm),
-        );
+            normalizeSearchText(property.address).includes(fallbackTerm)
+          );
 
     return [...exactish, ...fallback].slice(0, 8).map((property) => ({
       id: property.id,
@@ -342,7 +421,7 @@ const Search = (() => {
         <div class="font-600 text-sm">${suggestion.address}</div>
         <div class="text-xs text-[#e2e2e2]/40 mt-1">${suggestion.type} - ID: ${suggestion.id}</div>
       </div>
-    `,
+    `
       )
       .join('');
 
@@ -360,7 +439,7 @@ const Search = (() => {
       setSearchStatus(
         isDataLoading
           ? 'Still loading property data. Please wait a moment...'
-          : 'Property data is not ready. Please refresh the page.',
+          : 'Property data is not ready. Please refresh the page.'
       );
       return;
     }
@@ -369,7 +448,7 @@ const Search = (() => {
     const results = allProperties.filter(
       (property) =>
         normalizeSearchText(property.address).includes(normalizedTerm) ||
-        String(property.id).includes(searchTerm),
+        String(property.id).includes(searchTerm)
     );
 
     if (!results.length) {
@@ -391,7 +470,7 @@ const Search = (() => {
       setSearchStatus(
         isDataLoading
           ? 'Still loading property data. Please wait a moment...'
-          : 'Property data is not ready. Please refresh the page.',
+          : 'Property data is not ready. Please refresh the page.'
       );
       return;
     }
@@ -427,6 +506,17 @@ const Search = (() => {
 
   const getAllProperties = () => allProperties;
 
+  const isReady = () => isDataLoaded;
+
+  const onReady = (callback) => {
+    if (typeof callback !== 'function') return;
+    if (isDataLoaded) {
+      callback(allProperties);
+      return;
+    }
+    readyCallbacks.push(callback);
+  };
+
   const showNotification = (message, type = 'info') => {
     setSearchStatus(message, type);
   };
@@ -442,7 +532,7 @@ const Search = (() => {
         ? 'text-[#ffb2b6]'
         : type === 'success'
           ? 'text-[#a0caff]'
-          : 'text-[#e2e2e2]/60',
+          : 'text-[#e2e2e2]/60'
     );
   };
 
@@ -521,11 +611,17 @@ const Search = (() => {
   return {
     init,
     loadGeoJSONData,
+    loadSaleIndex,
     getSuggestions,
     performSearch,
     searchById,
     selectProperty,
     getPropertyById,
+    getSaleById,
+    getSaleByIdAsync,
+    enrichWithSale,
     getAllProperties,
+    isReady,
+    onReady,
   };
 })();

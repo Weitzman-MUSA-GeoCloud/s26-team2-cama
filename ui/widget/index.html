@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/maplibre-gl@4.0.0/dist/maplibre-gl.css" rel="stylesheet">
     <script src="https://unpkg.com/maplibre-gl@4.0.0/dist/maplibre-gl.js"></script>
-    <link rel="stylesheet" href="styles.css?v=20260424-owner-loading-cover">
+    <link rel="stylesheet" href="styles.css?v=20260429-change-zero-label-final">
 </head>
 <body class="bg-[#121414] text-[#e2e2e2] font-inter">
     <div id="ownerLoadingCover" class="owner-loading-cover">
@@ -40,8 +40,9 @@
         </div>
     </nav>
 
-    <main class="grid grid-cols-1 lg:grid-cols-[380px_1fr] h-[calc(100vh-65px)] overflow-hidden">
-        <aside class="bg-[#1e2020] border-r border-[#e2e2e2]/20 p-6 overflow-y-auto">
+    <main id="ownerShell" class="grid grid-cols-1 lg:grid-cols-[380px_1fr] h-[calc(100vh-65px)] overflow-hidden">
+        <aside id="ownerSidebar" class="bg-[#1e2020] border-r border-[#e2e2e2]/20 p-6 overflow-y-auto">
+            <button id="closeOwnerFloatPanel" type="button" aria-label="Close property panel">&times;</button>
             <div id="ownerIntroBlock" class="mb-6">
                 <h1 class="text-2xl font-space-grotesk font-700">Find Your Property</h1>
                 <p class="text-sm text-[#e2e2e2]/55 mt-2">Search your address or OPA ID to view the latest predicted value.</p>
@@ -80,12 +81,24 @@
             </div>
 
             <section id="propertySection" class="hidden space-y-5">
+                <div class="mobile-owner-sheet-header">
+                    <div>
+                        <div class="text-xs text-[#e2e2e2]/45 uppercase tracking-wider">Selected Property</div>
+                        <div class="text-sm font-space-grotesk font-600">Property Details</div>
+                    </div>
+                    <button id="closeOwnerPropertySheet" type="button" aria-label="Close property details">&times;</button>
+                </div>
+
                 <div class="bg-[#121414] border border-[#e2e2e2]/20 p-5">
                     <label class="text-xs text-[#e2e2e2]/60 uppercase tracking-wider">Value Change</label>
                     <div id="changePercent" class="text-3xl font-space-grotesk font-700 mt-3">-</div>
                     <div id="changeAmount" class="text-sm text-[#e2e2e2]/60 mt-2">-</div>
-                    <div class="w-full h-2 bg-[#1e2020] mt-4 overflow-hidden">
-                        <div id="changeBar" class="h-full bg-[#e20546] w-0 transition-all duration-500"></div>
+                    <div class="change-axis-wrap">
+                        <div class="change-axis-track">
+                            <div class="change-axis-zero"></div>
+                            <div id="changeBar" class="change-axis-bar"></div>
+                        </div>
+                        <div class="change-axis-zero-label">0</div>
                     </div>
                 </div>
 
@@ -116,8 +129,8 @@
             <div id="sidebarSection" class="hidden"></div>
         </aside>
 
-        <section class="flex flex-col min-w-0">
-            <div class="bg-[#1e2020] border-b border-[#e2e2e2]/20 px-6 py-4 flex items-center justify-between gap-6">
+        <section id="ownerMapWorkspace" class="flex flex-col min-w-0">
+            <div id="ownerMapToolbar" class="bg-[#1e2020] border-b border-[#e2e2e2]/20 px-6 py-4 flex items-center justify-between gap-6">
                 <h2 class="text-sm font-space-grotesk font-600">Property Map</h2>
                 <div class="flex items-center gap-5">
                     <div class="w-72" aria-label="Predicted value color legend">
@@ -190,10 +203,11 @@
     </main>
 
     <script src="js/utils.js?v=20260424-owner-loading-cover"></script>
-    <script src="js/mapInteraction.js?v=20260424-owner-loading-cover"></script>
-    <script src="js/search.js?v=20260424-owner-loading-cover"></script>
-    <script src="js/propertyDisplay.js?v=20260424-owner-loading-cover"></script>
+    <script src="js/mapInteraction.js?v=20260429-full-search"></script>
+    <script src="js/search.js?v=20260429-full-search2"></script>
+    <script src="js/propertyDisplay.js?v=20260429-nearby-zero-line"></script>
     <script src="js/chartRenderer.js?v=20260424-owner-loading-cover"></script>
-    <script src="js/main.js?v=20260424-owner-loading-cover"></script>
+    <script src="js/main.js?v=20260429-fast-open"></script>
 </body>
 </html>
+

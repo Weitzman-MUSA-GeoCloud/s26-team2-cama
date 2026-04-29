@@ -1,17 +1,17 @@
 const HomeStats = (() => {
-  const GEOJSON_URL =
-    'https://storage.googleapis.com/musa5090s26-team2-temp_data/property_tile_info.geojson';
+  const SEARCH_INDEX_URL =
+    'https://storage.googleapis.com/musa5090s26-team2-public/configs/property_search_index.json';
 
   const init = async () => {
     setupScrollReveal();
     try {
-      const response = await fetch(GEOJSON_URL);
+      const response = await fetch(SEARCH_INDEX_URL);
       if (!response.ok) {
-        throw new Error(`Failed to load GeoJSON: ${response.status}`);
+        throw new Error(`Failed to load property search index: ${response.status}`);
       }
 
-      const geojson = await response.json();
-      const stats = calculateStats(geojson.features || []);
+      const records = normalizeSearchRecords(await response.json());
+      const stats = calculateStats(records || []);
       renderStats(stats);
     } catch (error) {
       console.error('Error loading home statistics:', error);
@@ -23,17 +23,26 @@ const HomeStats = (() => {
     }
   };
 
-  const calculateStats = (features) => {
+  const normalizeSearchRecords = (payload) => {
+    if (Array.isArray(payload)) return payload;
+    if (!payload?.columns || !payload?.rows) return [];
+
+    return payload.rows.map((row) =>
+      payload.columns.reduce((record, column, index) => {
+        record[column] = row[index];
+        return record;
+      }, {})
+    );
+  };
+
+  const calculateStats = (records) => {
     let totalAssessedValue = 0;
     let increasedCount = 0;
     const changes = [];
 
-    features.forEach((feature) => {
-      const props = feature.properties || {};
-      const predictedValue = Number(props.predicted_value || 0);
-      const lastYearValue = props.log_price
-        ? Math.exp(Number(props.log_price))
-        : predictedValue;
+    records.forEach((record) => {
+      const predictedValue = Number(record.predicted_value || 0);
+      const lastYearValue = Number(record.market_value || record.last_year_value || 0);
 
       totalAssessedValue += predictedValue;
 
@@ -50,9 +59,9 @@ const HomeStats = (() => {
     const medianChange = median(changes);
 
     return {
-      totalCount: features.length,
+      totalCount: records.length,
       increasedCount,
-      increasedShare: features.length ? (increasedCount / features.length) * 100 : 0,
+      increasedShare: records.length ? (increasedCount / records.length) * 100 : 0,
       averageChange,
       medianChange,
       totalAssessedValue,
@@ -123,7 +132,7 @@ const HomeStats = (() => {
       {
         threshold: 0.18,
         rootMargin: '0px 0px -8% 0px',
-      },
+      }
     );
 
     revealTargets.forEach((target, index) => {

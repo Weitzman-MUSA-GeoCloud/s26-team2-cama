@@ -18,7 +18,7 @@ const ChartFiltering = (() => {
   const searchResults = document.getElementById('reviewerSearchResults');
   const activeFiltersSummary = document.getElementById('activeFiltersSummary');
   const presetButtons = Array.from(
-    document.querySelectorAll('.filter-preset-btn'),
+    document.querySelectorAll('.filter-preset-btn')
   );
 
   let filterCallbacks = [];
@@ -59,8 +59,45 @@ const ChartFiltering = (() => {
     });
 
     setupAddressSearch();
+    setupFilterHelp();
+    setupMobileFilters();
     syncSearchUi();
     renderActiveFilters();
+  };
+
+  const setupFilterHelp = () => {
+    const helpBtn = document.getElementById('filterHelpBtn');
+    const modal = document.getElementById('filterHelpModal');
+    const closeBtn = document.getElementById('closeFilterHelpBtn');
+    if (!helpBtn || !modal || !closeBtn) return;
+
+    helpBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+    closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) modal.classList.add('hidden');
+    });
+  };
+
+  const setupMobileFilters = () => {
+    const openBtn = document.getElementById('mobileFilterDockBtn');
+    const closeBtn = document.getElementById('closeMobileFiltersBtn');
+    const closeFilters = () => document.body.classList.remove('mobile-filter-panel-open');
+
+    openBtn?.addEventListener('click', () => {
+      document.body.classList.remove('mobile-chart-tab');
+      document.body.classList.add('mobile-filter-panel-open');
+    });
+
+    closeBtn?.addEventListener('click', closeFilters);
+    window.addEventListener('resize', () => {
+      if (!window.matchMedia('(max-width: 900px)').matches) closeFilters();
+    });
+  };
+
+  const closeMobileFilters = () => {
+    if (window.matchMedia('(max-width: 900px)').matches) {
+      document.body.classList.remove('mobile-filter-panel-open');
+    }
   };
 
   const handlePriceRangeChange = () => {
@@ -115,8 +152,9 @@ const ChartFiltering = (() => {
 
     PropertyPopup.showNotification(
       `Filters applied: ${Utils.formatCurrency(priceMin)} - ${Utils.formatCurrency(priceMax)}, ${changeMin}% to ${changeMax >= 0 ? '+' : ''}${changeMax}%`,
-      'success',
+      'success'
     );
+    closeMobileFilters();
   };
 
   const handleResetFilters = () => {
@@ -134,6 +172,7 @@ const ChartFiltering = (() => {
     DataManager.resetFilters();
     triggerFilterChange({});
     PropertyPopup.showNotification('Filters reset', 'info');
+    closeMobileFilters();
   };
 
   const applyFullChangeRange = () => {
@@ -246,7 +285,7 @@ const ChartFiltering = (() => {
             <div class="text-sm font-600">${property.address}</div>
             <div class="text-xs text-[#e2e2e2]/40 mt-1">OPA ${property.id} · ${Utils.formatCurrency(property.tax_year_value)}</div>
           </button>
-        `,
+        `
       )
       .join('');
     searchResults.classList.remove('hidden');
@@ -313,7 +352,7 @@ const ChartFiltering = (() => {
       if (priceMaxInput && data.priceMax !== undefined) priceMaxInput.value = Math.round(data.priceMax);
       updatePriceLabel(
         data.priceMin ?? configuredRanges.predictedMin,
-        data.priceMax ?? configuredRanges.predictedMax,
+        data.priceMax ?? configuredRanges.predictedMax
       );
     }
     if (data.changeMin !== undefined || data.changeMax !== undefined) {
@@ -321,7 +360,7 @@ const ChartFiltering = (() => {
       if (changeMaxInput && data.changeMax !== undefined) changeMaxInput.value = Math.round(data.changeMax);
       updateChangeLabel(
         data.changeMin ?? configuredRanges.defaultChangeMin,
-        data.changeMax ?? configuredRanges.defaultChangeMax,
+        data.changeMax ?? configuredRanges.defaultChangeMax
       );
     }
   };
@@ -422,7 +461,7 @@ const ChartFiltering = (() => {
             <span>${chip.label}</span>
             <button type="button" data-filter-key="${chip.key}" aria-label="Clear ${chip.key} filter">&times;</button>
           </span>
-        `,
+        `
       )
       .join('');
 
@@ -467,13 +506,13 @@ const ChartFiltering = (() => {
     if (Number.isFinite(filters.priceMin) || Number.isFinite(filters.priceMax)) {
       updatePriceLabel(
         filters.priceMin ?? configuredRanges.predictedMin,
-        filters.priceMax ?? configuredRanges.predictedMax,
+        filters.priceMax ?? configuredRanges.predictedMax
       );
     }
     if (Number.isFinite(filters.changeMin) || Number.isFinite(filters.changeMax)) {
       updateChangeLabel(
         filters.changeMin ?? configuredRanges.defaultChangeMin,
-        filters.changeMax ?? configuredRanges.defaultChangeMax,
+        filters.changeMax ?? configuredRanges.defaultChangeMax
       );
     }
     syncSearchUi();

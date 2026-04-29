@@ -46,7 +46,7 @@ const PropertyPopup = (() => {
     document.getElementById('popupAddress').textContent = property.address || '-';
     document.getElementById('popupId').textContent = property.id || '-';
     document.getElementById('popupCurrentValue').textContent = Utils.formatCurrency(
-      property.tax_year_value,
+      property.tax_year_value
     );
     document.getElementById('popupPredictedValue').textContent =
       Utils.formatCurrency(property.predicted_value);
@@ -168,14 +168,14 @@ const PropertyPopup = (() => {
       right: 20px;
       padding: 16px 24px;
       background-color: ${
-  type === 'success'
-    ? '#a0caff'
-    : type === 'error'
-      ? '#e20546'
-      : type === 'warning'
-        ? '#ffb2b6'
-        : '#1e2020'
-  };
+        type === 'success'
+          ? '#a0caff'
+          : type === 'error'
+            ? '#e20546'
+            : type === 'warning'
+              ? '#ffb2b6'
+              : '#1e2020'
+      };
       color: ${type === 'info' ? '#e2e2e2' : '#121414'};
       border-radius: 0;
       font-weight: 600;
