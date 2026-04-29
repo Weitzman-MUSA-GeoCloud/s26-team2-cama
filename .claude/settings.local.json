@@ -2,13 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(gcloud functions:*)",
-      "Bash(gcloud logging:*)",
-      "Bash(bq show:*)",
-      "Bash(gcloud bigquery:*)",
-      "Bash(gcloud alpha:*)",
-      "Bash(xargs grep *)",
-      "Bash(pip install *)",
-      "Bash(python -c ' *)"
+      "Bash(gcloud workflows:*)",
+      "Bash(xargs cat *)",
+      "Bash(bq query *)",
+      "Bash(gcloud bigquery *)",
+      "Bash(python3 -c ' *)",
+      "Bash(gcloud alpha *)",
+      "Bash(gsutil cat *)",
+      "Bash(gcloud storage *)"
     ]
   }
 }
