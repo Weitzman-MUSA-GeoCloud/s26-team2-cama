@@ -1,0 +1,1568 @@
+[
+  {
+    "tax_year": 2013,
+    "lower_bound": 0,
+    "upper_bound": 50000,
+    "property_count": 8
+  },
+  {
+    "tax_year": 2013,
+    "lower_bound": 50000,
+    "upper_bound": 100000,
+    "property_count": 3
+  },
+  {
+    "tax_year": 2014,
+    "lower_bound": 0,
+    "upper_bound": 50000,
+    "property_count": 8
+  },
+  {
+    "tax_year": 2014,
+    "lower_bound": 50000,
+    "upper_bound": 100000,
+    "property_count": 6
+  },
+  {
+    "tax_year": 2014,
+    "lower_bound": 200000,
+    "upper_bound": 250000,
+    "property_count": 1
+  },
+  {
+    "tax_year": 2014,
+    "lower_bound": 250000,
+    "upper_bound": 300000,
+    "property_count": 3
+  },
+  {
+    "tax_year": 2014,
+    "lower_bound": 400000,
+    "upper_bound": 450000,
+    "property_count": 3
+  },
+  {
+    "tax_year": 2014,
+    "lower_bound": 550000,
+    "upper_bound": 600000,
+    "property_count": 2
+  },
+  {
+    "tax_year": 2014,
+    "lower_bound": 1000000,
+    "upper_bound": 1050000,
+    "property_count": 1
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 0,
+    "upper_bound": 50000,
+    "property_count": 104098
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 50000,
+    "upper_bound": 100000,
+    "property_count": 147592
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 100000,
+    "upper_bound": 150000,
+    "property_count": 122391
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 150000,
+    "upper_bound": 200000,
+    "property_count": 86108
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 200000,
+    "upper_bound": 250000,
+    "property_count": 38183
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 250000,
+    "upper_bound": 300000,
+    "property_count": 20194
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 300000,
+    "upper_bound": 350000,
+    "property_count": 11605
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 350000,
+    "upper_bound": 400000,
+    "property_count": 8286
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 400000,
+    "upper_bound": 450000,
+    "property_count": 5725
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 450000,
+    "upper_bound": 500000,
+    "property_count": 4212
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 500000,
+    "upper_bound": 550000,
+    "property_count": 2792
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 550000,
+    "upper_bound": 600000,
+    "property_count": 2245
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 600000,
+    "upper_bound": 650000,
+    "property_count": 1612
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 650000,
+    "upper_bound": 700000,
+    "property_count": 1122
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 700000,
+    "upper_bound": 750000,
+    "property_count": 942
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 750000,
+    "upper_bound": 800000,
+    "property_count": 831
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 800000,
+    "upper_bound": 850000,
+    "property_count": 788
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 850000,
+    "upper_bound": 900000,
+    "property_count": 614
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 900000,
+    "upper_bound": 950000,
+    "property_count": 503
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 950000,
+    "upper_bound": 1000000,
+    "property_count": 453
+  },
+  {
+    "tax_year": 2015,
+    "lower_bound": 1000000,
+    "upper_bound": 1050000,
+    "property_count": 7522
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 0,
+    "upper_bound": 50000,
+    "property_count": 105850
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 50000,
+    "upper_bound": 100000,
+    "property_count": 144888
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 100000,
+    "upper_bound": 150000,
+    "property_count": 122545
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 150000,
+    "upper_bound": 200000,
+    "property_count": 84507
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 200000,
+    "upper_bound": 250000,
+    "property_count": 39224
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 250000,
+    "upper_bound": 300000,
+    "property_count": 20646
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 300000,
+    "upper_bound": 350000,
+    "property_count": 11917
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 350000,
+    "upper_bound": 400000,
+    "property_count": 8534
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 400000,
+    "upper_bound": 450000,
+    "property_count": 6150
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 450000,
+    "upper_bound": 500000,
+    "property_count": 4316
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 500000,
+    "upper_bound": 550000,
+    "property_count": 3008
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 550000,
+    "upper_bound": 600000,
+    "property_count": 2305
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 600000,
+    "upper_bound": 650000,
+    "property_count": 1716
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 650000,
+    "upper_bound": 700000,
+    "property_count": 1181
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 700000,
+    "upper_bound": 750000,
+    "property_count": 960
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 750000,
+    "upper_bound": 800000,
+    "property_count": 842
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 800000,
+    "upper_bound": 850000,
+    "property_count": 799
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 850000,
+    "upper_bound": 900000,
+    "property_count": 633
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 900000,
+    "upper_bound": 950000,
+    "property_count": 509
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 950000,
+    "upper_bound": 1000000,
+    "property_count": 472
+  },
+  {
+    "tax_year": 2016,
+    "lower_bound": 1000000,
+    "upper_bound": 1050000,
+    "property_count": 7670
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 0,
+    "upper_bound": 50000,
+    "property_count": 103476
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 50000,
+    "upper_bound": 100000,
+    "property_count": 145400
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 100000,
+    "upper_bound": 150000,
+    "property_count": 122461
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 150000,
+    "upper_bound": 200000,
+    "property_count": 84102
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 200000,
+    "upper_bound": 250000,
+    "property_count": 38932
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 250000,
+    "upper_bound": 300000,
+    "property_count": 21159
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 300000,
+    "upper_bound": 350000,
+    "property_count": 12754
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 350000,
+    "upper_bound": 400000,
+    "property_count": 8746
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 400000,
+    "upper_bound": 450000,
+    "property_count": 6612
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 450000,
+    "upper_bound": 500000,
+    "property_count": 4463
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 500000,
+    "upper_bound": 550000,
+    "property_count": 3341
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 550000,
+    "upper_bound": 600000,
+    "property_count": 2474
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 600000,
+    "upper_bound": 650000,
+    "property_count": 1840
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 650000,
+    "upper_bound": 700000,
+    "property_count": 1396
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 700000,
+    "upper_bound": 750000,
+    "property_count": 1061
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 750000,
+    "upper_bound": 800000,
+    "property_count": 900
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 800000,
+    "upper_bound": 850000,
+    "property_count": 809
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 850000,
+    "upper_bound": 900000,
+    "property_count": 637
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 900000,
+    "upper_bound": 950000,
+    "property_count": 561
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 950000,
+    "upper_bound": 1000000,
+    "property_count": 522
+  },
+  {
+    "tax_year": 2017,
+    "lower_bound": 1000000,
+    "upper_bound": 1050000,
+    "property_count": 7948
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 0,
+    "upper_bound": 50000,
+    "property_count": 102099
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 50000,
+    "upper_bound": 100000,
+    "property_count": 145837
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 100000,
+    "upper_bound": 150000,
+    "property_count": 121838
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 150000,
+    "upper_bound": 200000,
+    "property_count": 83652
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 200000,
+    "upper_bound": 250000,
+    "property_count": 38858
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 250000,
+    "upper_bound": 300000,
+    "property_count": 21330
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 300000,
+    "upper_bound": 350000,
+    "property_count": 12809
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 350000,
+    "upper_bound": 400000,
+    "property_count": 8920
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 400000,
+    "upper_bound": 450000,
+    "property_count": 6828
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 450000,
+    "upper_bound": 500000,
+    "property_count": 4775
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 500000,
+    "upper_bound": 550000,
+    "property_count": 3492
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 550000,
+    "upper_bound": 600000,
+    "property_count": 2586
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 600000,
+    "upper_bound": 650000,
+    "property_count": 1946
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 650000,
+    "upper_bound": 700000,
+    "property_count": 1531
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 700000,
+    "upper_bound": 750000,
+    "property_count": 1135
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 750000,
+    "upper_bound": 800000,
+    "property_count": 1004
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 800000,
+    "upper_bound": 850000,
+    "property_count": 897
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 850000,
+    "upper_bound": 900000,
+    "property_count": 748
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 900000,
+    "upper_bound": 950000,
+    "property_count": 648
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 950000,
+    "upper_bound": 1000000,
+    "property_count": 540
+  },
+  {
+    "tax_year": 2018,
+    "lower_bound": 1000000,
+    "upper_bound": 1050000,
+    "property_count": 9291
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 0,
+    "upper_bound": 50000,
+    "property_count": 98074
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 50000,
+    "upper_bound": 100000,
+    "property_count": 130166
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 100000,
+    "upper_bound": 150000,
+    "property_count": 111606
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 150000,
+    "upper_bound": 200000,
+    "property_count": 84013
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 200000,
+    "upper_bound": 250000,
+    "property_count": 49612
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 250000,
+    "upper_bound": 300000,
+    "property_count": 24404
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 300000,
+    "upper_bound": 350000,
+    "property_count": 16655
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 350000,
+    "upper_bound": 400000,
+    "property_count": 10944
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 400000,
+    "upper_bound": 450000,
+    "property_count": 8396
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 450000,
+    "upper_bound": 500000,
+    "property_count": 6869
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 500000,
+    "upper_bound": 550000,
+    "property_count": 4913
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 550000,
+    "upper_bound": 600000,
+    "property_count": 3837
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 600000,
+    "upper_bound": 650000,
+    "property_count": 2942
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 650000,
+    "upper_bound": 700000,
+    "property_count": 2351
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 700000,
+    "upper_bound": 750000,
+    "property_count": 1888
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 750000,
+    "upper_bound": 800000,
+    "property_count": 1347
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 800000,
+    "upper_bound": 850000,
+    "property_count": 1218
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 850000,
+    "upper_bound": 900000,
+    "property_count": 894
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 900000,
+    "upper_bound": 950000,
+    "property_count": 751
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 950000,
+    "upper_bound": 1000000,
+    "property_count": 680
+  },
+  {
+    "tax_year": 2019,
+    "lower_bound": 1000000,
+    "upper_bound": 1050000,
+    "property_count": 10727
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 0,
+    "upper_bound": 50000,
+    "property_count": 100792
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 50000,
+    "upper_bound": 100000,
+    "property_count": 117780
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 100000,
+    "upper_bound": 150000,
+    "property_count": 110125
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 150000,
+    "upper_bound": 200000,
+    "property_count": 75674
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 200000,
+    "upper_bound": 250000,
+    "property_count": 61303
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 250000,
+    "upper_bound": 300000,
+    "property_count": 28307
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 300000,
+    "upper_bound": 350000,
+    "property_count": 18296
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 350000,
+    "upper_bound": 400000,
+    "property_count": 11929
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 400000,
+    "upper_bound": 450000,
+    "property_count": 9117
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 450000,
+    "upper_bound": 500000,
+    "property_count": 7169
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 500000,
+    "upper_bound": 550000,
+    "property_count": 5579
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 550000,
+    "upper_bound": 600000,
+    "property_count": 4141
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 600000,
+    "upper_bound": 650000,
+    "property_count": 3128
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 650000,
+    "upper_bound": 700000,
+    "property_count": 2536
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 700000,
+    "upper_bound": 750000,
+    "property_count": 2014
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 750000,
+    "upper_bound": 800000,
+    "property_count": 1548
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 800000,
+    "upper_bound": 850000,
+    "property_count": 1333
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 850000,
+    "upper_bound": 900000,
+    "property_count": 994
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 900000,
+    "upper_bound": 950000,
+    "property_count": 730
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 950000,
+    "upper_bound": 1000000,
+    "property_count": 703
+  },
+  {
+    "tax_year": 2020,
+    "lower_bound": 1000000,
+    "upper_bound": 1050000,
+    "property_count": 11245
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 0,
+    "upper_bound": 50000,
+    "property_count": 100622
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 50000,
+    "upper_bound": 100000,
+    "property_count": 117659
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 100000,
+    "upper_bound": 150000,
+    "property_count": 110192
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 150000,
+    "upper_bound": 200000,
+    "property_count": 75737
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 200000,
+    "upper_bound": 250000,
+    "property_count": 61414
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 250000,
+    "upper_bound": 300000,
+    "property_count": 28502
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 300000,
+    "upper_bound": 350000,
+    "property_count": 18419
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 350000,
+    "upper_bound": 400000,
+    "property_count": 12118
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 400000,
+    "upper_bound": 450000,
+    "property_count": 9361
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 450000,
+    "upper_bound": 500000,
+    "property_count": 7328
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 500000,
+    "upper_bound": 550000,
+    "property_count": 5699
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 550000,
+    "upper_bound": 600000,
+    "property_count": 4210
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 600000,
+    "upper_bound": 650000,
+    "property_count": 3226
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 650000,
+    "upper_bound": 700000,
+    "property_count": 2583
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 700000,
+    "upper_bound": 750000,
+    "property_count": 2036
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 750000,
+    "upper_bound": 800000,
+    "property_count": 1573
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 800000,
+    "upper_bound": 850000,
+    "property_count": 1361
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 850000,
+    "upper_bound": 900000,
+    "property_count": 1008
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 900000,
+    "upper_bound": 950000,
+    "property_count": 729
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 950000,
+    "upper_bound": 1000000,
+    "property_count": 714
+  },
+  {
+    "tax_year": 2021,
+    "lower_bound": 1000000,
+    "upper_bound": 1050000,
+    "property_count": 11556
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 0,
+    "upper_bound": 50000,
+    "property_count": 100283
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 50000,
+    "upper_bound": 100000,
+    "property_count": 117538
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 100000,
+    "upper_bound": 150000,
+    "property_count": 110129
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 150000,
+    "upper_bound": 200000,
+    "property_count": 75729
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 200000,
+    "upper_bound": 250000,
+    "property_count": 61464
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 250000,
+    "upper_bound": 300000,
+    "property_count": 28552
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 300000,
+    "upper_bound": 350000,
+    "property_count": 18545
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 350000,
+    "upper_bound": 400000,
+    "property_count": 12261
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 400000,
+    "upper_bound": 450000,
+    "property_count": 9590
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 450000,
+    "upper_bound": 500000,
+    "property_count": 7448
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 500000,
+    "upper_bound": 550000,
+    "property_count": 5840
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 550000,
+    "upper_bound": 600000,
+    "property_count": 4334
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 600000,
+    "upper_bound": 650000,
+    "property_count": 3340
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 650000,
+    "upper_bound": 700000,
+    "property_count": 2662
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 700000,
+    "upper_bound": 750000,
+    "property_count": 2114
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 750000,
+    "upper_bound": 800000,
+    "property_count": 1642
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 800000,
+    "upper_bound": 850000,
+    "property_count": 1397
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 850000,
+    "upper_bound": 900000,
+    "property_count": 1039
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 900000,
+    "upper_bound": 950000,
+    "property_count": 742
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 950000,
+    "upper_bound": 1000000,
+    "property_count": 746
+  },
+  {
+    "tax_year": 2022,
+    "lower_bound": 1000000,
+    "upper_bound": 1050000,
+    "property_count": 11805
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 0,
+    "upper_bound": 50000,
+    "property_count": 47838
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 50000,
+    "upper_bound": 100000,
+    "property_count": 95616
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 100000,
+    "upper_bound": 150000,
+    "property_count": 94020
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 150000,
+    "upper_bound": 200000,
+    "property_count": 90864
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 200000,
+    "upper_bound": 250000,
+    "property_count": 77800
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 250000,
+    "upper_bound": 300000,
+    "property_count": 55831
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 300000,
+    "upper_bound": 350000,
+    "property_count": 27772
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 350000,
+    "upper_bound": 400000,
+    "property_count": 18420
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 400000,
+    "upper_bound": 450000,
+    "property_count": 13143
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 450000,
+    "upper_bound": 500000,
+    "property_count": 9754
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 500000,
+    "upper_bound": 550000,
+    "property_count": 7605
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 550000,
+    "upper_bound": 600000,
+    "property_count": 6260
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 600000,
+    "upper_bound": 650000,
+    "property_count": 5296
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 650000,
+    "upper_bound": 700000,
+    "property_count": 3947
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 700000,
+    "upper_bound": 750000,
+    "property_count": 2924
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 750000,
+    "upper_bound": 800000,
+    "property_count": 2278
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 800000,
+    "upper_bound": 850000,
+    "property_count": 1889
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 850000,
+    "upper_bound": 900000,
+    "property_count": 1547
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 900000,
+    "upper_bound": 950000,
+    "property_count": 1134
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 950000,
+    "upper_bound": 1000000,
+    "property_count": 1014
+  },
+  {
+    "tax_year": 2023,
+    "lower_bound": 1000000,
+    "upper_bound": 1050000,
+    "property_count": 14014
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 0,
+    "upper_bound": 50000,
+    "property_count": 47810
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 50000,
+    "upper_bound": 100000,
+    "property_count": 95415
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 100000,
+    "upper_bound": 150000,
+    "property_count": 93932
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 150000,
+    "upper_bound": 200000,
+    "property_count": 90905
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 200000,
+    "upper_bound": 250000,
+    "property_count": 77876
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 250000,
+    "upper_bound": 300000,
+    "property_count": 55929
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 300000,
+    "upper_bound": 350000,
+    "property_count": 27857
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 350000,
+    "upper_bound": 400000,
+    "property_count": 18502
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 400000,
+    "upper_bound": 450000,
+    "property_count": 13249
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 450000,
+    "upper_bound": 500000,
+    "property_count": 9835
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 500000,
+    "upper_bound": 550000,
+    "property_count": 7752
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 550000,
+    "upper_bound": 600000,
+    "property_count": 6359
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 600000,
+    "upper_bound": 650000,
+    "property_count": 5370
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 650000,
+    "upper_bound": 700000,
+    "property_count": 4014
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 700000,
+    "upper_bound": 750000,
+    "property_count": 3037
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 750000,
+    "upper_bound": 800000,
+    "property_count": 2319
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 800000,
+    "upper_bound": 850000,
+    "property_count": 1909
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 850000,
+    "upper_bound": 900000,
+    "property_count": 1558
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 900000,
+    "upper_bound": 950000,
+    "property_count": 1155
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 950000,
+    "upper_bound": 1000000,
+    "property_count": 1031
+  },
+  {
+    "tax_year": 2024,
+    "lower_bound": 1000000,
+    "upper_bound": 1050000,
+    "property_count": 14468
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 0,
+    "upper_bound": 50000,
+    "property_count": 34038
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 50000,
+    "upper_bound": 100000,
+    "property_count": 58493
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 100000,
+    "upper_bound": 150000,
+    "property_count": 76730
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 150000,
+    "upper_bound": 200000,
+    "property_count": 94148
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 200000,
+    "upper_bound": 250000,
+    "property_count": 78916
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 250000,
+    "upper_bound": 300000,
+    "property_count": 64037
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 300000,
+    "upper_bound": 350000,
+    "property_count": 51242
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 350000,
+    "upper_bound": 400000,
+    "property_count": 30566
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 400000,
+    "upper_bound": 450000,
+    "property_count": 19559
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 450000,
+    "upper_bound": 500000,
+    "property_count": 14247
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 500000,
+    "upper_bound": 550000,
+    "property_count": 9858
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 550000,
+    "upper_bound": 600000,
+    "property_count": 7626
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 600000,
+    "upper_bound": 650000,
+    "property_count": 6308
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 650000,
+    "upper_bound": 700000,
+    "property_count": 5187
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 700000,
+    "upper_bound": 750000,
+    "property_count": 4367
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 750000,
+    "upper_bound": 800000,
+    "property_count": 3157
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 800000,
+    "upper_bound": 850000,
+    "property_count": 2499
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 850000,
+    "upper_bound": 900000,
+    "property_count": 2066
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 900000,
+    "upper_bound": 950000,
+    "property_count": 1598
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 950000,
+    "upper_bound": 1000000,
+    "property_count": 1219
+  },
+  {
+    "tax_year": 2025,
+    "lower_bound": 1000000,
+    "upper_bound": 1050000,
+    "property_count": 16616
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 0,
+    "upper_bound": 50000,
+    "property_count": 34085
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 50000,
+    "upper_bound": 100000,
+    "property_count": 58329
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 100000,
+    "upper_bound": 150000,
+    "property_count": 76647
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 150000,
+    "upper_bound": 200000,
+    "property_count": 94161
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 200000,
+    "upper_bound": 250000,
+    "property_count": 78931
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 250000,
+    "upper_bound": 300000,
+    "property_count": 64101
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 300000,
+    "upper_bound": 350000,
+    "property_count": 51278
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 350000,
+    "upper_bound": 400000,
+    "property_count": 30623
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 400000,
+    "upper_bound": 450000,
+    "property_count": 19590
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 450000,
+    "upper_bound": 500000,
+    "property_count": 14284
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 500000,
+    "upper_bound": 550000,
+    "property_count": 9886
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 550000,
+    "upper_bound": 600000,
+    "property_count": 7666
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 600000,
+    "upper_bound": 650000,
+    "property_count": 6362
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 650000,
+    "upper_bound": 700000,
+    "property_count": 5230
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 700000,
+    "upper_bound": 750000,
+    "property_count": 4429
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 750000,
+    "upper_bound": 800000,
+    "property_count": 3191
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 800000,
+    "upper_bound": 850000,
+    "property_count": 2525
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 850000,
+    "upper_bound": 900000,
+    "property_count": 2088
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 900000,
+    "upper_bound": 950000,
+    "property_count": 1612
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 950000,
+    "upper_bound": 1000000,
+    "property_count": 1238
+  },
+  {
+    "tax_year": 2026,
+    "lower_bound": 1000000,
+    "upper_bound": 1050000,
+    "property_count": 16833
+  }
+]

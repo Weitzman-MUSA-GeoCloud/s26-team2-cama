@@ -1,0 +1,107 @@
+[
+  {
+    "lower_bound": 0,
+    "upper_bound": 50000,
+    "property_count": 2199
+  },
+  {
+    "lower_bound": 50000,
+    "upper_bound": 100000,
+    "property_count": 9224
+  },
+  {
+    "lower_bound": 100000,
+    "upper_bound": 150000,
+    "property_count": 10849
+  },
+  {
+    "lower_bound": 150000,
+    "upper_bound": 200000,
+    "property_count": 12435
+  },
+  {
+    "lower_bound": 200000,
+    "upper_bound": 250000,
+    "property_count": 11429
+  },
+  {
+    "lower_bound": 250000,
+    "upper_bound": 300000,
+    "property_count": 10779
+  },
+  {
+    "lower_bound": 300000,
+    "upper_bound": 350000,
+    "property_count": 7135
+  },
+  {
+    "lower_bound": 350000,
+    "upper_bound": 400000,
+    "property_count": 4227
+  },
+  {
+    "lower_bound": 400000,
+    "upper_bound": 450000,
+    "property_count": 2563
+  },
+  {
+    "lower_bound": 450000,
+    "upper_bound": 500000,
+    "property_count": 1875
+  },
+  {
+    "lower_bound": 500000,
+    "upper_bound": 550000,
+    "property_count": 1399
+  },
+  {
+    "lower_bound": 550000,
+    "upper_bound": 600000,
+    "property_count": 1201
+  },
+  {
+    "lower_bound": 600000,
+    "upper_bound": 650000,
+    "property_count": 1003
+  },
+  {
+    "lower_bound": 650000,
+    "upper_bound": 700000,
+    "property_count": 852
+  },
+  {
+    "lower_bound": 700000,
+    "upper_bound": 750000,
+    "property_count": 622
+  },
+  {
+    "lower_bound": 750000,
+    "upper_bound": 800000,
+    "property_count": 497
+  },
+  {
+    "lower_bound": 800000,
+    "upper_bound": 850000,
+    "property_count": 303
+  },
+  {
+    "lower_bound": 850000,
+    "upper_bound": 900000,
+    "property_count": 227
+  },
+  {
+    "lower_bound": 900000,
+    "upper_bound": 950000,
+    "property_count": 206
+  },
+  {
+    "lower_bound": 950000,
+    "upper_bound": 1000000,
+    "property_count": 128
+  },
+  {
+    "lower_bound": 1000000,
+    "upper_bound": 1050000,
+    "property_count": 394
+  }
+]

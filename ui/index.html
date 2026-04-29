@@ -1,68 +1,180 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="utf-8" />
-  <title>MUSA 5090 - CAMA Project</title>
-
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-
-    main {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    h1 {
-      text-align: center;
-    }
-
-    nav {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-    }
-
-    @media (orientation: portrait) {
-      nav {
-        flex-direction: column;
-      }
-    }
-
-    a {
-      display: block;
-      padding: 2rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      text-decoration: none;
-      color: #333;
-      transition: all 0.2s ease-in-out;
-    }
-
-    a:hover {
-      background-color: #f5f5f5;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      transform: translateY(-2px);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAMA Philadelphia - Residential Value Review</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=20260424-landing-hero-scroll">
 </head>
-
-<body>
-  <main>
-    <h1>MUSA 5090 - CAMA Project</h1>
-    <nav>
-      <a href="./reviewer">Tax Assessor Review UI</a>
-      <a href="./widget">Property Owner Widget UI</a>
+<body class="bg-[#121414] text-[#e2e2e2] font-inter">
+    <nav class="bg-[#1e2020]/95 border-b border-[#e2e2e2]/15 px-6 lg:px-8 py-4 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-6">
+            <a href="./" class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-[#a0caff] text-[#121414] font-space-grotesk font-bold flex items-center justify-center">C</div>
+                <div>
+                    <div class="text-lg font-space-grotesk font-semibold tracking-wide">CAMA PHILADELPHIA</div>
+                    <div class="text-xs text-[#e2e2e2]/50 uppercase tracking-[0.2em]">Residential Value Review</div>
+                </div>
+            </a>
+            <div class="hidden md:flex items-center gap-6 text-sm text-[#e2e2e2]/70">
+                <a href="#portals" class="hover:text-[#a0caff] transition-colors duration-200">Choose Portal</a>
+                <a href="./reviewer/" class="hover:text-[#a0caff] transition-colors duration-200">Housing Assessor</a>
+                <a href="./widget/" class="hover:text-[#a0caff] transition-colors duration-200">Property Owner</a>
+            </div>
+        </div>
     </nav>
-  </main>
-</body>
 
+    <main>
+        <section class="landing-hero landing-hero-screen px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto">
+                <div class="landing-hero-head landing-animate-left">
+                    <div class="inline-flex items-center gap-2 border border-[#a0caff]/30 bg-[#a0caff]/8 px-3 py-2 text-xs uppercase tracking-[0.24em] text-[#a0caff] landing-animate-up landing-delay-1">
+                        Philadelphia residential value review
+                    </div>
+                    <div class="landing-title-row landing-animate-up landing-delay-2">
+                        <img src="./assets/team-mark.svg" alt="Yanyang Isabelle Sihan Zicheng team mark" class="landing-team-mark">
+                        <h1 class="text-5xl md:text-7xl lg:text-[7rem] font-space-grotesk font-bold leading-[0.92] max-w-5xl">
+                            One citywide system, two clear entry points.
+                        </h1>
+                    </div>
+                    <p class="text-lg lg:text-xl text-[#e2e2e2]/70 max-w-2xl leading-8 landing-animate-up landing-delay-3">
+                        Choose the assessor workflow for citywide review, or the owner workflow for one property and its nearby context.
+                    </p>
+                </div>
+                <div class="landing-scroll-hint landing-animate-up landing-delay-5">
+                    <span>Scroll to choose a portal</span>
+                    <span class="landing-scroll-arrow">&#8595;</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="portals" class="px-6 lg:px-8 pb-16 pt-10 lg:pt-14">
+            <div class="max-w-7xl mx-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <a href="./reviewer/" class="portal-entry-card portal-entry-card--assessor group landing-scroll-reveal">
+                        <div class="portal-entry-header">
+                            <div class="portal-entry-icon bg-[#a0caff]/18 text-[#a0caff]">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-xs uppercase tracking-[0.24em] text-[#a0caff]/75 mb-2">Housing Assessor Portal</div>
+                                <h3 class="portal-entry-title">Review values across the city.</h3>
+                            </div>
+                        </div>
+                        <p class="portal-entry-copy">
+                            Built for parcel review, value filtering, and citywide comparison on the map.
+                        </p>
+                        <div class="portal-entry-grid">
+                            <div>
+                                <div class="portal-entry-subtitle">Best for</div>
+                                <ul class="portal-entry-list">
+                                    <li>Citywide filtering and parcel triage</li>
+                                    <li>Comparing price bands and change patterns</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <div class="portal-entry-subtitle">Includes</div>
+                                <ul class="portal-entry-list">
+                                    <li>Vector tiles with predicted value styling</li>
+                                    <li>Histogram-driven map filtering</li>
+                                    <li>Parcel detail and chart drilldown</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="portal-entry-cta">
+                            <span>Open Assessor Portal</span>
+                            <svg class="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </a>
+
+                    <a href="./widget/" class="portal-entry-card portal-entry-card--owner group landing-scroll-reveal">
+                        <div class="portal-entry-header">
+                            <div class="portal-entry-icon bg-[#ffb2b6]/16 text-[#ffb2b6]">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9m-9 11l4-4m-4 4l-4-4"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-xs uppercase tracking-[0.24em] text-[#ffb2b6]/75 mb-2">Property Owner Portal</div>
+                                <h3 class="portal-entry-title">Understand one property in neighborhood context.</h3>
+                            </div>
+                        </div>
+                        <p class="portal-entry-copy">
+                            Built for direct lookup, nearby context, and a clearer explanation of one address.
+                        </p>
+                        <div class="portal-entry-grid">
+                            <div>
+                                <div class="portal-entry-subtitle">Best for</div>
+                                <ul class="portal-entry-list">
+                                    <li>Address or OPA search for a single parcel</li>
+                                    <li>Comparing market and predicted values</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <div class="portal-entry-subtitle">Includes</div>
+                                <ul class="portal-entry-list">
+                                    <li>Property detail card with value change</li>
+                                    <li>Nearby change panel and radius overlay</li>
+                                    <li>Nearby examples and map jump links</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="portal-entry-cta portal-entry-cta--owner">
+                            <span>Open Property Owner Portal</span>
+                            <svg class="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="px-6 lg:px-8 py-16">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-12">
+                    <div class="text-xs uppercase tracking-[0.22em] text-[#e2e2e2]/45 mb-3">Workflow</div>
+                    <h2 class="text-3xl font-space-grotesk font-bold mb-2">What happens after entry.</h2>
+                    <p class="text-[#e2e2e2]/65 max-w-3xl mx-auto">
+                        A short view of what both portals are built to support.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="workflow-card">
+                        <div class="workflow-step">01</div>
+                        <h3 class="workflow-title">Find the parcel</h3>
+                        <p class="workflow-copy">Start from an address, OPA ID, or the map itself.</p>
+                    </div>
+                    <div class="workflow-card">
+                        <div class="workflow-step">02</div>
+                        <h3 class="workflow-title">Read the values</h3>
+                        <p class="workflow-copy">See market context, predicted values, and linked chart views.</p>
+                    </div>
+                    <div class="workflow-card">
+                        <div class="workflow-step">03</div>
+                        <h3 class="workflow-title">Compare in context</h3>
+                        <p class="workflow-copy">Move between one parcel and the broader city or nearby context.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-[#e2e2e2]/12 px-6 lg:px-8 py-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-sm text-[#e2e2e2]/45">
+            <div>CAMA Philadelphia Residential Value Review</div>
+            <div class="flex items-center gap-5">
+                <a href="./reviewer/" class="hover:text-[#a0caff] transition-colors duration-200">Housing Assessor Portal</a>
+                <a href="./widget/" class="hover:text-[#a0caff] transition-colors duration-200">Property Owner Portal</a>
+            </div>
+        </div>
+    </footer>
+</body>
 </html>
