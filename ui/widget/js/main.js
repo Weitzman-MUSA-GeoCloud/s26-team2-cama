@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Main Module for Property Owner Widget
  * Initializes and connects all modules
  */

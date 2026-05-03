@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Map Interaction Module for Tax Assessor Review Interface
  * Handles Maplibre GL JS map initialization and property interactions
  */

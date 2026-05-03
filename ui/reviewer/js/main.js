@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Main Module for Tax Assessor Review Interface
  * Initializes and connects all modules
  */
