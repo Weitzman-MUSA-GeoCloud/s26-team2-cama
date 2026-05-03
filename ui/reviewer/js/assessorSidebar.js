@@ -81,7 +81,7 @@ const AssessorSidebar = (() => {
       'detailMetadata',
       [property.bldg_desc, property.zip_code ? `ZIP ${property.zip_code}` : null]
         .filter(Boolean)
-        .join(' | ') || '-'
+        .join(' | ') || '-',
     );
 
     if (hasPredictedValue && Number.isFinite(property.tax_year_value)) {
@@ -92,7 +92,7 @@ const AssessorSidebar = (() => {
         'selectedPercentChange',
         Number.isFinite(property.change_percent)
           ? `${sign}${Utils.formatPercentage(property.change_percent)}`
-          : '-'
+          : '-',
       );
     } else {
       setText('selectedAbsoluteChange', '-');
@@ -159,7 +159,7 @@ const AssessorSidebar = (() => {
       }
       PropertyPopup.showNotification(
         `${field === 'predicted' ? 'Predicted' : 'Market'} distribution filter cleared`,
-        'info'
+        'info',
       );
       return;
     }
@@ -181,7 +181,7 @@ const AssessorSidebar = (() => {
     }
     PropertyPopup.showNotification(
       `${field === 'predicted' ? 'Predicted' : 'Market'} distribution bin applied to map`,
-      'info'
+      'info',
     );
   };
 
@@ -380,7 +380,7 @@ const AssessorSidebar = (() => {
         d3
           .line()
           .x((d) => x(Number(d[xField])))
-          .y((d) => y(Number(d[yField])))
+          .y((d) => y(Number(d[yField]))),
       );
 
     g.append('g')
@@ -417,7 +417,7 @@ const AssessorSidebar = (() => {
             Number.isFinite(bin.x0) &&
             Number.isFinite(bin.x1) &&
             Number.isFinite(bin.count) &&
-            bin.x1 > bin.x0
+            bin.x1 > bin.x0,
           );
         return marketFallbackBins;
       })

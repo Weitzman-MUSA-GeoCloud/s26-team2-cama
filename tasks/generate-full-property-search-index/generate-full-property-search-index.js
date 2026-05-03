@@ -47,7 +47,7 @@ const normalizeRows = (payload) => {
   if (Array.isArray(payload)) return payload;
   if (!payload?.columns || !payload?.rows) return [];
   return payload.rows.map((row) =>
-    Object.fromEntries(payload.columns.map((column, index) => [column, row[index]]))
+    Object.fromEntries(payload.columns.map((column, index) => [column, row[index]])),
   );
 };
 
@@ -90,7 +90,7 @@ const rowValues = (record) => columns.map((column) => record[column] ?? null);
   const [baseText, mlText] = await Promise.all([downloadText(BASE_URL), downloadText(ML_INDEX_URL)]);
   const baseGeojson = JSON.parse(baseText);
   const mlById = new Map(
-    normalizeRows(JSON.parse(mlText)).map((record) => [String(record.id || record.property_id || ''), record])
+    normalizeRows(JSON.parse(mlText)).map((record) => [String(record.id || record.property_id || ''), record]),
   );
 
   const output = fs.createWriteStream(OUT_PATH, { encoding: 'utf8' });
@@ -122,20 +122,20 @@ const rowValues = (record) => columns.map((column) => record[column] ?? null);
     const record = {
       id,
       address: properties.location || ml.address || ml.location || `Property ${id}`,
-      property_type: ml.property_type || ml.bldg_desc || 'Residential',
-      bldg_desc: ml.bldg_desc || ml.property_type || null,
+      'property_type': ml.property_type || ml.bldg_desc || 'Residential',
+      'bldg_desc': ml.bldg_desc || ml.property_type || null,
       lat: round(toNumber(ml.lat) ?? lat, 7),
       lng: round(toNumber(ml.lng) ?? lng, 7),
-      market_value: round(marketValue, 0),
-      predicted_value: round(predictedValue, 0),
-      change_percent: round(toNumber(ml.change_percent) ?? changePercent, 2),
-      lot_size: round(toNumber(ml.lot_size), 0),
-      zip_code: ml.zip_code || null,
+      'market_value': round(marketValue, 0),
+      'predicted_value': round(predictedValue, 0),
+      'change_percent': round(toNumber(ml.change_percent) ?? changePercent, 2),
+      'lot_size': round(toNumber(ml.lot_size), 0),
+      'zip_code': ml.zip_code || null,
       neighborhood: ml.neighborhood || ml.zip_code || null,
-      sale_year: toNumber(ml.sale_year) ?? saleYear,
-      sale_month: toNumber(ml.sale_month) ?? saleMonth,
-      sale_price: round(toNumber(properties.sale_price) ?? toNumber(ml.sale_price), 0),
-      sale_date: saleDate,
+      'sale_year': toNumber(ml.sale_year) ?? saleYear,
+      'sale_month': toNumber(ml.sale_month) ?? saleMonth,
+      'sale_price': round(toNumber(properties.sale_price) ?? toNumber(ml.sale_price), 0),
+      'sale_date': saleDate,
     };
 
     if (!first) output.write(',\n');

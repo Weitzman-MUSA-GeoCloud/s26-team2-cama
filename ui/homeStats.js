@@ -31,7 +31,7 @@ const HomeStats = (() => {
       payload.columns.reduce((record, column, index) => {
         record[column] = row[index];
         return record;
-      }, {})
+      }, {}),
     );
   };
 
@@ -132,7 +132,7 @@ const HomeStats = (() => {
       {
         threshold: 0.18,
         rootMargin: '0px 0px -8% 0px',
-      }
+      },
     );
 
     revealTargets.forEach((target, index) => {

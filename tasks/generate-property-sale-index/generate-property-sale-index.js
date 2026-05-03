@@ -42,10 +42,10 @@ const toSaleRow = (feature) => {
   fs.writeFileSync(
     OUTPUT_PATH,
     JSON.stringify({
-      schema_version: 1,
+      'schema_version': 1,
       columns: ['id', 'sale_price', 'sale_date'],
       rows,
-    })
+    }),
   );
 
   console.log(
@@ -56,7 +56,7 @@ const toSaleRow = (feature) => {
         bytes: fs.statSync(OUTPUT_PATH).size,
       },
       null,
-      2
-    )
+      2,
+    ),
   );
 })();

@@ -97,7 +97,6 @@ const DataManager = (() => {
       zip_code: p.zip_code || null,
       neighborhood: p.zip_code || null,
       sale_date: p.sale_date || null,
-      sale_price: Number(p.sale_price || 0) || null,
       has_prediction: true,
     };
   };
@@ -238,7 +237,7 @@ const DataManager = (() => {
       payload.columns.reduce((record, column, index) => {
         record[column] = row[index];
         return record;
-      }, {})
+      }, {}),
     );
   };
 
@@ -260,7 +259,7 @@ const DataManager = (() => {
                 sale_price: toFiniteNumber(record.sale_price),
                 sale_date: record.sale_date || null,
               },
-            ])
+            ]),
         );
         allProperties = allProperties.map(enrichWithSale);
         applyFilters();
@@ -448,7 +447,7 @@ const DataManager = (() => {
    */
   const getNeighborhoodStats = (neighborhood) => {
     const neighborhoodProps = filteredProperties.filter(
-      (p) => p.neighborhood === neighborhood
+      (p) => p.neighborhood === neighborhood,
     );
     return {
       count: neighborhoodProps.length,
@@ -484,7 +483,7 @@ const DataManager = (() => {
     data.forEach((value) => {
       const binIndex = Math.min(
         Math.floor((value - stats.min) / binSize),
-        bins - 1
+        bins - 1,
       );
       distribution[binIndex]++;
     });
@@ -690,7 +689,7 @@ const DataManager = (() => {
         current[j] = Math.min(
           previous[j] + 1,
           current[j - 1] + 1,
-          previous[j - 1] + cost
+          previous[j - 1] + cost,
         );
       }
       for (let j = 0; j <= shortB.length; j++) previous[j] = current[j];

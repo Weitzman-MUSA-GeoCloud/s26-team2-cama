@@ -18,7 +18,7 @@ const ChartFiltering = (() => {
   const searchResults = document.getElementById('reviewerSearchResults');
   const activeFiltersSummary = document.getElementById('activeFiltersSummary');
   const presetButtons = Array.from(
-    document.querySelectorAll('.filter-preset-btn')
+    document.querySelectorAll('.filter-preset-btn'),
   );
 
   let filterCallbacks = [];
@@ -152,7 +152,7 @@ const ChartFiltering = (() => {
 
     PropertyPopup.showNotification(
       `Filters applied: ${Utils.formatCurrency(priceMin)} - ${Utils.formatCurrency(priceMax)}, ${changeMin}% to ${changeMax >= 0 ? '+' : ''}${changeMax}%`,
-      'success'
+      'success',
     );
     closeMobileFilters();
   };
@@ -285,7 +285,7 @@ const ChartFiltering = (() => {
             <div class="text-sm font-600">${property.address}</div>
             <div class="text-xs text-[#e2e2e2]/40 mt-1">OPA ${property.id} · ${Utils.formatCurrency(property.tax_year_value)}</div>
           </button>
-        `
+        `,
       )
       .join('');
     searchResults.classList.remove('hidden');
@@ -352,7 +352,7 @@ const ChartFiltering = (() => {
       if (priceMaxInput && data.priceMax !== undefined) priceMaxInput.value = Math.round(data.priceMax);
       updatePriceLabel(
         data.priceMin ?? configuredRanges.predictedMin,
-        data.priceMax ?? configuredRanges.predictedMax
+        data.priceMax ?? configuredRanges.predictedMax,
       );
     }
     if (data.changeMin !== undefined || data.changeMax !== undefined) {
@@ -360,7 +360,7 @@ const ChartFiltering = (() => {
       if (changeMaxInput && data.changeMax !== undefined) changeMaxInput.value = Math.round(data.changeMax);
       updateChangeLabel(
         data.changeMin ?? configuredRanges.defaultChangeMin,
-        data.changeMax ?? configuredRanges.defaultChangeMax
+        data.changeMax ?? configuredRanges.defaultChangeMax,
       );
     }
   };
@@ -461,7 +461,7 @@ const ChartFiltering = (() => {
             <span>${chip.label}</span>
             <button type="button" data-filter-key="${chip.key}" aria-label="Clear ${chip.key} filter">&times;</button>
           </span>
-        `
+        `,
       )
       .join('');
 
@@ -506,13 +506,13 @@ const ChartFiltering = (() => {
     if (Number.isFinite(filters.priceMin) || Number.isFinite(filters.priceMax)) {
       updatePriceLabel(
         filters.priceMin ?? configuredRanges.predictedMin,
-        filters.priceMax ?? configuredRanges.predictedMax
+        filters.priceMax ?? configuredRanges.predictedMax,
       );
     }
     if (Number.isFinite(filters.changeMin) || Number.isFinite(filters.changeMax)) {
       updateChangeLabel(
         filters.changeMin ?? configuredRanges.defaultChangeMin,
-        filters.changeMax ?? configuredRanges.defaultChangeMax
+        filters.changeMax ?? configuredRanges.defaultChangeMax,
       );
     }
     syncSearchUi();
