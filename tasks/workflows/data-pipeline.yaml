@@ -204,5 +204,13 @@ main:
                           type: OIDC
                       result: load_census_result
 
+    - generate_residential_market_value_geojson:
+        call: http.post
+        args:
+          url: https://us-central1-musa5090s26-team2.cloudfunctions.net/generate-residential-market-value-geojson
+          auth:
+            type: OIDC
+        result: residential_geojson_result
+
     - success:
         return: "All pipelines completed successfully"

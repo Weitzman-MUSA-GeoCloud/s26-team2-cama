@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gcloud functions:*)",
+      "Bash(gcloud workflows:*)",
+      "Bash(xargs cat *)",
+      "Bash(bq query *)",
+      "Bash(gcloud bigquery *)",
+      "Bash(python3 -c ' *)",
+      "Bash(gcloud alpha *)",
+      "Bash(gsutil cat *)",
+      "Bash(gcloud storage *)"
+    ]
+  }
+}
