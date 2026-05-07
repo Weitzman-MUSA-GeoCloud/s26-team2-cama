@@ -48,16 +48,16 @@ const MapInteraction = (() => {
     mapContainer = document.getElementById('map');
 
     if (!mapContainer) {
-      console.error('�?Map container not found');
+      console.error('鉂?Map container not found');
       return;
     }
 
     if (typeof maplibregl === 'undefined') {
-      console.error('�?Maplibre GL JS not loaded');
+      console.error('鉂?Maplibre GL JS not loaded');
       return;
     }
 
-    console.log('�?Starting map initialization...');
+    console.log('鉁?Starting map initialization...');
 
     // Default map options
     const defaultOptions = {
@@ -439,9 +439,82 @@ const MapInteraction = (() => {
    * Handle parcel click from vector tiles
    * @param {object} feature - Map feature object
    */
+  const enrichPropertyFromFeature = (property, feature, lngLat = null) => {
+    if (!property) return null;
+
+    const props = feature?.properties || {};
+    const predictedValue = Number(props.predicted_value);
+    const featureMarketValue = Number(props.market_value);
+    const featureCenter = getFeatureCenter(feature);
+    const marketValue = Number.isFinite(property.market_value)
+      ? property.market_value
+      : Number.isFinite(featureMarketValue)
+        ? featureMarketValue
+        : property.tax_year_value;
+
+    const sale = DataManager.getSaleById?.(property.id);
+    const merged = {
+      ...property,
+      address: props.address || property.address || `Property ${property.id || props.property_id || ''}`,
+      market_value: marketValue,
+      last_year_value: Number.isFinite(property.last_year_value)
+        ? property.last_year_value
+        : marketValue,
+      tax_year_value: Number.isFinite(property.tax_year_value)
+        ? property.tax_year_value
+        : marketValue,
+      predicted_value:
+        Number.isFinite(property.predicted_value) || !Number.isFinite(predictedValue)
+          ? property.predicted_value
+          : predictedValue,
+      sale_price: Number.isFinite(property.sale_price) && property.sale_price > 0
+        ? property.sale_price
+        : sale?.sale_price ?? null,
+      sale_date: property.sale_date || sale?.sale_date || null,
+      bldg_desc: property.bldg_desc || props.bldg_desc || 'Residential parcel',
+      property_type: property.property_type || props.bldg_desc || 'Residential',
+      lng: Number.isFinite(property.lng) ? property.lng : (lngLat?.lng ?? featureCenter?.[0] ?? null),
+      lat: Number.isFinite(property.lat) ? property.lat : (lngLat?.lat ?? featureCenter?.[1] ?? null),
+    };
+
+    if (
+      Number.isFinite(merged.tax_year_value) &&
+      Number.isFinite(merged.predicted_value) &&
+      merged.tax_year_value > 0
+    ) {
+      merged.change_percent =
+        ((merged.predicted_value - merged.tax_year_value) / merged.tax_year_value) * 100;
+    }
+
+    return merged;
+  };
+
+  const refreshSaleFieldsWhenReady = (property) => {
+    if (!property?.id || typeof DataManager === 'undefined' || typeof DataManager.getSaleByIdAsync !== 'function') {
+      return;
+    }
+    DataManager.getSaleByIdAsync(property.id).then((sale) => {
+      if (!sale || !selectedProperty || String(selectedProperty.id) !== String(property.id)) return;
+      const enriched = {
+        ...selectedProperty,
+        sale_price: Number.isFinite(selectedProperty.sale_price) && selectedProperty.sale_price > 0
+          ? selectedProperty.sale_price
+          : sale.sale_price,
+        sale_date: selectedProperty.sale_date || sale.sale_date,
+      };
+      selectedProperty = enriched;
+      if (typeof AssessorSidebar !== 'undefined') {
+        AssessorSidebar.showProperty(enriched);
+      } else {
+        PropertyPopup.open(enriched);
+      }
+    });
+  };
+
   const handleParcelClick = (feature, lngLat = null) => {
     const propertyId = feature.properties.property_id;
-    const property = DataManager.getPropertyById(propertyId);
+    const baseProperty = DataManager.getPropertyById(propertyId);
+    const property = enrichPropertyFromFeature(baseProperty, feature, lngLat);
 
     if (!property) {
       showParcelInfo(feature, lngLat);
@@ -456,6 +529,7 @@ const MapInteraction = (() => {
     } else {
       PropertyPopup.open(property);
     }
+    refreshSaleFieldsWhenReady(property);
 
     if (Number.isFinite(property.lng) && Number.isFinite(property.lat)) {
       flyToProperty([property.lng, property.lat]);
@@ -480,6 +554,7 @@ const MapInteraction = (() => {
           ? predictedValue
           : null;
 
+    const sale = DataManager.getSaleById?.(String(props.property_id || ''));
     const info = {
       id: String(props.property_id || ''),
       address: props.address || `Property ${props.property_id || ''}`,
@@ -493,6 +568,8 @@ const MapInteraction = (() => {
       property_type: props.bldg_desc || 'Residential',
       last_inspection: null,
       bldg_desc: props.bldg_desc || 'Residential parcel',
+      sale_price: Number.isFinite(Number(props.sale_price)) ? Number(props.sale_price) : sale?.sale_price ?? null,
+      sale_date: props.sale_date || sale?.sale_date || null,
       lat: lngLat?.lat ?? null,
       lng: lngLat?.lng ?? null,
     };
@@ -517,6 +594,7 @@ const MapInteraction = (() => {
     } else {
       console.log('Parcel information:', info);
     }
+    refreshSaleFieldsWhenReady(info);
   };
 
   /**
@@ -587,7 +665,7 @@ const MapInteraction = (() => {
     );
   };
 
-  // Kept for API compatibility �?selection is now expressed only via the
+  // Kept for API compatibility 鈥?selection is now expressed only via the
   // parcel highlight layers (no point marker), matching the Atlas look.
   const showMarker = () => {
     selectedMarker?.remove();
@@ -919,7 +997,7 @@ const MapInteraction = (() => {
     };
     map.on('styledata', styleDataHandler);
 
-    // Fallback poll �?guarantees layers come back even if the above events
+    // Fallback poll 鈥?guarantees layers come back even if the above events
     // never fire as expected.
     const pollStart = Date.now();
     const poll = () => {
@@ -935,7 +1013,7 @@ const MapInteraction = (() => {
     setTimeout(poll, 80);
 
     // `diff: false` forces MapLibre to completely reset the style rather than
-    // attempting a minimal diff �?otherwise our custom source/layers can be
+    // attempting a minimal diff 鈥?otherwise our custom source/layers can be
     // left in an inconsistent "half-migrated" state.
     map.setStyle(styleToApply, { diff: false });
   };
@@ -971,4 +1049,5 @@ const MapInteraction = (() => {
     clearSelection,
   };
 })();
+
 

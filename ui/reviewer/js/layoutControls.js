@@ -74,7 +74,7 @@ const LayoutControls = (() => {
 
     handle.addEventListener('pointermove', (event) => {
       if (!handle.classList.contains('dragging')) return;
-      const nextHeight = clamp(startHeight - (event.clientY - startY), 120, 420);
+      const nextHeight = clamp(startHeight - (event.clientY - startY), 260, 420);
       panel.style.height = `${nextHeight}px`;
       refreshLayout();
     });

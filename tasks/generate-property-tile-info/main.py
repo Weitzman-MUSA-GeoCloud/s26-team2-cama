@@ -6,6 +6,7 @@ from google.cloud import storage
 
 PROJECT_ID = "musa5090s26-team2"
 BUCKET_TEMP = "musa5090s26-team2-temp_data"
+BUCKET_PUBLIC = "musa5090s26-team2-public"
 OUTPUT_BLOB = "property_tile_info.geojson"
 LOCAL_TMP = "/tmp/property_tile_info.geojson"
 
@@ -60,6 +61,8 @@ def generate_property_tile_info(request):
     Join current_assessments, current_assessments_model_training_data, and
     pwd_parcels, then export the result as a GeoJSON FeatureCollection to
     gs://musa5090s26-team2-temp_data/property_tile_info.geojson
+    and
+    gs://musa5090s26-team2-public/property_tile_info.geojson
     """
     try:
         bq_client = bigquery.Client(project=PROJECT_ID)
@@ -105,11 +108,18 @@ def generate_property_tile_info(request):
 
         print(f"Total features written: {feature_count}")
 
-        # Upload to GCS
+        # Upload to GCS. The temp copy is used by the tile-generation job;
+        # the public copy is a stable fallback for front-end search/detail.
         print(f"Uploading to gs://{BUCKET_TEMP}/{OUTPUT_BLOB}...")
-        bucket = storage_client.bucket(BUCKET_TEMP)
-        blob = bucket.blob(OUTPUT_BLOB)
-        blob.upload_from_filename(LOCAL_TMP, content_type="application/geo+json")
+        temp_bucket = storage_client.bucket(BUCKET_TEMP)
+        temp_blob = temp_bucket.blob(OUTPUT_BLOB)
+        temp_blob.upload_from_filename(LOCAL_TMP, content_type="application/geo+json")
+
+        print(f"Uploading to gs://{BUCKET_PUBLIC}/{OUTPUT_BLOB}...")
+        public_bucket = storage_client.bucket(BUCKET_PUBLIC)
+        public_blob = public_bucket.blob(OUTPUT_BLOB)
+        public_blob.cache_control = "public, max-age=300"
+        public_blob.upload_from_filename(LOCAL_TMP, content_type="application/geo+json")
 
         os.remove(LOCAL_TMP)
 
@@ -117,6 +127,8 @@ def generate_property_tile_info(request):
             "status": "success",
             "message": f"GeoJSON written with {feature_count} features",
             "gcs_path": f"gs://{BUCKET_TEMP}/{OUTPUT_BLOB}",
+            "public_gcs_path": f"gs://{BUCKET_PUBLIC}/{OUTPUT_BLOB}",
+            "public_url": f"https://storage.googleapis.com/{BUCKET_PUBLIC}/{OUTPUT_BLOB}",
         }, 200
 
     except Exception as e:

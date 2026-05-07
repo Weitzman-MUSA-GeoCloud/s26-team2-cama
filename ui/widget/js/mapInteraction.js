@@ -246,6 +246,35 @@ const MapInteraction = (() => {
         return null;
       };
 
+      const enrichSaleFields = (property) => {
+        if (!property?.id || typeof Search === 'undefined') return property;
+        const sale = Search.getSaleById?.(property.id);
+        if (!sale) return property;
+        return {
+          ...property,
+          sale_price: Number.isFinite(property.sale_price) && property.sale_price > 0
+            ? property.sale_price
+            : sale.sale_price,
+          sale_date: property.sale_date || sale.sale_date,
+        };
+      };
+
+      const refreshSaleFieldsWhenReady = (property) => {
+        if (!property?.id || typeof Search === 'undefined' || typeof Search.getSaleByIdAsync !== 'function') {
+          return;
+        }
+        Search.getSaleByIdAsync(property.id).then((sale) => {
+          if (!sale || highlightedPropertyId !== String(property.id)) return;
+          PropertyDisplay.displayProperty({
+            ...property,
+            sale_price: Number.isFinite(property.sale_price) && property.sale_price > 0
+              ? property.sale_price
+              : sale.sale_price,
+            sale_date: property.sale_date || sale.sale_date,
+          });
+        });
+      };
+
       const openPropertyFromFeature = (feature, lngLat = null) => {
         const props = feature.properties;
         if (typeof PropertyDisplay === 'undefined') return;
@@ -274,12 +303,14 @@ const MapInteraction = (() => {
               duration: 1000,
             });
           }
-          PropertyDisplay.displayProperty(enrichedProperty);
+          PropertyDisplay.displayProperty(enrichSaleFields(enrichedProperty));
+          refreshSaleFieldsWhenReady(enrichedProperty);
           return;
         }
 
         const predictedValue = Number(props.predicted_value);
         const marketValue = Number(props.market_value);
+        const salePrice = Number(props.sale_price);
         const lastYearValue = Number.isFinite(marketValue)
           ? marketValue
           : props.log_price
@@ -298,6 +329,8 @@ const MapInteraction = (() => {
           predicted_value: Number.isFinite(predictedValue) ? predictedValue : null,
           property_type: props.bldg_desc || 'Residential',
           lot_size: Number(props.gross_area || 0),
+          sale_date: props.sale_date || null,
+          sale_price: Number.isFinite(salePrice) ? salePrice : null,
           year_built: null,
           tax_status: 'Current',
           neighborhood: null,
@@ -320,7 +353,28 @@ const MapInteraction = (() => {
             duration: 1000,
           });
         }
-        PropertyDisplay.displayProperty(propertyData);
+        PropertyDisplay.displayProperty(enrichSaleFields(propertyData));
+        refreshSaleFieldsWhenReady(propertyData);
+
+        if (typeof Search !== 'undefined' && typeof Search.onReady === 'function') {
+          Search.onReady(() => {
+            if (highlightedPropertyId !== propertyId) return;
+            const refreshedProperty = getSearchPropertyById(propertyId);
+            if (!refreshedProperty) return;
+
+            const refreshed = {
+              ...refreshedProperty,
+              lat: Number.isFinite(refreshedProperty.lat)
+                ? refreshedProperty.lat
+                : propertyData.lat,
+              lng: Number.isFinite(refreshedProperty.lng)
+                ? refreshedProperty.lng
+                : propertyData.lng,
+            };
+            PropertyDisplay.displayProperty(enrichSaleFields(refreshed));
+            refreshSaleFieldsWhenReady(refreshed);
+          });
+        }
       };
 
       map.on('click', 'property-parcels-fill', (e) => {

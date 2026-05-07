@@ -131,9 +131,11 @@ body {
 }
 
 .landing-hero-screen {
-  min-height: calc(100vh - 73px);
+  min-height: calc(86vh - 73px);
   display: flex;
   align-items: center;
+  padding-top: 32px;
+  padding-bottom: 88px;
 }
 
 .landing-hero-head {
@@ -172,8 +174,8 @@ body {
 }
 
 .landing-scroll-reveal {
-  opacity: 0;
-  transform: translateY(56px) scale(0.985);
+  opacity: 1;
+  transform: translateY(0) scale(1);
   transition:
     opacity 0.9s cubic-bezier(0.18, 0.86, 0.22, 1),
     transform 0.9s cubic-bezier(0.18, 0.86, 0.22, 1);
@@ -785,6 +787,117 @@ nav {
 }
 
 @media (max-width: 640px) {
+  body {
+    min-height: 100svh;
+    background:
+      linear-gradient(180deg, rgba(18, 20, 20, 0.45), #121414 72%),
+      url('./assets/reviewer-loading-philadelphia.png') center top / cover no-repeat;
+  }
+
+  nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 40;
+    padding: 10px 14px !important;
+    background: rgba(18, 20, 20, 0.76) !important;
+    border-bottom: 1px solid rgba(226, 226, 226, 0.12);
+    backdrop-filter: blur(12px);
+  }
+
+  nav img {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  nav .text-lg {
+    font-size: 15px !important;
+  }
+
+  nav .text-xs {
+    display: none;
+  }
+
+  main {
+    min-height: 100svh;
+    padding-top: 56px;
+  }
+
+  .landing-hero {
+    min-height: calc(100svh - 56px);
+    display: flex;
+    align-items: flex-end;
+    padding: 18px 0 24px !important;
+    background: transparent;
+  }
+
+  .landing-hero::before {
+    opacity: 0.18;
+  }
+
+  .landing-hero::after {
+    display: none;
+  }
+
+  .landing-hero .max-w-7xl {
+    width: 100%;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .portal-entry-card {
+    min-height: auto;
+    gap: 14px;
+    padding: 18px;
+    background: rgba(18, 20, 20, 0.9);
+    border-color: rgba(226, 226, 226, 0.16);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+  }
+
+  .portal-entry-header {
+    gap: 12px;
+  }
+
+  .portal-entry-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .portal-entry-title {
+    font-size: 1.35rem;
+    line-height: 1.12;
+  }
+
+  .portal-entry-copy {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .portal-entry-grid {
+    display: none;
+  }
+
+  .portal-entry-cta {
+    width: 100%;
+    min-height: 42px;
+    justify-content: space-between;
+    padding: 0 12px;
+    border: 1px solid rgba(160, 202, 255, 0.24);
+    background: rgba(160, 202, 255, 0.08);
+  }
+
+  .portal-entry-cta--owner {
+    border-color: rgba(255, 178, 182, 0.22);
+    background: rgba(255, 178, 182, 0.08);
+  }
+
+  main > section:not(#portals),
+  footer {
+    display: none;
+  }
+
   .landing-title-row {
     flex-direction: column;
     gap: 14px;

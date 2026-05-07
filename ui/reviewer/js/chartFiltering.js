@@ -59,8 +59,45 @@ const ChartFiltering = (() => {
     });
 
     setupAddressSearch();
+    setupFilterHelp();
+    setupMobileFilters();
     syncSearchUi();
     renderActiveFilters();
+  };
+
+  const setupFilterHelp = () => {
+    const helpBtn = document.getElementById('filterHelpBtn');
+    const modal = document.getElementById('filterHelpModal');
+    const closeBtn = document.getElementById('closeFilterHelpBtn');
+    if (!helpBtn || !modal || !closeBtn) return;
+
+    helpBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+    closeBtn.addEventListener('click', () => modal.classList.add('hidden'));
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) modal.classList.add('hidden');
+    });
+  };
+
+  const setupMobileFilters = () => {
+    const openBtn = document.getElementById('mobileFilterDockBtn');
+    const closeBtn = document.getElementById('closeMobileFiltersBtn');
+    const closeFilters = () => document.body.classList.remove('mobile-filter-panel-open');
+
+    openBtn?.addEventListener('click', () => {
+      document.body.classList.remove('mobile-chart-tab');
+      document.body.classList.add('mobile-filter-panel-open');
+    });
+
+    closeBtn?.addEventListener('click', closeFilters);
+    window.addEventListener('resize', () => {
+      if (!window.matchMedia('(max-width: 900px)').matches) closeFilters();
+    });
+  };
+
+  const closeMobileFilters = () => {
+    if (window.matchMedia('(max-width: 900px)').matches) {
+      document.body.classList.remove('mobile-filter-panel-open');
+    }
   };
 
   const handlePriceRangeChange = () => {
@@ -117,6 +154,7 @@ const ChartFiltering = (() => {
       `Filters applied: ${Utils.formatCurrency(priceMin)} - ${Utils.formatCurrency(priceMax)}, ${changeMin}% to ${changeMax >= 0 ? '+' : ''}${changeMax}%`,
       'success',
     );
+    closeMobileFilters();
   };
 
   const handleResetFilters = () => {
@@ -134,6 +172,7 @@ const ChartFiltering = (() => {
     DataManager.resetFilters();
     triggerFilterChange({});
     PropertyPopup.showNotification('Filters reset', 'info');
+    closeMobileFilters();
   };
 
   const applyFullChangeRange = () => {
